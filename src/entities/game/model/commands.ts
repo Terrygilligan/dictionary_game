@@ -9,3 +9,4 @@ export type GameCommand =
   | { readonly type: 'startGame'; readonly deck: readonly RoundSpec[] }
   | { readonly type: 'submitAnswer'; readonly choiceId: string }
   | { readonly type: 'nextRound' }
+  | { readonly type: 'resetStreak' }

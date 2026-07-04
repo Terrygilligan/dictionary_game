@@ -5,6 +5,7 @@ import {
   selectIsLastRound,
   selectProgress,
   selectScore,
+  selectStreak,
 } from '@/entities/game'
 import { buildDeck, type DeckOptions } from '../model/deck.ts'
 import { useGameDispatch, useGameState } from '../model/useGame.ts'
@@ -55,6 +56,7 @@ export function GameScreen({ deckOptions }: GameScreenProps) {
       answer={selectCurrentAnswer(state)}
       progress={selectProgress(state)}
       score={selectScore(state)}
+      streak={selectStreak(state)}
       isLastRound={selectIsLastRound(state)}
       onSelect={submitAnswer}
       onNext={nextRound}

@@ -15,6 +15,8 @@ export const selectCurrentAnswer = (state: GameState): AnswerRecord | null =>
 export const selectScore = (state: GameState): number =>
   state.answers.filter((answer) => answer.correct).length
 
+export const selectStreak = (state: GameState): number => state.streak
+
 export const selectProgress = (state: GameState): { current: number; total: number } => ({
   current: Math.min(state.currentRound + 1, state.deck.length),
   total: state.deck.length,

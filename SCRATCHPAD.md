@@ -54,3 +54,47 @@ Introduced the `GameEvent` union:
 ### Tests
 Domain decider/evolver, the generic event store, the event bus, deck building,
 and an end-to-end `<GameScreen>` play-through.
+
+---
+
+## 0002 — Answer streak
+
+**Date:** 2026-07-04
+**Status:** implemented
+
+### Goal
+Track a live "streak" of consecutive correct answers, display it during play,
+and expose an explicit way to reset it.
+
+### Architectural rationale
+
+- **Streak is derived, not stored ad-hoc.** Consistent with event sourcing, the
+  streak is a projection of the event log — never mutated directly. A new
+  `streak/updated` event carries the resulting streak value, and `evolveGame`
+  folds it into `state.streak`. This keeps replay deterministic and auditable
+  (you can see every streak change in the log).
+
+- **Decider owns the rule.** `decideGame` computes the next streak when handling
+  `submitAnswer`: a correct answer emits `streak/updated { streak: prev + 1 }`,
+  an incorrect answer emits `streak/updated { streak: 0 }`. The command therefore
+  produces an ordered pair of events: `answer/submitted` **then**
+  `streak/updated`, so the log records the cause (the answer) before its effect
+  (the streak change).
+
+- **Explicit reset command.** `GameCommand` gains `resetStreak`, which emits
+  `streak/updated { streak: 0 }` only when the streak is non-zero (no redundant
+  events). `game/started` resets the streak to 0 as part of a fresh game.
+
+### Event-definition changes
+- New command: `{ type: 'resetStreak' }`.
+- New event: `{ type: 'streak/updated'; streak: number }`.
+- `GameState` gains `readonly streak: number` (seed `0`).
+
+### UI
+`RoundPanel` displays the current streak in its header (driven purely by the
+event-derived `streak` prop). `GameScreen` passes `selectStreak(state)`.
+
+### Tests
+Extended domain tests for increment/reset and the explicit `resetStreak`
+command; updated the deterministic event-sequence expectation to include the
+interleaved `streak/updated` events.

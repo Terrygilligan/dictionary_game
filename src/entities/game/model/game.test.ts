@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { decideGame } from './decide.ts'
 import { evolveGame, initialGameState } from './state.ts'
-import { selectScore } from './selectors.ts'
+import { selectScore, selectStreak } from './selectors.ts'
 import type { GameCommand } from './commands.ts'
 import type { GameEvent } from './events.ts'
 import type { GameState, RoundSpec } from './types.ts'
@@ -86,10 +86,53 @@ describe('game domain', () => {
     expect(log.map((event) => event.type)).toEqual([
       'game/started',
       'answer/submitted',
+      'streak/updated',
       'round/advanced',
       'answer/submitted',
+      'streak/updated',
       'game/finished',
     ])
     expect(selectScore(state)).toBe(2)
+  })
+
+  describe('streak', () => {
+    it('increments on consecutive correct answers', () => {
+      let state = run(initialGameState, { type: 'startGame', deck })
+      expect(selectStreak(state)).toBe(0)
+      state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a' }) // correct
+      expect(selectStreak(state)).toBe(1)
+      state = run(state, { type: 'nextRound' })
+      state = run(state, { type: 'submitAnswer', choiceId: 'beta-b' }) // correct
+      expect(selectStreak(state)).toBe(2)
+    })
+
+    it('resets to 0 on an incorrect answer', () => {
+      let state = run(initialGameState, { type: 'startGame', deck })
+      state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a' }) // correct
+      expect(selectStreak(state)).toBe(1)
+      state = run(state, { type: 'nextRound' })
+      state = run(state, { type: 'submitAnswer', choiceId: 'beta-a' }) // wrong
+      expect(selectStreak(state)).toBe(0)
+    })
+
+    it('emits answer/submitted before streak/updated', () => {
+      const started = run(initialGameState, { type: 'startGame', deck })
+      const events = decideGame(started, { type: 'submitAnswer', choiceId: 'alpha-a' })
+      expect(events.map((e) => e.type)).toEqual(['answer/submitted', 'streak/updated'])
+      expect(events[1]).toEqual({ type: 'streak/updated', streak: 1 })
+    })
+
+    it('resetStreak clears a non-zero streak', () => {
+      let state = run(initialGameState, { type: 'startGame', deck })
+      state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a' }) // correct
+      expect(selectStreak(state)).toBe(1)
+      state = run(state, { type: 'resetStreak' })
+      expect(selectStreak(state)).toBe(0)
+    })
+
+    it('resetStreak is a no-op when the streak is already 0', () => {
+      const started = run(initialGameState, { type: 'startGame', deck })
+      expect(decideGame(started, { type: 'resetStreak' })).toEqual([])
+    })
   })
 })

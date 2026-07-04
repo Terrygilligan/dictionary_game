@@ -21,12 +21,16 @@ describe('<GameScreen>', () => {
     fireEvent.click(screen.getByTestId('start-button'))
 
     for (let round = 0; round < 3; round += 1) {
+      expect(screen.getByTestId('streak')).toHaveTextContent(
+        round === 0 ? 'No streak' : `${round} streak`,
+      )
       const correct = screen
         .getAllByTestId('choice')
         .find((el) => el.getAttribute('data-correct') === 'true')
       expect(correct).toBeDefined()
       fireEvent.click(correct!)
       expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!')
+      expect(screen.getByTestId('streak')).toHaveTextContent(`${round + 1} streak`)
       fireEvent.click(screen.getByTestId('next-button'))
     }
 

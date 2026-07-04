@@ -6,6 +6,7 @@ export interface RoundPanelProps {
   answer: AnswerRecord | null
   progress: { current: number; total: number }
   score: number
+  streak: number
   isLastRound: boolean
   onSelect: (choiceId: string) => void
   onNext: () => void
@@ -27,6 +28,7 @@ export function RoundPanel({
   answer,
   progress,
   score,
+  streak,
   isLastRound,
   onSelect,
   onNext,
@@ -38,6 +40,9 @@ export function RoundPanel({
       <header className="round__header">
         <span className="round__progress" data-testid="progress">
           Round {progress.current} / {progress.total}
+        </span>
+        <span className="round__streak" data-testid="streak">
+          {streak > 0 ? `\u{1F525} ${streak} streak` : 'No streak'}
         </span>
         <span className="round__score" data-testid="score">
           Score {score}

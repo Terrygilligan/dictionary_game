@@ -13,6 +13,7 @@ export type GameEvent =
       readonly correct: boolean
     }
   | { readonly type: 'round/advanced'; readonly toRoundIndex: number }
+  | { readonly type: 'streak/updated'; readonly streak: number }
   | { readonly type: 'game/finished'; readonly correct: number; readonly total: number }
 
 export type GameEventType = GameEvent['type']

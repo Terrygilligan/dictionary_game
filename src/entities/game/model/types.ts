@@ -32,4 +32,6 @@ export interface GameState {
   readonly deck: readonly RoundSpec[]
   readonly currentRound: number
   readonly answers: readonly AnswerRecord[]
+  /** Consecutive correct answers; reset to 0 on a wrong answer or `resetStreak`. */
+  readonly streak: number
 }

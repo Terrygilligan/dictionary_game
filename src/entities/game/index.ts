@@ -14,6 +14,7 @@ export {
   selectAnswerForRound,
   selectCurrentAnswer,
   selectScore,
+  selectStreak,
   selectProgress,
   selectIsLastRound,
 } from './model/selectors.ts'

@@ -23,6 +23,8 @@ export const decideGame: Decider<GameState, GameCommand, GameEvent> = (state, co
       if (selectAnswerForRound(state, state.currentRound)) return []
       const choice = round.choices.find((c) => c.id === command.choiceId)
       if (!choice) return []
+      const nextStreak = choice.correct ? state.streak + 1 : 0
+      // Record the cause (the answer) before its effect (the streak change).
       return [
         {
           type: 'answer/submitted',
@@ -30,7 +32,13 @@ export const decideGame: Decider<GameState, GameCommand, GameEvent> = (state, co
           choiceId: choice.id,
           correct: choice.correct,
         },
+        { type: 'streak/updated', streak: nextStreak },
       ]
+    }
+
+    case 'resetStreak': {
+      if (state.streak === 0) return []
+      return [{ type: 'streak/updated', streak: 0 }]
     }
 
     case 'nextRound': {
