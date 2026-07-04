@@ -1,0 +1,5 @@
+export { createEventStore } from './eventStore.ts'
+export type { EventStore, EventStoreOptions } from './eventStore.ts'
+export type { EventEnvelope, Evolve, Decider } from './types.ts'
+export { createEventLogService, replayLog, eventLogFromJSON } from './eventLog.ts'
+export type { EventLog, EventLogService, EventLogServiceOptions } from './eventLog.ts'
