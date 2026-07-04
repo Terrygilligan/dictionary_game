@@ -264,3 +264,48 @@ Goal: make Lexicon Master installable and playable offline.
 `public/pwa-512.png`, `public/pwa-maskable-512.png`, `src/app/pwa/registerSW.ts`;
 `index.html` gains manifest + theme-color links; `.oxlintrc.json` ignores the
 service worker (worker globals, non-module).
+
+---
+
+## 0005 — Formalised event log: schema + `EventLogService`
+
+**Date:** 2026-07-04
+**Status:** implemented
+
+### Goal
+Make the event log a first-class, persistable artifact: a typed `Event` +
+`EventLog` schema and an `EventLogService` that appends events, exports the log
+to JSON (for offline, file-based storage), and replays it to reconstruct game
+state. Per the manifesto's **offline-first / event-mirrored** principle — a match
+is fully reconstructible from its mirrored log with no runtime API calls.
+
+### Architectural rationale
+
+- **Layer: `shared/event-sourcing`.** This is domain-agnostic infrastructure
+  (generic over `TState`/`TEvent`), so it sits in `shared` beside
+  `createEventStore` and is reused by any feature. It imports no entity.
+- **Event object = `EventEnvelope<TEvent>`.** The existing envelope already *is*
+  the persisted event record (identity `id`, ordering `seq`, `timestamp`, and the
+  domain `event` payload). Reusing it — rather than minting a parallel `Event`
+  type — keeps a single serialization shape across the store and the log service.
+- **`EventLog` structure.** `{ matchId, createdAt, events: EventEnvelope[] }`.
+  `matchId` scopes a log to one match/game; `createdAt` records when the log was
+  opened; `events` is the append-only, ordered array — the single source of truth.
+- **Determinism at the edges.** `append` is the only impure surface: it stamps
+  `seq` (monotonic), `timestamp` (injectable `clock`), and `id` (injectable
+  `nextId`) — mirroring `createEventStore`. `replay` is a **pure** fold
+  (`events.reduce(evolve, seed)`), so a log always reconstructs identical state.
+- **Offline-first / event-mirrored.** `toJSON` serialises the whole `EventLog`
+  for file/localStorage persistence; `eventLogFromJSON` parses + validates it
+  back, and `replayLog` (a pure standalone) rebuilds state. Round-trip
+  (live → JSON → parse → replay) reproduces the live state exactly (tested).
+
+### Event-definition changes
+No new domain events. Adds infrastructure types `EventLog<TEvent>` and
+`EventLogService<TState, TEvent>` plus pure helpers `replayLog` /
+`eventLogFromJSON`, exported from `shared/event-sourcing`.
+
+### Tests
+`eventLog.test.ts`: monotonic seq + metadata on append; JSON round-trip;
+pure replay reconstructs state; `matchId`/`createdAt` preserved; malformed JSON
+rejected.
