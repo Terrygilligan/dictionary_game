@@ -1,5 +1,7 @@
 # SCRATCHPAD
 
+**NOTE:** This file is a historical log. For architectural rules and standards, refer to **ARCHITECTURAL_MANIFESTO.md**.
+
 Per the Lexicon Master Architecture Manifesto, every feature implementation is
 preceded by a rationale recorded here.
 
