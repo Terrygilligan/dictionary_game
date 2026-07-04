@@ -50,23 +50,29 @@ its definition from four candidates, score derived from play).
   a hand-rolled event bus/store. Dev-only: Vite, TypeScript, oxlint, Vitest.
 
 ### Event-definition changes (per the "event-definition update" standard)
+Introduced the `GameEvent` union:
+`game/started`, `answer/submitted`, `round/advanced`, `game/finished`.
+
+### Tests
+Domain decider/evolver, the generic event store, the event bus, deck building,
+and an end-to-end `<GameScreen>` play-through.
 
 ---
 
 ## 0004 — The "Dictionary Game" (Main Game)
 
 **Date:** 2026-07-04
-**Status:** In Progress
+**Status:** implemented
 
 ### Goal
 Implement the core domain logic for the "Dictionary Game" (the "Dealer" game).
 
 ### Mechanics & Interpretations
-1. **Phased Selection State Machine:** 
-   - Phases: `scroll → page → column → wordNumber → sealed → revealed`.
+1. **Phased Selection State Machine:**
+   - Phases: `idle → scroll → page → column → wordNumber → ready → sealed → revealed`.
    - Each phase accepts a `select<Phase>` command. Out-of-order commands return `[]` (invalid).
    - "Scroll" represents a section-index (e.g., A-E, F-J, etc.) to mimic the "flicking" through a dictionary.
-2. **Blind Arbiter:** 
+2. **Blind Arbiter:**
    - `sealWord` resolves coordinates to a concrete word ID.
    - `secretWord` is stored in state but masked from all selectors.
    - `revealWord` event makes the word public to the UI.
@@ -74,7 +80,15 @@ Implement the core domain logic for the "Dictionary Game" (the "Dealer" game).
    - Commands: `selectScroll`, `selectPage`, `selectColumn`, `selectWordNumber`, `sealWord`, `revealWord`.
    - Events: `game/started` (with lexicon layout), `scroll/selected`, `page/selected`, `column/selected`, `wordNumber/selected`, `word/sealed`, `word/revealed`.
 4. **Bounds:**
-   - The Lexicon layout is passed at `game/started` as part of the initial state. The decider
+   - The Lexicon layout is passed at `game/started` and carried in state. The decider
+     validates every selection against the layout, and each bound depends on the
+     prior coordinate (page count depends on the chosen scroll, etc.) — which is
+     precisely why selection is phased.
+
+### Implementation notes (as built)
+
+- **Location & isolation.** A self-contained sub-module `entities/game/model/main-game/`
+  (`types`, `events`, `commands`, `layout`, `decide`, `state`, `selectors`, `index`),
 
 ---
 
@@ -93,12 +107,38 @@ Implement the UI for the "Dictionary Game" selection flow.
 * **Blind Arbiter UX:** The selection screens show the *process* (flicking, selecting page side), but never the target word.
 * **Accessibility:** We will integrate `useTTS` and `useSTT` hooks (from `shared/lib/speech`) to handle dictionary interactions. The UI will trigger these based on state changes (e.g., when a selection phase finishes).
 * **State Feedback:** The UI reflects the current phase (`scroll`, `page`, `column`, `wordNumber`, `ready`). If the domain decider returns an error (out of bounds), the UI must display a non-blocking error toast.
-Introduced the `GameEvent` union:
-`game/started`, `answer/submitted`, `round/advanced`, `game/finished`.
+  re-exported from `entities/game`'s public API. It lives alongside — and does not
+  disturb — the existing multiple-choice quiz domain (its own `GameEvent`/`GameState`).
+  It imports **no** sibling entity: words are opaque `wordId` strings inside the
+  `LexiconLayout`, so the domain stays pure and boundary-clean (FSD).
+- **Layout model.** `LexiconLayout → scrolls[] → pages[] → columns[] → wordIds[]`.
+  `layout.ts` holds the pure bounds/resolution helpers (`inRange`, `scrollCount`,
+  `pageCount`, `columnCount`, `wordCount`, `resolveWordId`, `hasAnyWord`); `decide`
+  and `evolve` contain no I/O, randomness, or clocks.
+- **The `ready` phase.** The spec lists `wordNumber → sealed`; because sealing is a
+  *distinct* arbiter command (`sealWord`), the machine rests in `ready` between the
+  last coordinate and the seal. `selectWordNumber` moves `wordNumber → ready`;
+  `sealWord` moves `ready → sealed`. Two commands cannot collapse into one FSM edge.
+- **Blind Arbiter (enforced).** `word/sealed` carries the id into the private
+  `state.secretWordId`; **no selector reads it**. `word/revealed` is the single
+  legitimate exit — it writes `state.revealedWordId`, and `selectRevealedWordId`
+  returns `null` until then. `selectIsSealed` / `selectIsRevealed` expose only phase.
+- **Determinism.** Given the same command sequence the event log is identical, and
+  replaying the log from `initialMainGameState` reproduces state exactly (tested).
+- **Out of scope (this task = domain only).** No feature/UI wiring yet; the
+  manifesto's TTS/STT/keyboard accessibility requirements apply to the future
+  presentation layer, not this pure domain module.
+
+### Event-definition changes
+New `MainGameEvent` union: `game/started` (with layout), `scroll/selected`,
+`page/selected`, `column/selected`, `wordNumber/selected`, `word/sealed`,
+`word/revealed`. New `MainGameCommand` union mirrors the six intents above.
+>>>>>>> 5f90a2c9148dcde04e9e70a9989af0f0cb68a6c4
 
 ### Tests
-Domain decider/evolver, the generic event store, the event bus, deck building,
-and an end-to-end `<GameScreen>` play-through.
+`main-game/mainGame.test.ts` (9 cases): phase walk, out-of-order rejection,
+out-of-bounds rejection, seal-hides-word, reveal-exposes-word, reveal-before-seal
+rejection, and deterministic-replay of a full game.
 
 ---
 
