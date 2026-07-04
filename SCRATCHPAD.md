@@ -75,6 +75,24 @@ Implement the core domain logic for the "Dictionary Game" (the "Dealer" game).
    - Events: `game/started` (with lexicon layout), `scroll/selected`, `page/selected`, `column/selected`, `wordNumber/selected`, `word/sealed`, `word/revealed`.
 4. **Bounds:**
    - The Lexicon layout is passed at `game/started` as part of the initial state. The decider
+
+---
+
+## 0005 — Main Game Selection UI
+
+**Date:** 2026-07-04
+**Status:** In Progress
+
+### Goal
+
+Implement the UI for the "Dictionary Game" selection flow.
+
+### Architectural Rationale
+
+* **FSD Boundary:** The UI lives in `features/main-game/ui`. It imports `entities/game` only for state selection and command dispatch. It does **not** contain game logic (decisions).
+* **Blind Arbiter UX:** The selection screens show the *process* (flicking, selecting page side), but never the target word.
+* **Accessibility:** We will integrate `useTTS` and `useSTT` hooks (from `shared/lib/speech`) to handle dictionary interactions. The UI will trigger these based on state changes (e.g., when a selection phase finishes).
+* **State Feedback:** The UI reflects the current phase (`scroll`, `page`, `column`, `wordNumber`, `ready`). If the domain decider returns an error (out of bounds), the UI must display a non-blocking error toast.
 Introduced the `GameEvent` union:
 `game/started`, `answer/submitted`, `round/advanced`, `game/finished`.
 
