@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/shared/ui/Button';
 
 // Types for the main game selection flow
