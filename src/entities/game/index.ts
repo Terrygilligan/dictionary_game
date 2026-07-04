@@ -18,3 +18,30 @@ export {
   selectProgress,
   selectIsLastRound,
 } from './model/selectors.ts'
+
+// --- Main Game (the "Dictionary Game" — phased selection + Blind Arbiter) ---
+export type {
+  LexiconColumn,
+  LexiconPage,
+  LexiconScroll,
+  LexiconLayout,
+  Coordinates,
+  MainGamePhase,
+  MainGameState,
+  MainGameEvent,
+  MainGameEventType,
+  MainGameCommand,
+} from './model/main-game/index.ts'
+export {
+  initialMainGameState,
+  evolveMainGame,
+  decideMainGame,
+  selectPhase,
+  selectCoordinates,
+  selectScrollLabels,
+  selectCurrentOptionCount,
+  selectIsSealed,
+  selectIsRevealed,
+  selectRevealedWordId,
+  resolveWordId,
+} from './model/main-game/index.ts'
