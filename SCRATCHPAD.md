@@ -50,6 +50,31 @@ its definition from four candidates, score derived from play).
   a hand-rolled event bus/store. Dev-only: Vite, TypeScript, oxlint, Vitest.
 
 ### Event-definition changes (per the "event-definition update" standard)
+
+---
+
+## 0004 — The "Dictionary Game" (Main Game)
+
+**Date:** 2026-07-04
+**Status:** In Progress
+
+### Goal
+Implement the core domain logic for the "Dictionary Game" (the "Dealer" game).
+
+### Mechanics & Interpretations
+1. **Phased Selection State Machine:** 
+   - Phases: `scroll → page → column → wordNumber → sealed → revealed`.
+   - Each phase accepts a `select<Phase>` command. Out-of-order commands return `[]` (invalid).
+   - "Scroll" represents a section-index (e.g., A-E, F-J, etc.) to mimic the "flicking" through a dictionary.
+2. **Blind Arbiter:** 
+   - `sealWord` resolves coordinates to a concrete word ID.
+   - `secretWord` is stored in state but masked from all selectors.
+   - `revealWord` event makes the word public to the UI.
+3. **Event/Command definitions:**
+   - Commands: `selectScroll`, `selectPage`, `selectColumn`, `selectWordNumber`, `sealWord`, `revealWord`.
+   - Events: `game/started` (with lexicon layout), `scroll/selected`, `page/selected`, `column/selected`, `wordNumber/selected`, `word/sealed`, `word/revealed`.
+4. **Bounds:**
+   - The Lexicon layout is passed at `game/started` as part of the initial state. The decider
 Introduced the `GameEvent` union:
 `game/started`, `answer/submitted`, `round/advanced`, `game/finished`.
 
