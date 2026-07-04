@@ -53,8 +53,12 @@ All three must pass.
 
 ## Core Principles
 
-1. **Determinism**: Given the same events, the state should always be identical
-2. **Testability**: Core logic should be easily testable without UI dependencies  
-3. **Separation of Concerns**: Clear boundaries between game logic, presentation, and infrastructure
-4. **Accessibility First**: All features must be accessible from the start
-5. **Event-Driven**: All state changes flow through the event system
+- **FSD (Feature-Sliced Design):** `app → pages → features → entities → shared`. Strict one-way dependency. `entities` are domain-pure and may not import sibling entities.
+- **Event-Sourced State:** State is derived *solely* from the event log. 
+- **Pure Domain Logic:** `decide` and `evolve` functions must be 100% deterministic, pure functions (no I/O, no randomness). 
+- **Blind Arbiter Pattern:** The domain state acts as an opaque container for secret information (e.g., the target word). No selector may expose private state until an explicit `reveal` event is processed.
+- **Offline-First:** All data dependencies must be bundled within the app. No runtime API calls for game data.
+
+## Accessibility
+
+- **TTS/STT Integration:** The app must prioritize Web Speech APIs for interaction, enabling a "Blind Arbiter" experience where the AI "Dealer" speaks and listens, rather than relying on visual text.
