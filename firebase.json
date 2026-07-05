@@ -1,0 +1,78 @@
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": [
+      {
+        "collectionGroup": "users",
+        "queryScope": "COLLECTION",
+        "fields": [
+          {"fieldPath": "updatedAt", "order": "DESCENDING"},
+          {"fieldPath": "createdAt", "order": "DESCENDING"}
+        ]
+      },
+      {
+        "collectionGroup": "users",
+        "queryScope": "COLLECTION", 
+        "fields": [
+          {"fieldPath": "userId", "order": "ASCENDING"},
+          {"fieldPath": "matchId", "order": "ASCENDING"}
+        ]
+      }
+    ]
+  },
+  "functions": {
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" install",
+      "npm --prefix \"$RESOURCE_DIR\" run build"
+    ],
+    "source": "functions",
+    "runtime": "nodejs18",
+    "region": "europe-west1",
+    "ignore": [
+      "node_modules",
+      ".git",
+      "firebase-debug.log",
+      "firebase-debug.*.legacy.log"
+    ]
+  },
+  "hosting": {
+    "public": "dist",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "/privacy-policy",
+        "destination": "/privacy-policy.html"
+      },
+      {
+        "source": "/terms-of-service", 
+        "destination": "/terms-of-service.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "hosting": {
+      "port": 5000
+    },
+    "ui": {
+      "port": 3000
+    },
+    "singleProjectMode": true
+  }
+}

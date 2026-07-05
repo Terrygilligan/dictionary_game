@@ -1,0 +1,251 @@
+{
+  "ui": {
+    "start": "Spiel starten",
+    "pause": "Pause",
+    "resume": "Fortsetzen",
+    "restart": "Neustarten",
+    "quit": "Beenden",
+    "home": "Startseite",
+    "gamesRoom": "Spielzimmer",
+    "tagline": "Dorf Gemeinschaftsspiele",
+    "settings": "Einstellungen",
+    "profile": "Profil",
+    "score": "Punktzahl",
+    "streak": "Serie",
+    "time": "Zeit",
+    "round": "Runde",
+    "game": "Spiel",
+    "player": "Spieler",
+    "dealer": "Geber",
+    "word": "Wort",
+    "definition": "Definition",
+    "select": "Auswählen",
+    "submit": "Absenden",
+    "cancel": "Abbrechen",
+    "confirm": "Bestätigen",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "warning": "Warnung",
+    "info": "Information"
+  },
+  "game": {
+    "multipleChoice": {
+      "title": "Wählen Sie die richtige Definition",
+      "instruction": "Wählen Sie die Definition, die zum obigen Wort passt",
+      "correct": "Korrekt!",
+      "incorrect": "Falsch. Versuchen Sie es erneut!",
+      "timeUp": "Zeit abgelaufen!"
+    },
+    "dictionary": {
+      "title": "Wörterbuch Spiel",
+      "selectScroll": "Buchstabenbereich auswählen",
+      "selectPage": "Seitenseite auswählen",
+      "selectColumn": "Spalte auswählen",
+      "selectWordNumber": "Wortnummer auswählen",
+      "sealWord": "Wahl versiegeln",
+      "revealWord": "Wort offenbaren",
+      "wordSealed": "Ihr Wort wurde versiegelt",
+      "wordRevealed": "Das Wort ist:"
+    },
+    "achievements": {
+      "firstWin": "Erster Sieg",
+      "streakMaster": "Serienmeister",
+      "speedDemon": "Geschwindigkeitsdämon",
+      "perfectionist": "Perfektionist",
+      "socialButterfly": "Sozialer Schmetterling"
+    }
+  },
+  "auth": {
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "signOut": "Abmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "displayName": "Anzeigename",
+    "forgotPassword": "Passwort vergessen?",
+    "resetPassword": "Passwort zurücksetzen",
+    "createAccount": "Konto erstellen",
+    "alreadyHaveAccount": "Haben Sie bereits ein Konto?",
+    "noAccount": "Haben Sie kein Konto?"
+  },
+  "profile": {
+    "title": "Spielerprofil",
+    "totalScore": "Gesamtpunktzahl",
+    "matchesPlayed": "Gespielte Spiele",
+    "winRate": "Gewinnrate",
+    "highestStreak": "Höchste Serie",
+    "currentStreak": "Aktuelle Serie",
+    "achievements": "Erfolge",
+    "friends": "Freunde",
+    "recentActivity": "Letzte Aktivität",
+    "statistics": "Statistiken"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "language": "Sprache",
+    "sound": "Soundeffekte",
+    "music": "Hintergrundmusik",
+    "accessibility": "Barrierefreiheit",
+    "textToSpeech": "Text-zu-Sprache",
+    "speechToText": "Sprache-zu-Text",
+    "highContrast": "Hoher Kontrast",
+    "largeText": "Großer Text",
+    "keyboardNavigation": "Tastaturnavigation"
+  },
+  "languages": {
+    "en": "Englisch",
+    "nl": "Niederländisch",
+    "bg": "Bulgarisch",
+    "in": "Indonesisch",
+    "fr": "Französisch",
+    "de": "Deutsch"
+  },
+  "errors": {
+    "network": "Netzwerkfehler. Überprüfen Sie Ihre Verbindung.",
+    "auth": "Authentifizierungsfehler. Melden Sie sich erneut an.",
+    "notFound": "Die angeforderte Ressource wurde nicht gefunden.",
+    "permission": "Sie haben keine Berechtigung für diese Aktion.",
+    "validation": "Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
+    "unknown": "Ein unbekannter Fehler ist aufgetreten."
+  },
+  "landing": {
+    "tagline": "Ein mehrsprachiges Wörterbuchspiel für Ihre Dorfgemeinschaft",
+    "welcome": "Willkommen bei Lexicon Master",
+    "description": "Fordern Sie sich mit Wörtern in mehreren Sprachen heraus, während Sie sich mit Ihrer Gemeinschaft verbinden.",
+    "getStarted": "Starten",
+    "features": {
+      "multilingual": {
+        "title": "Mehrsprachige Unterstützung",
+        "description": "Spielen Sie auf Englisch, Niederländisch, Bulgarisch, Indonesisch, Französisch und Deutsch"
+      },
+      "accessible": {
+        "title": "Vollständig Zugänglich",
+        "description": "Text-zu-Sprache, Sprache-zu-Text und Tastaturnavigation für alle"
+      },
+      "village": {
+        "title": "Von der Gemeinschaft Gebaut",
+        "description": "Beigetragen von Dorfbewohnern, für Dorfbewohner - Verbindungen durch Sprache aufbauen"
+      }
+    },
+    "howItWorks": {
+      "title": "Wie es Funktioniert",
+      "step1": "Melden Sie sich mit Ihrer E-Mail an oder erstellen Sie ein neues Konto",
+      "step2": "Wählen Sie Ihre bevorzugte Sprache",
+      "step3": "Spielen Sie Wörterbuchspiele oder fordern Sie den Dealer heraus",
+      "step4": "Verfolgen Sie Ihren Fortschritt und konkurrieren Sie mit Freunden"
+    }
+  },
+  "gamePage": {
+    "title": "Lexicon Master",
+    "tagline": "Passen Sie jedes Wort seiner Bedeutung an.",
+    "switchToDictionary": "Zu Wörterbuchspiel wechseln →",
+    "dictionaryTitle": "Wörterbuchspiel",
+    "dictionaryTagline": "Der Dealer wählt ein geheimes Wort.",
+    "switchToQuiz": "← Zu Quizspiel wechseln"
+  },
+  "dictionaryDealer": {
+    "title": "Wörterbuch Dealer",
+    "startGame": "Hauptspiel starten",
+    "flickingSections": "Durch Wörterbuchabschnitte blättern...",
+    "stop": "Stopp!",
+    "pageSelected": "Seite ausgewählt. Welche Seite?",
+    "left": "Links",
+    "right": "Rechts",
+    "whichColumn": "Welche Spalte?",
+    "whichWordNumber": "Ungefähr welche Wortnummer?",
+    "enterWordNumber": "Wortnummer eingeben",
+    "confirm": "Bestätigen",
+    "wordCoordinatesLocked": "Wortkoordinaten gesperrt.",
+    "sealWord": "Wort versiegeln",
+    "dealerReady": "Der Dealer ist bereit.",
+    "revealWord": "Wort offenbaren (TTS)",
+    "wordRevealed": "Das Wort wurde offenbart!",
+    "playAgain": "Erneut spielen"
+  },
+  "quiz": {
+    "startPanel": {
+      "title": "Bereit, Ihren Wortschatz zu testen?",
+      "description": "Sie sehen ein Wort und vier Definitionen. Wählen Sie die, die passt.",
+      "startButton": "Spiel starten"
+    },
+    "roundPanel": {
+      "progress": "Runde {{current}} / {{total}}",
+      "streak": "{{streak}} Serie",
+      "noStreak": "Keine Serie",
+      "score": "Punktzahl {{score}}",
+      "correct": "Korrekt!",
+      "incorrect": "Nicht ganz.",
+      "next": "Nächstes Wort",
+      "seeResults": "Ergebnisse anzeigen"
+    },
+    "resultPanel": {
+      "title": "Spiel Beendet",
+      "playAgain": "Erneut spielen",
+      "verdict": {
+        "flawless": "Fehlerlos — Wörterbuch gemeistert!",
+        "strong": "Starker Wortschatz!",
+        "notBad": "Nicht schlecht - weiter lernen.",
+        "plentyToLearn": "Viele neue Wörter zu lernen."
+      }
+    }
+  },
+  "games": {
+    "title": "Spiele Hub",
+    "tagline": "Wählen Sie Ihr Abenteuer und verbinden Sie sich mit Ihrer Dorfgemeinschaft durch Sprachlernspiele",
+    "quickPlay": {
+      "title": "Schnelle Spielzone"
+    },
+    "modes": {
+      "solo": {
+        "title": "Solo Sprint",
+        "description": "Fordern Sie sich heraus, so viele Wörter wie möglich innerhalb einer festgelegten Zeit zu definieren oder zu übersetzen",
+        "duration": "5 Minuten",
+        "difficulty": "Mittel"
+      },
+      "versus": {
+        "title": "Dorf Versus",
+        "description": "Ein kompetitiver Modus, bei dem Sie und Ihre Nachbarn um die höchste Punktzahl konkurrieren, wobei dasselbe Wortdeck verwendet wird",
+        "players": "2-8 Spieler",
+        "duration": "10 Minuten"
+      },
+      "bridge": {
+        "title": "Community Bridge",
+        "description": "Ein kollaborativer Modus, bei dem Spieler zusammenarbeiten, um ein \"Community Lexicon\" zu erstellen, indem sie Definitionen für neue Wörter in ihrer Muttersprache hinzufügen"
+      }
+    },
+    "playNow": "Jetzt Spielen",
+    "playGames": "Spiele Spielen",
+    "communityBridge": {
+      "title": "Community Bridge",
+      "currentWord": "Wort des Tages",
+      "language": "Deutsch",
+      "contributions": "Beiträge:",
+      "contribute": "Übersetzung Hinzufügen",
+      "recentContributions": "Neueste Community Beiträge"
+    },
+    "activeRooms": {
+      "title": "Aktive Räume",
+      "comingSoon": "Dorf Tische Bald",
+      "description": "Erstellen und treten Sie kleinen Gruppenspielen bei Freunden aus Ihrem Dorf bei. Perfekt für intime Lernsitzungen!",
+      "notifyMe": "Benachrichtigen Sie mich, wenn verfügbar"
+    },
+    "recentActivity": {
+      "title": "Neueste Aktivität"
+    },
+    "activity": {
+      "newHighScore": "Neuer Highscore erreicht!",
+      "communityContribution": "Community Beitrag gemacht",
+      "streakAchievement": "Serie Meilenstein erreicht"
+    }
+  },
+  "accessibility": {
+    "screenReaderOnly": "Nur Screenreader",
+    "keyboardHint": "Eingabe drücken zum Auswählen, Escape zum Abbrechen",
+    "navigationHint": "Pfeiltasten zur Navigation verwenden",
+    "gameStarted": "Spiel gestartet",
+    "gamePaused": "Spiel pausiert",
+    "gameResumed": "Spiel fortgesetzt",
+    "gameEnded": "Spiel beendet"
+  }
+}

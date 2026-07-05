@@ -1,0 +1,251 @@
+{
+  "ui": {
+    "start": "Commencer le jeu",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "restart": "Redémarrer",
+    "quit": "Quitter",
+    "home": "Accueil",
+    "gamesRoom": "Salle de Jeux",
+    "tagline": "Jeux de la Communauté Villageoise",
+    "settings": "Paramètres",
+    "profile": "Profil",
+    "score": "Score",
+    "streak": "Série",
+    "time": "Temps",
+    "round": "Manche",
+    "game": "Jeu",
+    "player": "Joueur",
+    "dealer": "Croupier",
+    "word": "Mot",
+    "definition": "Définition",
+    "select": "Sélectionner",
+    "submit": "Soumettre",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "warning": "Avertissement",
+    "info": "Information"
+  },
+  "game": {
+    "multipleChoice": {
+      "title": "Choisissez la définition correcte",
+      "instruction": "Sélectionnez la définition qui correspond au mot ci-dessus",
+      "correct": "Correct !",
+      "incorrect": "Incorrect. Essayez encore !",
+      "timeUp": "Le temps est écoulé !"
+    },
+    "dictionary": {
+      "title": "Jeu de dictionnaire",
+      "selectScroll": "Sélectionnez une plage de lettres",
+      "selectPage": "Sélectionnez un côté de page",
+      "selectColumn": "Sélectionnez une colonne",
+      "selectWordNumber": "Sélectionnez un numéro de mot",
+      "sealWord": "Scellez votre choix",
+      "revealWord": "Révélez le mot",
+      "wordSealed": "Votre mot a été scellé",
+      "wordRevealed": "Le mot est :"
+    },
+    "achievements": {
+      "firstWin": "Première Victoire",
+      "streakMaster": "Maître des Séries",
+      "speedDemon": "Démon de la Vitesse",
+      "perfectionist": "Perfectionniste",
+      "socialButterfly": "Papillon Social"
+    }
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signUp": "S'inscrire",
+    "signOut": "Se déconnecter",
+    "email": "Email",
+    "password": "Mot de passe",
+    "displayName": "Nom d'affichage",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "createAccount": "Créer un compte",
+    "alreadyHaveAccount": "Vous avez déjà un compte ?",
+    "noAccount": "Vous n'avez pas de compte ?"
+  },
+  "profile": {
+    "title": "Profil du joueur",
+    "totalScore": "Score total",
+    "matchesPlayed": "Matchs joués",
+    "winRate": "Taux de victoire",
+    "highestStreak": "Série la plus élevée",
+    "currentStreak": "Série actuelle",
+    "achievements": "Succès",
+    "friends": "Amis",
+    "recentActivity": "Activité récente",
+    "statistics": "Statistiques"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "sound": "Effets sonores",
+    "music": "Musique de fond",
+    "accessibility": "Accessibilité",
+    "textToSpeech": "Synthèse vocale",
+    "speechToText": "Reconnaissance vocale",
+    "highContrast": "Contraste élevé",
+    "largeText": "Texte large",
+    "keyboardNavigation": "Navigation au clavier"
+  },
+  "languages": {
+    "en": "Anglais",
+    "nl": "Néerlandais",
+    "bg": "Bulgare",
+    "in": "Indonésien",
+    "fr": "Français",
+    "de": "Allemand"
+  },
+  "errors": {
+    "network": "Erreur réseau. Vérifiez votre connexion.",
+    "auth": "Erreur d'authentification. Reconnectez-vous.",
+    "notFound": "La ressource demandée n'a pas été trouvée.",
+    "permission": "Vous n'avez pas la permission d'effectuer cette action.",
+    "validation": "Vérifiez votre saisie et réessayez.",
+    "unknown": "Une erreur inconnue s'est produite."
+  },
+  "landing": {
+    "tagline": "Un jeu de dictionnaire multilingue pour votre communauté villageoise",
+    "welcome": "Bienvenue chez Lexicon Master",
+    "description": "Défiez-vous avec des mots dans plusieurs langues tout en vous connectant avec votre communauté.",
+    "getStarted": "Commencer",
+    "features": {
+      "multilingual": {
+        "title": "Support Multilingue",
+        "description": "Jouez en anglais, néerlandais, bulgare, indonésien, français et allemand"
+      },
+      "accessible": {
+        "title": "Pleinement Accessible",
+        "description": "Synthèse vocale, reconnaissance vocale et navigation au clavier pour tous"
+      },
+      "village": {
+        "title": "Construit par la Communauté",
+        "description": "Contribué par les villageois, pour les villageois - construire des connexions à travers le langage"
+      }
+    },
+    "howItWorks": {
+      "title": "Comment Ça Marche",
+      "step1": "Connectez-vous avec votre email ou créez un nouveau compte",
+      "step2": "Choisissez votre langue préférée",
+      "step3": "Jouez à des jeux de dictionnaire ou défiez le Dealer",
+      "step4": "Suivez vos progrès et competez avec des amis"
+    }
+  },
+  "gamePage": {
+    "title": "Lexicon Master",
+    "tagline": "Associez chaque mot à sa signification.",
+    "switchToDictionary": "Basculer vers Jeu de Dictionnaire →",
+    "dictionaryTitle": "Jeu de Dictionnaire",
+    "dictionaryTagline": "Le Dealer sélectionne un mot secret.",
+    "switchToQuiz": "← Basculer vers Jeu Quiz"
+  },
+  "dictionaryDealer": {
+    "title": "Dealer de Dictionnaire",
+    "startGame": "Démarrer le Jeu Principal",
+    "flickingSections": "Parcourir les sections du dictionnaire...",
+    "stop": "Arrêter!",
+    "pageSelected": "Page sélectionnée. Quel côté ?",
+    "left": "Gauche",
+    "right": "Droite",
+    "whichColumn": "Quelle colonne ?",
+    "whichWordNumber": "Environ quel numéro de mot ?",
+    "enterWordNumber": "Entrez le numéro du mot",
+    "confirm": "Confirmer",
+    "wordCoordinatesLocked": "Coordonnées du mot verrouillées.",
+    "sealWord": "Sceller le Mot",
+    "dealerReady": "Le Dealer est prêt.",
+    "revealWord": "Révéler le Mot (TTS)",
+    "wordRevealed": "Le mot est révélé !",
+    "playAgain": "Rejouer"
+  },
+  "quiz": {
+    "startPanel": {
+      "title": "Prêt à tester votre vocabulaire ?",
+      "description": "Vous verrez un mot et quatre définitions. Choisissez celle qui correspond.",
+      "startButton": "Commencer le jeu"
+    },
+    "roundPanel": {
+      "progress": "Tour {{current}} / {{total}}",
+      "streak": "{{streak}} série",
+      "noStreak": "Aucune série",
+      "score": "Score {{score}}",
+      "correct": "Correct !",
+      "incorrect": "Pas tout à fait.",
+      "next": "Mot suivant",
+      "seeResults": "Voir les résultats"
+    },
+    "resultPanel": {
+      "title": "Jeu Terminé",
+      "playAgain": "Rejouer",
+      "verdict": {
+        "flawless": "Parfait — dictionnaire maîtrisé !",
+        "strong": "Vocabulaire solide !",
+        "notBad": "Pas mal — continuez à étudier.",
+        "plentyToLearn": "Beaucoup de nouveaux mots à apprendre."
+      }
+    }
+  },
+  "games": {
+    "title": "Hub de Jeux",
+    "tagline": "Choisissez votre aventure et connectez-vous avec votre communauté villageoise via les jeux d'apprentissage des langues",
+    "quickPlay": {
+      "title": "Zone de Jeu Rapide"
+    },
+    "modes": {
+      "solo": {
+        "title": "Solo Sprint",
+        "description": "Défiez-vous de définir ou traduire autant de mots que possible dans un délai fixé",
+        "duration": "5 minutes",
+        "difficulty": "Moyen"
+      },
+      "versus": {
+        "title": "Village Versus",
+        "description": "Un mode compétitif où vous et vos voisins concourez pour le score le plus élevé en utilisant le même jeu de mots",
+        "players": "2-8 joueurs",
+        "duration": "10 minutes"
+      },
+      "bridge": {
+        "title": "Community Bridge",
+        "description": "Un mode collaboratif où les joueurs travaillent ensemble pour construire un \"Community Lexicon\" en ajoutant des définitions pour nouveaux mots dans leur langue maternelle"
+      }
+    },
+    "playNow": "Jouer Maintenant",
+    "playGames": "Jouer aux Jeux",
+    "communityBridge": {
+      "title": "Community Bridge",
+      "currentWord": "Mot du Jour",
+      "language": "Français",
+      "contributions": "Contributions :",
+      "contribute": "Ajouter une Traduction",
+      "recentContributions": "Contributions Récentes de la Communauté"
+    },
+    "activeRooms": {
+      "title": "Salles Actives",
+      "comingSoon": "Tables Village Bientôt",
+      "description": "Créez et rejoignez des jeux de petit groupe avec des amis de votre village. Parfait pour des sessions d'apprentissage intimes !",
+      "notifyMe": "Me notifier quand disponible"
+    },
+    "recentActivity": {
+      "title": "Activité Récente"
+    },
+    "activity": {
+      "newHighScore": "Nouveau score élevé atteint !",
+      "communityContribution": "Contribution communautaire faite",
+      "streakAchievement": "Jalon de série atteint"
+    }
+  },
+  "accessibility": {
+    "screenReaderOnly": "Lecteur d'écran uniquement",
+    "keyboardHint": "Appuyez sur Entrée pour sélectionner, Échap pour annuler",
+    "navigationHint": "Utilisez les flèches pour naviguer",
+    "gameStarted": "Jeu commencé",
+    "gamePaused": "Jeu en pause",
+    "gameResumed": "Jeu repris",
+    "gameEnded": "Jeu terminé"
+  }
+}

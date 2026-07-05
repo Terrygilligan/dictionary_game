@@ -1,5 +1,6 @@
 import type { AnswerRecord, RoundSpec } from '@/entities/game'
 import { Button } from '@/shared/ui'
+import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 
 export interface RoundPanelProps {
   round: RoundSpec
@@ -33,19 +34,20 @@ export function RoundPanel({
   onSelect,
   onNext,
 }: RoundPanelProps) {
+  const { t } = useTranslate()
   const answered = answer !== null
 
   return (
     <section className="panel" aria-labelledby="round-term">
       <header className="round__header">
         <span className="round__progress" data-testid="progress">
-          Round {progress.current} / {progress.total}
+          {t('quiz.roundPanel.progress', { current: progress.current, total: progress.total })}
         </span>
         <span className="round__streak" data-testid="streak">
-          {streak > 0 ? `\u{1F525} ${streak} streak` : 'No streak'}
+          {streak > 0 ? `\u{1F525} ${t('quiz.roundPanel.streak', { streak })}` : t('quiz.roundPanel.noStreak')}
         </span>
         <span className="round__score" data-testid="score">
-          Score {score}
+          {t('quiz.roundPanel.score', { score })}
         </span>
       </header>
 
@@ -79,10 +81,10 @@ export function RoundPanel({
             role="status"
             data-testid="feedback"
           >
-            {answer.correct ? 'Correct!' : 'Not quite.'}
+            {answer.correct ? t('quiz.roundPanel.correct') : t('quiz.roundPanel.incorrect')}
           </p>
           <Button onClick={onNext} data-testid="next-button">
-            {isLastRound ? 'See results' : 'Next word'}
+            {isLastRound ? t('quiz.roundPanel.seeResults') : t('quiz.roundPanel.next')}
           </Button>
         </footer>
       ) : null}

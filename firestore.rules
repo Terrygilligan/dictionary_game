@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection - each user can only access their own documents
+    match /users/{userId} {
+      // Profile subcollection - user can read/write their own profile
+      match /profile/{profileId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Matches subcollection - user can read/write their own event logs
+      match /matches/{matchId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+        
+        // Additional validation for event log structure
+        allow create: if request.auth != null 
+          && request.auth.uid == userId
+          && request.resource.data.matchId is string
+          && request.resource.data.createdAt is timestamp
+          && request.resource.data.events is list
+          && request.resource.data.events.size() < 1000; // Reasonable limit
+      }
+      
+      // Sync subcollection - user can read/write their own sync data
+      match /sync/{syncId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // Friends subcollection - user can read/write their own friend list
+      match /friends/{friendId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Public collections (readable by all authenticated users)
+    match /public/{publicId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Could be restricted to admins
+      
+      // Leaderboard data
+      match /leaderboard/{entryId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null; // Server-side updates only in production
+      }
+    }
+    
+    // Match collections for sharing (if users want to share their games)
+    match /shared/{shareId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    
+    // Deny all other reads/writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,70 @@
+export interface UserCreated {
+  readonly type: 'user/created'
+  readonly userId: string
+  readonly email: string
+  readonly displayName: string
+  readonly createdAt: number
+}
+
+export interface UserAuthenticated {
+  readonly type: 'user/authenticated'
+  readonly userId: string
+  readonly token: string // Handled by auth service, not exposed to UI
+  readonly timestamp: number
+}
+
+export interface UserUpdated {
+  readonly type: 'user/updated'
+  readonly userId: string
+  readonly displayName?: string
+  readonly timestamp: number
+}
+
+export interface ProfileUpdated {
+  readonly type: 'profile/updated'
+  readonly userId: string
+  readonly totalScore?: number
+  readonly matchesPlayed?: number
+  readonly timestamp: number
+}
+
+export interface AchievementUnlocked {
+  readonly type: 'achievement/unlocked'
+  readonly userId: string
+  readonly achievementId: string
+  readonly name: string
+  readonly description: string
+  readonly category: 'score' | 'streak' | 'games' | 'social'
+  readonly unlockedAt: number
+}
+
+export interface FriendAdded {
+  readonly type: 'friend/added'
+  readonly userId: string
+  readonly friendId: string
+  readonly timestamp: number
+}
+
+export interface FriendRemoved {
+  readonly type: 'friend/removed'
+  readonly userId: string
+  readonly friendId: string
+  readonly timestamp: number
+}
+
+export interface SyncCompleted {
+  readonly type: 'sync/completed'
+  readonly userId: string
+  readonly eventsSynced: number
+  readonly timestamp: number
+}
+
+export type UserEvent = 
+  | UserCreated
+  | UserAuthenticated
+  | UserUpdated
+  | ProfileUpdated
+  | AchievementUnlocked
+  | FriendAdded
+  | FriendRemoved
+  | SyncCompleted

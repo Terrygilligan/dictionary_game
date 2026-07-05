@@ -1,0 +1,379 @@
+/**
+ * Crypto-Shredding Utility for GDPR Compliance
+ * 
+ * This utility provides encryption/decryption functions for sensitive data
+ * in event logs, enabling secure data storage and the ability to "shred"
+ * data by destroying encryption keys.
+ */
+
+// Web Crypto API for browser compatibility
+const crypto = window.crypto
+
+// Encryption configuration
+const ENCRYPTION_ALGORITHM = 'aes-256-gcm'
+const KEY_DERIVATION_ITERATIONS = 100000
+const SALT_LENGTH = 32
+const IV_LENGTH = 16
+
+export interface EncryptedData {
+  data: string // Base64 encrypted data
+  salt: string // Base64 salt
+  iv: string // Base64 initialization vector
+  tag: string // Base64 authentication tag
+  algorithm: string
+  keyId?: string // Optional key identifier for key rotation
+}
+
+export interface EncryptionKey {
+  id: string
+  key: Buffer
+  createdAt: number
+  expiresAt?: number
+  isActive: boolean
+}
+
+/**
+ * Key management for crypto-shredding
+ * In production, keys should be stored in a secure key management system
+ */
+class KeyManager {
+  private keys: Map<string, EncryptionKey> = new Map()
+  private activeKeyId: string | null = null
+
+  /**
+   * Generate a new encryption key
+   */
+  generateKey(id?: string): EncryptionKey {
+    const keyId = id || `key_${Date.now()}_${randomBytes(8).toString('hex')}`
+    const key = randomBytes(32) // 256 bits for AES-256
+    
+    const encryptionKey: EncryptionKey = {
+      id: keyId,
+      key,
+      createdAt: Date.now(),
+      expiresAt: Date.now() + (365 * 24 * 60 * 60 * 1000), // 1 year
+      isActive: true,
+    }
+
+    this.keys.set(keyId, encryptionKey)
+    this.activeKeyId = keyId
+    
+    return encryptionKey
+  }
+
+  /**
+   * Get the active encryption key
+   */
+  getActiveKey(): EncryptionKey | null {
+    if (!this.activeKeyId) {
+      return this.generateKey()
+    }
+    
+    const key = this.keys.get(this.activeKeyId)
+    if (!key || !key.isActive || (key.expiresAt && key.expiresAt < Date.now())) {
+      return this.generateKey()
+    }
+    
+    return key
+  }
+
+  /**
+   * Get a specific key by ID
+   */
+  getKey(id: string): EncryptionKey | null {
+    return this.keys.get(id) || null
+  }
+
+  /**
+   * Deactivate a key (crypto-shredding)
+   */
+  deactivateKey(id: string): boolean {
+    const key = this.keys.get(id)
+    if (key) {
+      key.isActive = false
+      // In production, securely delete the key material
+      key.key.fill(0)
+      return true
+    }
+    return false
+  }
+
+  /**
+   * Rotate to a new key
+   */
+  rotateKey(): EncryptionKey {
+    if (this.activeKeyId) {
+      this.deactivateKey(this.activeKeyId)
+    }
+    return this.generateKey()
+  }
+
+  /**
+   * Get all active keys
+   */
+  getActiveKeys(): EncryptionKey[] {
+    return Array.from(this.keys.values()).filter(key => 
+      key.isActive && (!key.expiresAt || key.expiresAt > Date.now())
+    )
+  }
+}
+
+// Global key manager instance
+const keyManager = new KeyManager()
+
+
+/**
+ * Encrypt sensitive data
+ */
+export function encryptSensitiveData(data: string, customKeyId?: string): EncryptedData {
+  const key = customKeyId ? keyManager.getKey(customKeyId) : keyManager.getActiveKey()
+  
+  if (!key) {
+    throw new Error('No encryption key available')
+  }
+
+  const salt = randomBytes(SALT_LENGTH)
+  const iv = randomBytes(IV_LENGTH)
+  
+  const cipher = createCipheriv(ENCRYPTION_ALGORITHM, key.key, iv)
+  
+  let encrypted = cipher.update(data, 'utf8', 'hex')
+  encrypted += cipher.final('hex')
+  
+  const tag = cipher.getAuthTag()
+  
+  return {
+    data: Buffer.from(encrypted, 'hex').toString('base64'),
+    salt: salt.toString('base64'),
+    iv: iv.toString('base64'),
+    tag: tag.toString('base64'),
+    algorithm: ENCRYPTION_ALGORITHM,
+    keyId: key.id,
+  }
+}
+
+/**
+ * Decrypt sensitive data
+ */
+export function decryptSensitiveData(encryptedData: EncryptedData): string {
+  const key = encryptedData.keyId 
+    ? keyManager.getKey(encryptedData.keyId)
+    : keyManager.getActiveKey()
+  
+  if (!key || !key.isActive) {
+    throw new Error('Encryption key not available or inactive - data may be shredded')
+  }
+
+  const salt = Buffer.from(encryptedData.salt, 'base64')
+  const iv = Buffer.from(encryptedData.iv, 'base64')
+  const tag = Buffer.from(encryptedData.tag, 'base64')
+  const data = Buffer.from(encryptedData.data, 'base64')
+
+  const decipher = createDecipheriv(ENCRYPTION_ALGORITHM, key.key, iv)
+  decipher.setAuthTag(tag)
+  
+  let decrypted = decipher.update(data, undefined, 'utf8')
+  decrypted += decipher.final('utf8')
+  
+  return decrypted
+}
+
+/**
+ * Check if encrypted data can be decrypted
+ */
+export function canDecrypt(encryptedData: EncryptedData): boolean {
+  try {
+    const key = encryptedData.keyId 
+      ? keyManager.getKey(encryptedData.keyId)
+      : keyManager.getActiveKey()
+    
+    return !!(key && key.isActive)
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Crypto-shred data by deactivating the key
+ */
+export function cryptoShredData(keyId: string): boolean {
+  return keyManager.deactivateKey(keyId)
+}
+
+/**
+ * Get information about encryption keys
+ */
+export function getEncryptionInfo() {
+  const activeKeys = keyManager.getActiveKeys()
+  const activeKey = keyManager.getActiveKey()
+  
+  return {
+    activeKeyId: activeKey?.id || null,
+    totalActiveKeys: activeKeys.length,
+    algorithm: ENCRYPTION_ALGORITHM,
+    keyRotationEnabled: true,
+  }
+}
+
+/**
+ * Encrypt user profile fields for GDPR compliance
+ */
+export function encryptUserProfile(profile: {
+  email: string
+  displayName?: string
+  [key: string]: any
+}): Record<string, any> {
+  const encrypted: Record<string, any> = { ...profile }
+  
+  // Encrypt sensitive fields
+  if (profile.email) {
+    encrypted.email = encryptSensitiveData(profile.email)
+  }
+  
+  if (profile.displayName) {
+    encrypted.displayName = encryptSensitiveData(profile.displayName)
+  }
+  
+  // Add metadata about encryption
+  encrypted.encryptedFields = ['email', 'displayName'].filter(field => profile[field])
+  encrypted.encryptionInfo = getEncryptionInfo()
+  
+  return encrypted
+}
+
+/**
+ * Decrypt user profile fields
+ */
+export function decryptUserProfile(encryptedProfile: Record<string, any>): {
+  email: string
+  displayName?: string
+  [key: string]: any
+} {
+  const decrypted: Record<string, any> = { ...encryptedProfile }
+  
+  // Remove encryption metadata
+  delete decrypted.encryptedFields
+  delete decrypted.encryptionInfo
+  
+  // Decrypt sensitive fields
+  if (encryptedProfile.email && typeof encryptedProfile.email === 'object') {
+    try {
+      decrypted.email = decryptSensitiveData(encryptedProfile.email)
+    } catch {
+      decrypted.email = '[ENCRYPTED_DATA_UNAVAILABLE]'
+    }
+  }
+  
+  if (encryptedProfile.displayName && typeof encryptedProfile.displayName === 'object') {
+    try {
+      decrypted.displayName = decryptSensitiveData(encryptedProfile.displayName)
+    } catch {
+      decrypted.displayName = '[ENCRYPTED_DATA_UNAVAILABLE]'
+    }
+  }
+  
+  return decrypted
+}
+
+/**
+ * Encrypt event log data for GDPR compliance
+ */
+export function encryptEventLog(eventLog: {
+  matchId: string
+  createdAt: number
+  events: any[]
+}): Record<string, any> {
+  const encrypted = { ...eventLog }
+  
+  // Encrypt user-identifiable information in events
+  encrypted.events = eventLog.events.map(event => {
+    const encryptedEvent = { ...event }
+    
+    // Encrypt user ID if present
+    if (event.userId) {
+      encryptedEvent.userId = encryptSensitiveData(event.userId)
+    }
+    
+    // Encrypt any personal data in event payload
+    if (event.payload && typeof event.payload === 'object') {
+      encryptedEvent.payload = { ...event.payload }
+      
+      // Common personal fields to encrypt
+      const personalFields = ['email', 'displayName', 'name', 'username']
+      personalFields.forEach(field => {
+        if (event.payload[field]) {
+          encryptedEvent.payload[field] = encryptSensitiveData(event.payload[field])
+        }
+      })
+    }
+    
+    return encryptedEvent
+  })
+  
+  encrypted.encryptionInfo = getEncryptionInfo()
+  return encrypted
+}
+
+/**
+ * Decrypt event log data
+ */
+export function decryptEventLog(encryptedEventLog: Record<string, any>): {
+  matchId: string
+  createdAt: number
+  events: any[]
+} {
+  const decrypted = { ...encryptedEventLog }
+  
+  // Remove encryption metadata
+  delete decrypted.encryptionInfo
+  
+  // Decrypt events
+  decrypted.events = encryptedEventLog.events.map((event: any) => {
+    const decryptedEvent = { ...event }
+    
+    // Decrypt user ID
+    if (event.userId && typeof event.userId === 'object') {
+      try {
+        decryptedEvent.userId = decryptSensitiveData(event.userId)
+      } catch {
+        decryptedEvent.userId = '[ENCRYPTED_DATA_UNAVAILABLE]'
+      }
+    }
+    
+    // Decrypt payload
+    if (event.payload && typeof event.payload === 'object') {
+      decryptedEvent.payload = { ...event.payload }
+      
+      const personalFields = ['email', 'displayName', 'name', 'username']
+      personalFields.forEach(field => {
+        if (event.payload[field] && typeof event.payload[field] === 'object') {
+          try {
+            decryptedEvent.payload[field] = decryptSensitiveData(event.payload[field])
+          } catch {
+            decryptedEvent.payload[field] = '[ENCRYPTED_DATA_UNAVAILABLE]'
+          }
+        }
+      })
+    }
+    
+    return decryptedEvent
+  })
+  
+  return decrypted
+}
+
+/**
+ * Initialize the crypto-shredding system
+ */
+export function initializeCryptoShredding(): void {
+  // Generate initial key if none exists
+  keyManager.getActiveKey()
+  
+  console.log('Crypto-shredding system initialized')
+  console.log('Active key ID:', keyManager.getActiveKey()?.id)
+}
+
+/**
+ * Export key management utilities for testing
+ */
+export const _keyManager = keyManager

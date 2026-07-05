@@ -1,2 +1,6 @@
 export { Button } from './Button.tsx'
 export type { ButtonProps } from './Button.tsx'
+export { LanguageSwitcher } from './LanguageSwitcher.tsx'
+export { PasswordInput } from './PasswordInput.tsx'
+export { RuleBook } from './RuleBook.tsx'
+export { Header } from './Header.tsx'

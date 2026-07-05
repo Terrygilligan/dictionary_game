@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/shared/ui/Button';
+import { useDealerVoice } from '@/shared/lib/speech/useDealerVoice';
+import { useTranslate } from '@/shared/lib/i18n/useTranslate';
 
 // Types for the main game selection flow
 type SelectionPhase = 'idle' | 'scroll' | 'page' | 'column' | 'wordNumber' | 'ready' | 'sealed' | 'revealed';
@@ -65,6 +67,10 @@ export const DictionarySelection = () => {
   const { state, dispatch } = useMockGameStore();
   const phase = state.phase;
   const [tempSelection, setTempSelection] = useState<number | null>(null);
+  const { t } = useTranslate();
+  
+  // Initialize dealer voice for TTS announcements
+  useDealerVoice(state, []); // Pass empty eventLog for now, will be connected later
 
   const handleDispatch = (commandType: MainGameCommand['type'], payload: Record<string, any> = {}) => {
     dispatch({ type: commandType, payload });
@@ -73,9 +79,9 @@ export const DictionarySelection = () => {
   if (phase === 'idle') {
     return (
       <div className="selection-container" aria-live="polite">
-        <h2>Dictionary Dealer</h2>
+        <h2>{t('dictionaryDealer.title')}</h2>
         <Button onClick={() => handleDispatch('startGame')}>
-          Start Main Game
+          {t('dictionaryDealer.startGame')}
         </Button>
       </div>
     );
@@ -83,47 +89,47 @@ export const DictionarySelection = () => {
 
   return (
     <div className="selection-container" aria-live="polite">
-      <h2>Dictionary Dealer</h2>
+      <h2>{t('dictionaryDealer.title')}</h2>
       
       {phase === 'scroll' && (
         <div className="scroll-phase">
-          <p>Flicking through dictionary sections...</p>
+          <p>{t('dictionaryDealer.flickingSections')}</p>
           <Button onClick={() => handleDispatch('selectScroll', { section: 'A-D' })}>
-            Stop!
+            {t('dictionaryDealer.stop')}
           </Button>
         </div>
       )}
 
       {phase === 'page' && (
         <div className="page-phase">
-          <p>Page selected. Which side?</p>
+          <p>{t('dictionaryDealer.pageSelected')}</p>
           <Button onClick={() => handleDispatch('selectPage', { side: 'left' })}>
-            Left
+            {t('dictionaryDealer.left')}
           </Button>
           <Button onClick={() => handleDispatch('selectPage', { side: 'right' })}>
-            Right
+            {t('dictionaryDealer.right')}
           </Button>
         </div>
       )}
 
       {phase === 'column' && (
         <div className="column-phase">
-          <p>Which column?</p>
+          <p>{t('dictionaryDealer.whichColumn')}</p>
           <Button onClick={() => handleDispatch('selectColumn', { side: 'left' })}>
-            Left
+            {t('dictionaryDealer.left')}
           </Button>
           <Button onClick={() => handleDispatch('selectColumn', { side: 'right' })}>
-            Right
+            {t('dictionaryDealer.right')}
           </Button>
         </div>
       )}
 
       {phase === 'wordNumber' && (
         <div className="number-phase">
-          <p>Approximately which word number?</p>
+          <p>{t('dictionaryDealer.whichWordNumber')}</p>
           <input 
             type="number" 
-            placeholder="Enter word number" 
+            placeholder={t('dictionaryDealer.enterWordNumber')} 
             onChange={(e) => setTempSelection(parseInt(e.target.value) || null)} 
             aria-label="Word number input"
           />
@@ -131,34 +137,34 @@ export const DictionarySelection = () => {
             onClick={() => handleDispatch('selectWordNumber', { number: tempSelection })}
             disabled={tempSelection === null}
           >
-            Confirm
+            {t('dictionaryDealer.confirm')}
           </Button>
         </div>
       )}
 
       {phase === 'ready' && (
         <div className="seal-phase">
-          <p>Word coordinates locked.</p>
+          <p>{t('dictionaryDealer.wordCoordinatesLocked')}</p>
           <Button onClick={() => handleDispatch('sealWord')}>
-            Seal Word
+            {t('dictionaryDealer.sealWord')}
           </Button>
         </div>
       )}
 
       {phase === 'sealed' && (
         <div className="reveal-phase">
-          <p>The Dealer is ready.</p>
+          <p>{t('dictionaryDealer.dealerReady')}</p>
           <Button onClick={() => handleDispatch('revealWord')}>
-            Reveal Word (TTS)
+            {t('dictionaryDealer.revealWord')}
           </Button>
         </div>
       )}
 
       {phase === 'revealed' && (
         <div className="completed-phase">
-          <p>Word revealed!</p>
+          <p>{t('dictionaryDealer.wordRevealed')}</p>
           <Button onClick={() => handleDispatch('startGame')}>
-            Play Again
+            {t('dictionaryDealer.playAgain')}
           </Button>
         </div>
       )}

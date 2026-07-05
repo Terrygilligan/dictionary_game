@@ -1,4 +1,4 @@
-import { WORDS, type Word } from '@/entities/word'
+import { getRandomWords, type LexiconWord } from '@/entities/lexicon'
 import type { Choice, RoundSpec } from '@/entities/game'
 import { nextId, sample, shuffle, type Rng } from '@/shared/lib'
 
@@ -6,7 +6,7 @@ export interface DeckOptions {
   roundCount?: number
   choicesPerRound?: number
   rng?: Rng
-  words?: readonly Word[]
+  seed?: number
 }
 
 /**
@@ -15,13 +15,17 @@ export interface DeckOptions {
  * so the event log remains a deterministic record.
  */
 export function buildDeck(options: DeckOptions = {}): RoundSpec[] {
-  const { roundCount = 8, choicesPerRound = 4, rng = Math.random, words = WORDS } = options
+  const { roundCount = 8, choicesPerRound = 4, rng = Math.random, seed } = options
 
+  // Get random words from the unified lexicon
+  const words = getRandomWords(roundCount + (choicesPerRound - 1) * roundCount, seed)
+
+  // Select prompt words
   const prompts = sample(words, roundCount, rng)
 
-  return prompts.map((word) => {
+  return prompts.map((word: LexiconWord) => {
     const distractors = sample(
-      words.filter((candidate) => candidate.id !== word.id),
+      words.filter((candidate: LexiconWord) => candidate.id !== word.id),
       choicesPerRound - 1,
       rng,
     )
@@ -29,15 +33,15 @@ export function buildDeck(options: DeckOptions = {}): RoundSpec[] {
     const choices: Choice[] = shuffle(
       [
         { id: nextId(), text: word.definition, correct: true },
-        ...distractors.map((d) => ({ id: nextId(), text: d.definition, correct: false })),
+        ...distractors.map((d: LexiconWord) => ({ id: nextId(), text: d.definition, correct: false })),
       ],
       rng,
     )
 
     return {
       wordId: word.id,
-      term: word.term,
-      partOfSpeech: word.partOfSpeech,
+      term: word.word,
+      partOfSpeech: 'noun', // Default part of speech - could be enhanced in lexicon schema
       choices,
     }
   })

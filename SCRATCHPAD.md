@@ -309,3 +309,120 @@ No new domain events. Adds infrastructure types `EventLog<TEvent>` and
 `eventLog.test.ts`: monotonic seq + metadata on append; JSON round-trip;
 pure replay reconstructs state; `matchId`/`createdAt` preserved; malformed JSON
 rejected.
+
+---
+
+## 0006 — Multilingual Village Expansion (i18n + Firebase)
+
+**Date:** 2026-07-04  
+**Status:** implemented
+
+### Goal
+Scale Lexicon Master to support a truly multilingual environment for the village community, including English, Dutch, Bulgarian, Indonesian, French, and German, with Firebase infrastructure for user data persistence.
+
+### Architectural rationale
+
+- **ID-based Lexicon Architecture.** The system already used word IDs (`word_001`, etc.) rather than hard-coded strings, making it naturally prepared for multilingual expansion. Words are resolved by ID through `getWordById()`, then localized content is applied via the i18n service.
+
+- **Strategy Pattern for Localization.** Externalized all display strings into JSON locale files (`en.json`, `nl.json`, `bg.json`, `in.json`, `fr.json`, `de.json`). The `i18nService` manages loading the appropriate locale file based on `currentLanguage` state, with fallback to English.
+
+- **Firebase Infrastructure.** Implemented Firebase auth and database services with proper security rules. The `authService` follows the Blind Arbiter pattern - tokens are never exposed to UI components. The `dbService` handles event log persistence and user data storage.
+
+- **React Hook Integration.** Created `useTranslate` hook that provides language-agnostic UI components with translation capabilities, language switching, and locale state management.
+
+- **Enhanced Lexicon Entity.** Added `i18nLexicon.ts` with `LocalizedLexiconWord` interface that extends base `LexiconWord` with `localizedWord` and `localizedDefinition` properties. This maintains the pure domain model while enabling multilingual display.
+
+- **Community-Ready Translation Structure.** Word translation registry includes optional `contributor` field metadata for future community-contributed dictionary features, enabling neighbor recognition for vocabulary additions.
+
+### Implementation details
+
+- **Firebase Configuration.** Environment-based configuration using `import.meta.env` with proper validation and lazy initialization of Firebase services.
+- **Security Rules.** Firestore rules restrict read/write access to `auth.uid` owners for user data, with proper validation for event log structure.
+- **Translation Resolution.** Two-step process: resolve word by ID, then apply current language translations with fallback to English.
+- **State Persistence.** Language preference stored in localStorage for user experience continuity.
+
+### Files added
+`src/shared/lib/i18n/` (service, types, React hook, 6 locale JSON files), `src/entities/lexicon/model/i18nLexicon.ts`, Firebase services (`src/services/auth.ts`, `src/services/db.ts`), enhanced `src/shared/api/firebase.ts`.
+
+### Tests
+Domain logic remains pure and testable. i18n service includes initialization and language switching validation. Firebase services include error handling and proper token management (never exposed to UI).
+
+---
+
+## 0007 — GDPR Compliance & Production Infrastructure
+
+**Date:** 2026-07-04  
+**Status:** implemented
+
+### Goal
+Implement GDPR compliance for the European market, including crypto-shredding for sensitive data, privacy policy infrastructure, and production deployment automation for EU-based hosting.
+
+### Architectural rationale
+
+- **Crypto-Shredding Implementation.** Created browser-compatible encryption system using Web Crypto API (AES-256-GCM) for sensitive data in event logs and user profiles. The `KeyManager` handles key lifecycle - destroying keys permanently shreds data, fulfilling GDPR's "right to be forgotten."
+
+- **Privacy by Design Architecture.** All user-facing forms include explicit Terms of Service and Privacy Policy acceptance checkboxes. Legal documents are properly structured and accessible via dedicated routes.
+
+- **EU-First Infrastructure.** Firebase project configured for `europe-west1` region with production deployment scripts that verify EU compliance before deployment.
+
+- **Browser Compatibility.** Replaced Node.js crypto module with Web Crypto API to ensure client-side encryption works in all browsers without external dependencies.
+
+- **Event Log Encryption.** Sensitive fields (user IDs, personal data) in event logs are automatically encrypted before Firestore storage, with transparent decryption during retrieval.
+
+- **Key Management Strategy.** Encryption keys are stored in memory only, never persisted or committed to source control. Production deployment recommends Google Cloud Secret Manager for key storage.
+
+### Implementation details
+
+- **Crypto-Shredding Service.** `cryptoShreddingBrowser.ts` provides `encryptUserProfile`, `decryptUserProfile`, `encryptEventLog`, `decryptEventLog` functions with automatic key management.
+
+- **Legal Documentation.** Created comprehensive `PrivacyPolicy.md` and `TermsOfService.md` documents covering data processing, user rights, cookie policies, and GDPR compliance clauses.
+
+- **Production Automation.** `deploy-production.sh` and `setup-production-env.sh` scripts handle Firebase EU deployment, security verification, and environment setup.
+
+- **Database Integration.** Modified `db.ts` to automatically encrypt/decrypt sensitive data during save/load operations, maintaining transparent API for the rest of the application.
+
+- **UI Integration.** Updated `AuthPage.tsx` with terms acceptance checkbox and proper validation, including links to legal documents.
+
+### Files added
+`src/shared/lib/security/cryptoShreddingBrowser.ts`, `docs/PrivacyPolicy.md`, `docs/TermsOfService.md`, `firebase.json`, `scripts/deploy-production.sh`, `scripts/setup-production-env.sh`, `docs/VILLAGE_BETA_GUIDE.md`, `RELEASE_CHECKLIST.md`.
+
+### Tests
+Crypto-shredding includes browser compatibility testing. Legal documents reviewed for GDPR compliance. Deployment scripts include environment validation and security checks.
+
+---
+
+## 0008 — Village Beta UI/UX Polish & Navigation
+
+**Date:** 2026-07-05  
+**Status:** implemented
+
+### Goal
+Complete the user experience for Village Beta testing by implementing proper navigation, language switching UI, and ensuring all pages are accessible and functional.
+
+### Architectural rationale
+
+- **Consistent Language Access.** Added `LanguageSwitcher` component to all page headers (Landing, Auth, Profile) ensuring users can change language from any context without navigation disruption.
+
+- **Component Reusability.** `LanguageSwitcher` is a shared UI component that integrates with the existing i18n service, maintaining clean separation between UI and state management.
+
+- **Progressive Enhancement.** Language switching works instantly without page reload, leveraging React's reactive state management and localStorage persistence.
+
+- **Accessibility First Design.** Language switcher includes proper labels, keyboard navigation, and WCAG 2.1 AA compliant styling with focus indicators.
+
+- **Navigation Flow.** Implemented proper page routing with "Get Started" button linking from landing to auth page, preparing for full router implementation.
+
+### Implementation details
+
+- **LanguageSwitcher Component.** Created reusable dropdown with all 6 languages, instant switching, and proper async language loading.
+
+- **Page Header Structure.** Added consistent `.page__header` layout across all pages with title on left, language switcher on right.
+
+- **CSS Styling.** Added comprehensive styling for language switcher with hover states, focus indicators, and responsive design considerations.
+
+- **Export Structure.** Updated `shared/ui/index.ts` to export LanguageSwitcher for consistent import patterns.
+
+### Files modified
+`src/pages/landing/ui/LandingPage.tsx`, `src/pages/auth/ui/AuthPage.tsx`, `src/pages/profile/ui/ProfilePage.tsx`, `src/app/styles/index.css`, `src/shared/ui/LanguageSwitcher.tsx`, `src/shared/ui/index.ts`.
+
+### Tests
+Language switching tested across all 6 languages. Navigation flow verified. Accessibility compliance checked with keyboard navigation and screen reader compatibility.
