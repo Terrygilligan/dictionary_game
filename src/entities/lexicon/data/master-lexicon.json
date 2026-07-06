@@ -1,0 +1,182 @@
+[
+  {
+    "id": "word_001",
+    "conceptId": "concept_001",
+    "translations": {
+      "en": "aberration",
+      "bg": "аберация"
+    },
+    "definitions": {
+      "en": "a departure from what is normal, usual, or expected, typically one that is unwelcome",
+      "bg": "отклонение от това, което е нормално, обичайно или очаквано, обикновено нежелано"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 1,
+      "wordNumber": 1
+    }
+  },
+  {
+    "id": "word_002",
+    "conceptId": "concept_002",
+    "translations": {
+      "en": "abhor",
+      "bg": "отвращавам"
+    },
+    "definitions": {
+      "en": "regard with disgust and hatred",
+      "bg": "преглеждам с отвращение и омраза"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 1,
+      "wordNumber": 2
+    }
+  },
+  {
+    "id": "word_003",
+    "conceptId": "concept_003",
+    "translations": {
+      "en": "abide",
+      "bg": "спазвам"
+    },
+    "definitions": {
+      "en": "accept or act in accordance with (a rule, decision, or recommendation)",
+      "bg": "приемам или действам в съответствие с (правило, решение или препоръка)"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 1,
+      "wordNumber": 3
+    }
+  },
+  {
+    "id": "word_004",
+    "conceptId": "concept_004",
+    "translations": {
+      "en": "abject",
+      "bg": "презрен"
+    },
+    "definitions": {
+      "en": "completely without pride or dignity; contemptible",
+      "bg": "напълно без гордост или достойнство; презрен"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 1,
+      "wordNumber": 4
+    }
+  },
+  {
+    "id": "word_005",
+    "conceptId": "concept_005",
+    "translations": {
+      "en": "abjure",
+      "bg": "отричам се"
+    },
+    "definitions": {
+      "en": "solemnly renounce or reject (a belief, cause, or claim)",
+      "bg": "торжествено се отказвам или отхвърлям (убеждение, кауза или твърдение)"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 1,
+      "wordNumber": 5
+    }
+  },
+  {
+    "id": "word_006",
+    "conceptId": "concept_006",
+    "translations": {
+      "en": "abnegation",
+      "bg": "отрицание"
+    },
+    "definitions": {
+      "en": "the act or an instance of abnegating a right, claim, or privilege",
+      "bg": "действието или пример за отричане на право, иск или привилегия"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 1,
+      "wordNumber": 6
+    }
+  },
+  {
+    "id": "word_007",
+    "conceptId": "concept_007",
+    "translations": {
+      "en": "abolish",
+      "bg": "премахвам"
+    },
+    "definitions": {
+      "en": "formally put an end to (a system, practice, or institution)",
+      "bg": "официално слагам край на (система, практика или институция)"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 1,
+      "wordNumber": 7
+    }
+  },
+  {
+    "id": "word_008",
+    "conceptId": "concept_008",
+    "translations": {
+      "en": "abortion",
+      "bg": "аборт"
+    },
+    "definitions": {
+      "en": "the deliberate termination of a human pregnancy",
+      "bg": "умишленото прекратяване на човешка бременност"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 1,
+      "wordNumber": 8
+    }
+  },
+  {
+    "id": "word_009",
+    "conceptId": "concept_009",
+    "translations": {
+      "en": "abridge",
+      "bg": "съкращавам"
+    },
+    "definitions": {
+      "en": "shorten (a book, movie, speech, or other text) without losing the sense",
+      "bg": "съкращавам (книга, филм, реч или друг текст) без да губя смисъла"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 1,
+      "wordNumber": 9
+    }
+  },
+  {
+    "id": "word_010",
+    "conceptId": "concept_010",
+    "translations": {
+      "en": "abroad",
+      "bg": "в чужбина"
+    },
+    "definitions": {
+      "en": "in or to a foreign country",
+      "bg": "в или в чужда държава"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 1,
+      "wordNumber": 10
+    }
+  }
+]

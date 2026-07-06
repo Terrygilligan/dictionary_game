@@ -1,12 +1,9 @@
-import dataset from './dataset.json'
 import type { LexiconWord, WordCoordinate } from './types'
 import { seededRng } from '@/shared/lib/random'
-import { migrateToMultiLanguageFormat, addBulgarianTranslations } from './lexicon-data'
+import { loadMasterLexicon } from './lexiconLoader'
 
-// Convert legacy dataset to new multi-language format
-const legacyData = dataset as any[]
-const migratedLexiconWords: LexiconWord[] = migrateToMultiLanguageFormat(legacyData)
-const lexiconWords: LexiconWord[] = addBulgarianTranslations(migratedLexiconWords)
+// Load and validate master lexicon data
+const lexiconWords: LexiconWord[] = loadMasterLexicon()
 
 /**
  * Get a word by its coordinates (for the Dealer game)
