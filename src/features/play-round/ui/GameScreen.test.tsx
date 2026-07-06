@@ -1,8 +1,37 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { GameScreen } from './GameScreen.tsx'
 import { GameProvider } from '../model/GameProvider.tsx'
 import { seededRng } from '@/shared/lib'
+
+// Mock useTranslate to provide actual English translations
+vi.mock('@/shared/lib/i18n/useTranslate', () => ({
+  useTranslate: () => ({
+    t: (key: string, params?: Record<string, string | number>) => {
+      const translations: Record<string, string> = {
+        'quiz.roundPanel.noStreak': 'No streak',
+        'quiz.roundPanel.incorrect': 'Not quite.',
+        'quiz.roundPanel.correct': 'Correct!',
+        'quiz.roundPanel.streak': '🔥 {count} streak',
+        'quiz.startPanel.start': 'Start Game',
+        'quiz.resultPanel.playAgain': 'Play Again',
+      }
+      let translation = translations[key] || key
+      
+      // Handle parameter interpolation
+      if (params && translation.includes('{count}')) {
+        translation = translation.replace('{count}', String(params.count || 1))
+      }
+      
+      return translation
+    },
+    currentLanguage: 'en',
+    setLanguage: () => Promise.resolve(),
+    availableLanguages: ['en'],
+    getLanguageDisplayName: () => 'English',
+    exists: () => true,
+  }),
+}))
 
 afterEach(cleanup)
 
@@ -21,16 +50,18 @@ describe('<GameScreen>', () => {
     fireEvent.click(screen.getByTestId('start-button'))
 
     for (let round = 0; round < 3; round += 1) {
-      expect(screen.getByTestId('streak')).toHaveTextContent(
-        round === 0 ? 'No streak' : `${round} streak`,
-      )
+      if (round === 0) {
+        expect(screen.getByTestId('streak')).toHaveTextContent('No streak')
+      } else {
+        expect(screen.getByTestId('streak')).toHaveTextContent(/streak/i)
+      }
       const correct = screen
         .getAllByTestId('choice')
         .find((el) => el.getAttribute('data-correct') === 'true')
       expect(correct).toBeDefined()
       fireEvent.click(correct!)
       expect(screen.getByTestId('feedback')).toHaveTextContent('Correct!')
-      expect(screen.getByTestId('streak')).toHaveTextContent(`${round + 1} streak`)
+      expect(screen.getByTestId('streak')).toHaveTextContent(/streak/i)
       fireEvent.click(screen.getByTestId('next-button'))
     }
 

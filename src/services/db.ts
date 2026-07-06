@@ -35,6 +35,12 @@ export interface DatabaseService {
   /** Load user profile data */
   loadUserProfile(userId: string): Promise<any | null>
   
+  /** Save user stats */
+  saveUserStats(userId: string, stats: any): Promise<void>
+  
+  /** Load user stats */
+  loadUserStats(userId: string): Promise<any | null>
+  
   /** Sync events to remote */
   syncEvents(userId: string, events: any[]): Promise<void>
   
@@ -189,6 +195,39 @@ class FirestoreDBService implements DatabaseService {
       console.log(`Synced ${events.length} events for user ${userId}`)
     } catch (error) {
       console.error('Failed to sync events:', error)
+      throw error
+    }
+  }
+
+  async saveUserStats(userId: string, stats: any): Promise<void> {
+    try {
+      const statsRef = doc(this.db, 'users', userId, 'stats')
+      
+      const statsData = {
+        ...stats,
+        updatedAt: serverTimestamp(),
+      }
+      
+      await setDoc(statsRef, statsData, { merge: true })
+      console.log(`Stats saved for user ${userId}`)
+    } catch (error) {
+      console.error('Failed to save user stats:', error)
+      throw error
+    }
+  }
+
+  async loadUserStats(userId: string): Promise<any | null> {
+    try {
+      const statsRef = doc(this.db, 'users', userId, 'stats')
+      const snapshot = await getDoc(statsRef)
+      
+      if (!snapshot.exists()) {
+        return null
+      }
+      
+      return snapshot.data()
+    } catch (error) {
+      console.error('Failed to load user stats:', error)
       throw error
     }
   }

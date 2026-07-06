@@ -85,17 +85,20 @@
   "profile": {
     "title": "Player Profile",
     "totalScore": "Total Score",
-    "matchesPlayed": "Matches Played",
+    "matchesPlayed": "Games Played",
     "winRate": "Win Rate",
+    "correctAnswers": "Correct Answers",
+    "totalQuestions": "Total Questions",
+    "accuracy": "Accuracy",
     "highestStreak": "Highest Streak",
     "currentStreak": "Current Streak",
     "achievements": "Achievements",
     "friends": "Friends",
     "recentActivity": "Recent Activity",
     "statistics": "Statistics",
-    "manageProfile": "Manage your profile and settings",
-    "activityDescription": "You've played {{count}} matches",
-    "noActivity": "No matches played yet. Start playing to see your activity!"
+    "manageProfile": "Manage profile and settings",
+    "activityDescription": "You've played {{count}} games",
+    "noActivity": "No games played yet. Start playing to see your activity!"
   },
   "settings": {
     "title": "Settings",

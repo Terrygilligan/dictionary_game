@@ -20,6 +20,15 @@ export interface UpdateProfile {
   readonly matchesPlayed?: number
 }
 
+export interface UpdateStats {
+  readonly type: 'stats/update'
+  readonly gamesPlayed?: number
+  readonly correctAnswers?: number
+  readonly totalQuestions?: number
+  readonly streak?: number
+  readonly highestStreak?: number
+}
+
 export interface AddFriend {
   readonly type: 'friend/add'
   readonly friendId: string
@@ -40,6 +49,7 @@ export type UserCommand =
   | AuthenticateUser
   | UpdateUser
   | UpdateProfile
+  | UpdateStats
   | AddFriend
   | RemoveFriend
   | SyncUser

@@ -71,6 +71,14 @@ function firebaseUserToDomainUser(firebaseUser: FirebaseUser): User {
     lastLoginAt: firebaseUser.metadata.lastSignInTime ? 
       new Date(firebaseUser.metadata.lastSignInTime).getTime() : 
       undefined,
+    stats: {
+      gamesPlayed: 0,
+      correctAnswers: 0,
+      totalQuestions: 0,
+      streak: 0,
+      highestStreak: 0,
+      updatedAt: Date.now(),
+    },
   }
 }
 

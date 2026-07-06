@@ -4,8 +4,8 @@ import { Button } from '@/shared/ui/Button'
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
 import { BackendTester } from '@/components/BackendTester'
 import { authService } from '@/services/auth'
-import { dbService } from '@/services/db'
-import type { User } from '@/entities/user'
+import { userService } from '@/services/userService'
+import type { User, UserStats } from '@/entities/user'
 
 interface ProfilePageProps {
   user: User
@@ -14,58 +14,28 @@ interface ProfilePageProps {
 
 export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
   const { t, currentLanguage, setLanguage, availableLanguages, getLanguageDisplayName } = useTranslate()
-  const [userStats, setUserStats] = useState({
-    totalScore: 0,
-    matchesPlayed: 0,
-    winRate: 0,
+  const [userStats, setUserStats] = useState<UserStats>({
+    gamesPlayed: 0,
+    correctAnswers: 0,
+    totalQuestions: 0,
+    streak: 0,
     highestStreak: 0,
-    currentStreak: 0,
+    updatedAt: Date.now(),
   })
   const [isLoading, setIsLoading] = useState(false)
 
-  // Load user statistics from event logs
+  // Load user statistics from Firestore
   useEffect(() => {
     const loadUserStats = async () => {
+      if (!user) return
+      
       try {
         setIsLoading(true)
-        const eventLogs = await dbService.getUserEventLogs(user.id)
+        const stats = await userService.loadUserStats(user.id)
         
-        // Calculate stats from event logs
-        let totalScore = 0
-        let matchesPlayed = eventLogs.length
-        let wins = 0
-        let highestStreak = 0
-        let currentStreak = 0
-
-        eventLogs.forEach(log => {
-          log.events.forEach(envelope => {
-            const event = envelope.event
-            if (event && typeof event === 'object') {
-              const typedEvent = event as any
-              if (typedEvent.type === 'profile/updated' && typedEvent.totalScore) {
-                totalScore = Math.max(totalScore, typedEvent.totalScore)
-              }
-              if (typedEvent.type === 'streak/updated') {
-                highestStreak = Math.max(highestStreak, typedEvent.streak)
-                currentStreak = typedEvent.streak
-              }
-              if (typedEvent.type === 'game/finished') {
-                // This would need more complex logic to determine wins
-                wins++
-              }
-            }
-          })
-        })
-
-        const winRate = matchesPlayed > 0 ? (wins / matchesPlayed) * 100 : 0
-
-        setUserStats({
-          totalScore,
-          matchesPlayed,
-          winRate,
-          highestStreak,
-          currentStreak,
-        })
+        if (stats) {
+          setUserStats(stats)
+        }
       } catch (error) {
         console.error('Failed to load user stats:', error)
       } finally {
@@ -74,7 +44,10 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
     }
 
     loadUserStats()
-  }, [user.id])
+  }, [user])
+
+  // Calculate accuracy percentage
+  const accuracy = userService.calculateAccuracy(userStats)
 
   const handleLanguageChange = async (language: string) => {
     try {
@@ -124,16 +97,20 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
 
         <div className="profile__stats">
           <div className="profile__stat">
-            <p className="profile__stat-value">{userStats.totalScore.toLocaleString()}</p>
-            <p className="profile__stat-label">{t('profile.totalScore')}</p>
+            <p className="profile__stat-value">{userStats.gamesPlayed}</p>
+            <p className="profile__stat-label">{t('profile.gamesPlayed')}</p>
           </div>
           <div className="profile__stat">
-            <p className="profile__stat-value">{userStats.matchesPlayed}</p>
-            <p className="profile__stat-label">{t('profile.matchesPlayed')}</p>
+            <p className="profile__stat-value">{userStats.correctAnswers}</p>
+            <p className="profile__stat-label">{t('profile.correctAnswers')}</p>
           </div>
           <div className="profile__stat">
-            <p className="profile__stat-value">{userStats.winRate.toFixed(1)}%</p>
-            <p className="profile__stat-label">{t('profile.winRate')}</p>
+            <p className="profile__stat-value">{userStats.totalQuestions}</p>
+            <p className="profile__stat-label">{t('profile.totalQuestions')}</p>
+          </div>
+          <div className="profile__stat">
+            <p className="profile__stat-value">{accuracy.toFixed(1)}%</p>
+            <p className="profile__stat-label">{t('profile.accuracy')}</p>
           </div>
           <div className="profile__stat">
             <p className="profile__stat-value">{userStats.highestStreak}</p>
@@ -164,8 +141,8 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
       <div className="panel">
         <h3 className="profile__section-title">{t('profile.recentActivity')}</h3>
         <p className="panel__lead">
-          {userStats.matchesPlayed > 0 
-            ? t('profile.activityDescription', { count: userStats.matchesPlayed })
+          {userStats.gamesPlayed > 0 
+            ? t('profile.activityDescription', { count: userStats.gamesPlayed })
             : t('profile.noActivity')
           }
         </p>

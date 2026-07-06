@@ -1,5 +1,14 @@
 export type AuthStatus = 'anonymous' | 'authenticated' | 'loading'
 
+export interface UserStats {
+  readonly gamesPlayed: number
+  readonly correctAnswers: number
+  readonly totalQuestions: number
+  readonly streak: number
+  readonly highestStreak: number
+  readonly updatedAt: number
+}
+
 export interface User {
   readonly id: string
   readonly email: string
@@ -7,6 +16,7 @@ export interface User {
   readonly emailVerified: boolean
   readonly createdAt: number
   readonly lastLoginAt?: number
+  readonly stats: UserStats
 }
 
 export interface UserProfile {
@@ -27,14 +37,6 @@ export interface Achievement {
   readonly category: 'score' | 'streak' | 'games' | 'social'
 }
 
-export interface UserStats {
-  readonly lifetimeScore: number
-  readonly matchesPlayed: number
-  readonly winRate: number
-  readonly averageScore: number
-  readonly highestStreak: number
-  readonly currentStreak: number
-}
 
 export interface FriendActivity {
   readonly userId: string

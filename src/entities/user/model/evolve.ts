@@ -20,6 +20,14 @@ export function evolveUser(state: UserState, event: UserEvent): UserState {
           displayName: event.displayName,
           emailVerified: false, // Default to false until verified
           createdAt: event.createdAt,
+          stats: {
+            gamesPlayed: 0,
+            correctAnswers: 0,
+            totalQuestions: 0,
+            streak: 0,
+            highestStreak: 0,
+            updatedAt: event.createdAt,
+          },
         },
         authStatus: 'authenticated',
       }
@@ -48,6 +56,22 @@ export function evolveUser(state: UserState, event: UserEvent): UserState {
         ...state,
         totalScore: event.totalScore ?? state.totalScore,
         matchesPlayed: event.matchesPlayed ?? state.matchesPlayed,
+      }
+
+    case 'stats/updated':
+      return {
+        ...state,
+        user: state.user ? {
+          ...state.user,
+          stats: {
+            gamesPlayed: event.gamesPlayed ?? state.user.stats.gamesPlayed,
+            correctAnswers: event.correctAnswers ?? state.user.stats.correctAnswers,
+            totalQuestions: event.totalQuestions ?? state.user.stats.totalQuestions,
+            streak: event.streak ?? state.user.stats.streak,
+            highestStreak: event.highestStreak ?? state.user.stats.highestStreak,
+            updatedAt: event.timestamp,
+          },
+        } : state.user,
       }
 
     case 'achievement/unlocked':

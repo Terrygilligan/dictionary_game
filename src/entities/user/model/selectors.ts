@@ -41,17 +41,19 @@ export const selectUserProfile = (state: UserState): UserProfile | null => {
 }
 
 export const selectUserStats = (state: UserState): UserStats => {
-  const winRate = state.matchesPlayed > 0 ? 0 : 0 // Will be calculated from game events
-  const averageScore = state.matchesPlayed > 0 ? state.totalScore / state.matchesPlayed : 0
-  
-  return {
-    lifetimeScore: state.totalScore,
-    matchesPlayed: state.matchesPlayed,
-    winRate,
-    averageScore,
-    highestStreak: 0, // Will be calculated from game events
-    currentStreak: 0, // Will be calculated from game events
+  // Return stats from the user object, or defaults if user doesn't exist
+  if (!state.user) {
+    return {
+      gamesPlayed: 0,
+      correctAnswers: 0,
+      totalQuestions: 0,
+      streak: 0,
+      highestStreak: 0,
+      updatedAt: Date.now(),
+    }
   }
+  
+  return state.user.stats
 }
 
 export const selectDisplayName = (state: UserState): string => 

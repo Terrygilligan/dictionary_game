@@ -68,6 +68,35 @@ export function decideUser(
       
       return events
 
+    case 'stats/update':
+      // Only update stats if user exists and is authenticated
+      if (!state.user || state.authStatus !== 'authenticated') return []
+      
+      const statsEvents: UserEvent[] = []
+      
+      // Check if any stats are being updated
+      const hasUpdates = 
+        command.gamesPlayed !== undefined ||
+        command.correctAnswers !== undefined ||
+        command.totalQuestions !== undefined ||
+        command.streak !== undefined ||
+        command.highestStreak !== undefined
+      
+      if (hasUpdates) {
+        statsEvents.push({
+          type: 'stats/updated',
+          userId: state.user.id,
+          gamesPlayed: command.gamesPlayed,
+          correctAnswers: command.correctAnswers,
+          totalQuestions: command.totalQuestions,
+          streak: command.streak,
+          highestStreak: command.highestStreak,
+          timestamp: Date.now(), // Will be replaced by injectable clock
+        })
+      }
+      
+      return statsEvents
+
     case 'friend/add':
       // Only add friend if user exists and is authenticated
       if (!state.user || state.authStatus !== 'authenticated') return []

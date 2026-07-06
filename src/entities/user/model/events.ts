@@ -52,6 +52,17 @@ export interface FriendRemoved {
   readonly timestamp: number
 }
 
+export interface StatsUpdated {
+  readonly type: 'stats/updated'
+  readonly userId: string
+  readonly gamesPlayed?: number
+  readonly correctAnswers?: number
+  readonly totalQuestions?: number
+  readonly streak?: number
+  readonly highestStreak?: number
+  readonly timestamp: number
+}
+
 export interface SyncCompleted {
   readonly type: 'sync/completed'
   readonly userId: string
@@ -64,6 +75,7 @@ export type UserEvent =
   | UserAuthenticated
   | UserUpdated
   | ProfileUpdated
+  | StatsUpdated
   | AchievementUnlocked
   | FriendAdded
   | FriendRemoved
