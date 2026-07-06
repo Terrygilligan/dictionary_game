@@ -34,4 +34,6 @@ export interface GameState {
   readonly answers: readonly AnswerRecord[]
   /** Consecutive correct answers; reset to 0 on a wrong answer or `resetStreak`. */
   readonly streak: number
+  /** Current language for the game (defaults to 'en'). */
+  readonly currentLanguage: string
 }

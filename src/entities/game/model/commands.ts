@@ -10,3 +10,4 @@ export type GameCommand =
   | { readonly type: 'submitAnswer'; readonly choiceId: string }
   | { readonly type: 'nextRound' }
   | { readonly type: 'resetStreak' }
+  | { readonly type: 'setLanguage'; readonly language: string }

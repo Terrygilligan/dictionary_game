@@ -16,15 +16,17 @@ import { ResultPanel } from './ResultPanel.tsx'
 export interface GameScreenProps {
   /** Deck configuration for new games (round count, choices, rng...). */
   deckOptions?: DeckOptions
+  /** Language for the game (defaults to 'en'). */
+  language?: string
 }
 
-export function GameScreen({ deckOptions }: GameScreenProps) {
+export function GameScreen({ deckOptions, language = 'en' }: GameScreenProps) {
   const state = useGameState()
   const dispatch = useGameDispatch()
 
   const startGame = useCallback(() => {
-    dispatch({ type: 'startGame', deck: buildDeck(deckOptions) })
-  }, [dispatch, deckOptions])
+    dispatch({ type: 'startGame', deck: buildDeck({ ...deckOptions, language }) })
+  }, [dispatch, deckOptions, language])
 
   const submitAnswer = useCallback(
     (choiceId: string) => dispatch({ type: 'submitAnswer', choiceId }),
@@ -33,6 +35,7 @@ export function GameScreen({ deckOptions }: GameScreenProps) {
 
   const nextRound = useCallback(() => dispatch({ type: 'nextRound' }), [dispatch])
 
+  
   if (state.status === 'idle') {
     return <StartPanel onStart={startGame} />
   }

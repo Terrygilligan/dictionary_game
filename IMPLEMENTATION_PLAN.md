@@ -49,7 +49,7 @@ Rest up, enjoy your morning coffee, and I'll be ready to dive in whenever you ar
 
 *This section can be updated as we work through the implementation phases.*
 
-### **Status**: Phase 1 Complete ✅
+### **Status**: Phase 2 Complete ✅
 ### **Phase 1 Accomplished**:
 - ✅ Created `feature/multi-language-support` branch
 - ✅ Refactored `LexiconWord` to concept-based structure
@@ -60,10 +60,21 @@ Rest up, enjoy your morning coffee, and I'll be ready to dive in whenever you ar
 - ✅ Fixed compilation errors across codebase
 - ✅ Build successful - ready for Phase 2
 
-### **Next Session**: Phase 2 - Engine Logic Refactor
+### **Phase 2 Accomplished**:
+- ✅ Updated `GameState` to include `currentLanguage` field
+- ✅ Added `setLanguage` command and `language/changed` event
+- ✅ Updated `buildDeck()` to accept `language` parameter
+- ✅ Modified game engine to be locale-aware
+- ✅ Updated `GameScreen` to pass language to deck builder
+- ✅ Updated `GamePage` to pass current i18n language
+- ✅ Added `selectCurrentLanguage()` selector
+- ✅ Build successful - engine logic refactor complete
+
+### **Next Session**: Phase 3 - UI Integration
 ### **Files to Modify**:
-- `src/entities/game/model/main-game.ts`
-- Update game engine to be locale-aware
+- Add language toggle to game settings
+- Test Bulgarian words display correctly
+- Ensure language changes reset game deck
 
 ### **Key Considerations**:
 - Maintain backward compatibility during refactor

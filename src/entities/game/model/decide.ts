@@ -52,6 +52,11 @@ export const decideGame: Decider<GameState, GameCommand, GameEvent> = (state, co
       return [{ type: 'round/advanced', toRoundIndex: state.currentRound + 1 }]
     }
 
+    case 'setLanguage': {
+      if (state.currentLanguage === command.language) return []
+      return [{ type: 'language/changed', language: command.language }]
+    }
+
     default:
       return assertNever(command)
   }

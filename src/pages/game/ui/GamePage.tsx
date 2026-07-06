@@ -3,6 +3,7 @@ import { GameScreen } from '@/features/play-round'
 import { DictionarySelection } from '@/features/main-game'
 import { Button } from '@/shared/ui/Button'
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
+import { i18nService } from '@/shared/lib/i18n/i18nService'
 
 type GameMode = 'quiz' | 'dictionary'
 
@@ -13,6 +14,7 @@ interface GamePageProps {
 export function GamePage({ isGuest = false }: GamePageProps) {
   const [gameMode, setGameMode] = useState<GameMode>('quiz')
   const { t } = useTranslate()
+  const currentLanguage = i18nService.getCurrentLanguage()
 
   // Guest notice
   if (isGuest) {
@@ -27,7 +29,7 @@ export function GamePage({ isGuest = false }: GamePageProps) {
             </Button>
           </div>
         </header>
-        <GameScreen />
+        <GameScreen language={currentLanguage} />
       </main>
     )
   }
@@ -44,7 +46,7 @@ export function GamePage({ isGuest = false }: GamePageProps) {
             </Button>
           </div>
         </header>
-        <GameScreen />
+        <GameScreen language={currentLanguage} />
       </main>
     )
   }

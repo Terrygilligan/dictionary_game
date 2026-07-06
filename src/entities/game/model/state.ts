@@ -8,6 +8,7 @@ export const initialGameState: GameState = {
   currentRound: 0,
   answers: [],
   streak: 0,
+  currentLanguage: 'en',
 }
 
 /** Pure fold: `(state, event) -> nextState`. Exhaustive over `GameEvent`. */
@@ -20,6 +21,7 @@ export const evolveGame: Evolve<GameState, GameEvent> = (state, event) => {
         currentRound: 0,
         answers: [],
         streak: 0,
+        currentLanguage: state.currentLanguage,
       }
     case 'answer/submitted':
       return {
@@ -37,6 +39,8 @@ export const evolveGame: Evolve<GameState, GameEvent> = (state, event) => {
       return { ...state, currentRound: event.toRoundIndex }
     case 'streak/updated':
       return { ...state, streak: event.streak }
+    case 'language/changed':
+      return { ...state, currentLanguage: event.language }
     case 'game/finished':
       return { ...state, status: 'finished' }
     default:

@@ -24,3 +24,5 @@ export const selectProgress = (state: GameState): { current: number; total: numb
 
 export const selectIsLastRound = (state: GameState): boolean =>
   state.deck.length > 0 && state.currentRound >= state.deck.length - 1
+
+export const selectCurrentLanguage = (state: GameState): string => state.currentLanguage
