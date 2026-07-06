@@ -18,8 +18,17 @@ export interface DeckOptions {
 export function buildDeck(options: DeckOptions = {}): RoundSpec[] {
   const { roundCount = 8, choicesPerRound = 4, rng = Math.random, seed, language = 'en' } = options
 
+  // Debug: Log the language being used
+  console.log(`🔍 buildDeck: Building deck for language "${language}"`)
+
   // Get random words for the specified language
   const words = getRandomWordsForLanguage(roundCount + (choicesPerRound - 1) * roundCount, language, seed)
+  
+  // Debug: Log sample of words received
+  console.log(`📊 buildDeck: Received ${words.length} words for language "${language}"`)
+  if (words.length > 0 && words[0]) {
+    console.log(`📝 Sample word: ${words[0].word} -> ${words[0].definition}`)
+  }
 
   // Select prompt words
   const prompts = sample(words, roundCount, rng)

@@ -25,7 +25,11 @@ export function GameScreen({ deckOptions, language = 'en' }: GameScreenProps) {
   const dispatch = useGameDispatch()
 
   const startGame = useCallback(() => {
-    dispatch({ type: 'startGame', deck: buildDeck({ ...deckOptions, language }) })
+    console.log(`🎮 GameScreen.startGame: Starting game with language "${language}"`)
+    console.log(`🎮 GameScreen.startGame: Deck options:`, { ...deckOptions, language })
+    const deck = buildDeck({ ...deckOptions, language })
+    console.log(`🎮 GameScreen.startGame: Built deck with ${deck.length} rounds`)
+    dispatch({ type: 'startGame', deck })
   }, [dispatch, deckOptions, language])
 
   const submitAnswer = useCallback(

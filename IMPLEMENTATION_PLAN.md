@@ -92,6 +92,12 @@ Rest up, enjoy your morning coffee, and I'll be ready to dive in whenever you ar
 - Ensure Bulgarian words integrate seamlessly
 - Consider performance implications for multi-language lookups
 
+### **📚 Documentation & Scaling**:
+- **Language Addition Guide**: See `docs/ADDING_NEW_LANGUAGE.md` for standardized process
+- **Validation Tools**: Use `scripts/validate-lexicon.cjs` to ensure data integrity
+- **Copy-Paste Templates**: Included in documentation for consistent JSON structure
+- **Troubleshooting**: Comprehensive guide for common language integration issues
+
 ---
 
 ## 🔄 **Future Enhancements**
