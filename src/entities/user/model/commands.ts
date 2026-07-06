@@ -4,6 +4,15 @@ export interface CreateUser {
   readonly displayName: string
 }
 
+export interface RegisterUser {
+  readonly type: 'user/register'
+  readonly userId: string
+  readonly email: string
+  readonly displayName: string
+  readonly emailVerified: boolean
+  readonly createdAt: number
+}
+
 export interface AuthenticateUser {
   readonly type: 'user/authenticate'
   readonly token: string // Handled by auth service
@@ -46,6 +55,7 @@ export interface SyncUser {
 
 export type UserCommand = 
   | CreateUser
+  | RegisterUser
   | AuthenticateUser
   | UpdateUser
   | UpdateProfile

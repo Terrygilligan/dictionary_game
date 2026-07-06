@@ -3,9 +3,25 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Users collection - each user can only access their own documents
     match /users/{userId} {
+      // Allow service account to write user profiles for projections
+      allow write: if request.auth != null && 
+        (request.auth.uid == userId || 
+         request.auth.token.email == "firebase-adminsdk-fbsvc@lexicon-master-adb6b.iam.gserviceaccount.com");
+      
       // Profile subcollection - user can read/write their own profile
       match /profile/{profileId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if request.auth != null && 
+          (request.auth.uid == userId || 
+           request.auth.token.email == "firebase-adminsdk-fbsvc@lexicon-master-adb6b.iam.gserviceaccount.com");
+      }
+      
+      // Stats subcollection - user can read/write their own stats, service account can write
+      match /stats/{statsId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if request.auth != null && 
+          (request.auth.uid == userId || 
+           request.auth.token.email == "firebase-adminsdk-fbsvc@lexicon-master-adb6b.iam.gserviceaccount.com");
       }
       
       // Matches subcollection - user can read/write their own event logs

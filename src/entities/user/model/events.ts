@@ -6,6 +6,15 @@ export interface UserCreated {
   readonly createdAt: number
 }
 
+export interface UserRegistered {
+  readonly type: 'user/registered'
+  readonly userId: string
+  readonly email: string
+  readonly displayName: string
+  readonly emailVerified: boolean
+  readonly createdAt: number
+}
+
 export interface UserAuthenticated {
   readonly type: 'user/authenticated'
   readonly userId: string
@@ -72,6 +81,7 @@ export interface SyncCompleted {
 
 export type UserEvent = 
   | UserCreated
+  | UserRegistered
   | UserAuthenticated
   | UserUpdated
   | ProfileUpdated

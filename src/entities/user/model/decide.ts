@@ -26,6 +26,19 @@ export function decideUser(
         createdAt: Date.now(), // Will be replaced by injectable clock
       }]
 
+    case 'user/register':
+      // Only register if user exists and is authenticated
+      if (!state.user || state.authStatus !== 'authenticated') return []
+      
+      return [{
+        type: 'user/registered',
+        userId: command.userId,
+        email: command.email,
+        displayName: command.displayName,
+        emailVerified: command.emailVerified,
+        createdAt: command.createdAt,
+      }]
+
     case 'user/authenticate':
       // Only authenticate if user exists and is anonymous
       if (!state.user || state.authStatus === 'authenticated') return []

@@ -11,6 +11,7 @@ import {
 } from 'firebase/auth'
 import { getFirebaseAuth } from '@/shared/api/firebase'
 import type { User } from '@/entities/user'
+import { userProjectionService } from './userProjectionService'
 
 /**
  * Authentication service that handles Firebase Auth operations
@@ -127,6 +128,30 @@ class FirebaseAuthService implements AuthService {
       
       // Get token for internal use
       const token = await userCredential.user.getIdToken()
+      
+      // 🔍 DEBUG LOG: User registration event
+      console.log('🔍 [AUTH] USER_REGISTERED event triggered:', {
+        userId: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        createdAt: user.createdAt
+      })
+      
+      // 🎯 Emit USER_REGISTERED event to projection system
+      try {
+        await userProjectionService.processUserEvent({
+          type: 'user/registered',
+          userId: user.id,
+          email: user.email,
+          displayName: user.displayName,
+          emailVerified: user.emailVerified,
+          createdAt: user.createdAt,
+        })
+        console.log('✅ [AUTH] USER_REGISTERED event processed by projection service')
+      } catch (error) {
+        console.error('❌ [AUTH] Failed to process USER_REGISTERED event:', error)
+        // Don't fail the signup if projection fails, but log the error
+      }
       
       return {
         success: true,

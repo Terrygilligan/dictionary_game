@@ -32,6 +32,15 @@ export function evolveUser(state: UserState, event: UserEvent): UserState {
         authStatus: 'authenticated',
       }
 
+    case 'user/registered':
+      return {
+        ...state,
+        user: state.user ? {
+          ...state.user,
+          emailVerified: event.emailVerified,
+        } : state.user,
+      }
+
     case 'user/authenticated':
       return {
         ...state,
