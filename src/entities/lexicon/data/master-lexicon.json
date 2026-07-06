@@ -198,5 +198,265 @@
       "column": 1,
       "wordNumber": 10
     }
+  },
+  {
+    "id": "word_011",
+    "conceptId": "concept_011",
+    "translations": {
+      "en": "accommodate",
+      "bg": "предоставям",
+      "nl": "accommoderen",
+      "in": "mengakomodasi",
+      "fr": "accommoder",
+      "de": "unterbringen"
+    },
+    "definitions": {
+      "en": "provide lodging or sufficient space for; fit in with the wishes or needs of",
+      "bg": "предоставям настаняване или достатъчно пространство; съобразявам се с желанията или нуждите на",
+      "nl": "onderdak bieden of voldoende ruimte voor; rekening houden met de wensen of behoeften van",
+      "in": "menyediakan akomodasi atau ruang yang cukup; menyesuaikan dengan keinginan atau kebutuhan",
+      "fr": "fournir un logement ou un espace suffisant; s'adapter aux souhaits ou besoins de",
+      "de": "Unterkunft oder ausreichend Platz bieten; sich den Wünschen oder Bedürfnissen anpassen von"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 2,
+      "wordNumber": 1
+    }
+  },
+  {
+    "id": "word_012",
+    "conceptId": "concept_012",
+    "translations": {
+      "en": "benevolent",
+      "bg": "благодетелен",
+      "nl": "welwillend",
+      "in": "baik hati",
+      "fr": "bienveillant",
+      "de": "wohltätig"
+    },
+    "definitions": {
+      "en": "well-meaning and kindly; showing or motivated by sympathy and generosity",
+      "bg": "благонамерен и любезен; показващ или мотивиран от съчувствие и щедрост",
+      "nl": "goedbedoeld en vriendelijk; getoond of gemotiveerd door sympathie en vrijgevigheid",
+      "in": "bermaksudat baik dan ramah; menunjukkan atau dimotivasi oleh simpati dan kemurahan hati",
+      "fr": "bien intentionné et aimable; montrant ou motivé par la sympathie et la générosité",
+      "de": "wohlwollend und freundlich; gezeigt oder motiviert durch Mitgefühl und Großzügigkeit"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 2,
+      "wordNumber": 2
+    }
+  },
+  {
+    "id": "word_013",
+    "conceptId": "concept_013",
+    "translations": {
+      "en": "collaborate",
+      "bg": "сътруднича",
+      "nl": "samenwerken",
+      "in": "bekerja sama",
+      "fr": "collaborer",
+      "de": "zusammenarbeiten"
+    },
+    "definitions": {
+      "en": "work jointly on an activity or project; cooperate with or assist someone",
+      "bg": "работа съвместно върху дейност или проект; сътруднича с или подпомагам някого",
+      "nl": "gezamenlijk werken aan een activiteit of project; samenwerken met of iemand helpen",
+      "in": "bekerja sama dalam suatu kegiatan atau proyek; bekerja sama dengan atau membantu seseorang",
+      "fr": "travailler conjointement à une activité ou un projet; coopérer avec ou aider quelqu'un",
+      "de": "gemeinsam an einer Aktivität oder einem Projekt arbeiten; mit jemandem zusammenarbeiten oder helfen"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 2,
+      "wordNumber": 3
+    }
+  },
+  {
+    "id": "word_014",
+    "conceptId": "concept_014",
+    "translations": {
+      "en": "diligent",
+      "bg": "усърден",
+      "nl": "ijverig",
+      "in": "rajin",
+      "fr": "diligent",
+      "de": "fleißig"
+    },
+    "definitions": {
+      "en": "showing care and conscientiousness in one's work or duties; having or showing care",
+      "bg": "показващ грижа и съвестност в работата или задълженията си; притежаващ или показващ грижа",
+      "nl": "zorg en toewijding tonen in het werk of de plichten; zorgzaam of toewijding tonend",
+      "in": "menunjukkan perhatian dan kesungguhan dalam pekerjaan atau tugas; memiliki atau menunjukkan kepedulian",
+      "fr": "montrant du soin et de la conscience dans son travail ou ses devoirs; ayant ou montrant du soin",
+      "de": "Sorgfalt und Gewissenhaftigkeit in der Arbeit oder den Pflichten zeigen; sorgfältig oder Fürsorge zeigend"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 2,
+      "wordNumber": 4
+    }
+  },
+  {
+    "id": "word_015",
+    "conceptId": "concept_015",
+    "translations": {
+      "en": "eloquent",
+      "bg": "красноречив",
+      "nl": "welsprekend",
+      "in": "fasih",
+      "fr": "éloquent",
+      "de": "beredt"
+    },
+    "definitions": {
+      "en": "fluent or persuasive in speaking or writing; clearly expressing or indicating something",
+      "bg": "плавен или убедителен в говоренето или писането; ясно изразяващ или указващ нещо",
+      "nl": "vloeiend of overtuigend in spreken of schrijven; duidelijk uitdrukkend of aangevend iets",
+      "in": "lancar atau persuasif dalam berbicara atau menulis; jelas menyatakan atau menunjukkan sesuatu",
+      "fr": "fluide ou persuasif en parole ou en écrit; exprimant clairement ou indiquant quelque chose",
+      "de": "fließend oder überzeugend im Sprechen oder Schreiben; klar ausdrückend oder etwas andeutend"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 2,
+      "wordNumber": 5
+    }
+  },
+  {
+    "id": "word_016",
+    "conceptId": "concept_016",
+    "translations": {
+      "en": "facilitate",
+      "bg": "улеснявам",
+      "nl": "faciliteren",
+      "in": "memfasilitasi",
+      "fr": "faciliter",
+      "de": "ermöglichen"
+    },
+    "definitions": {
+      "en": "make an action or process easy or easier; help bring about an outcome",
+      "bg": "правя действие или процес лесен или по-лесен; помагам да се постигне резултат",
+      "nl": "een actie of proces gemakkelijk of makkelijker maken; helpen een resultaat te bereiken",
+      "in": "membuat tindakan atau proses menjadi mudah atau lebih mudah; membantu mencapai hasil",
+      "fr": "rendre une action ou un processus facile ou plus facile; aider à atteindre un résultat",
+      "de": "eine Aktion oder einen Prozess erleichtern oder einfacher machen; helfen ein Ergebnis zu erreichen"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 2,
+      "wordNumber": 6
+    }
+  },
+  {
+    "id": "word_017",
+    "conceptId": "concept_017",
+    "translations": {
+      "en": "gregarious",
+      "bg": "общителен",
+      "nl": "gezellig",
+      "in": "suka berkumpul",
+      "fr": "grégaire",
+      "de": "gesellig"
+    },
+    "definitions": {
+      "en": "fond of company; sociable and outgoing; tending to associate with others",
+      "bg": "обичащ компания; общителен и откритен; склонен да се асоциира с други",
+      "nl": "houd van gezelschap; sociaal en uitgaand; geneigd om met anderen om te gaan",
+      "in": "menyukai persahabatan; sosial dan terbuka; cenderung berasosiasi dengan orang lain",
+      "fr": "aime la compagnie; sociable et extraverti; enclin à s'associer avec d'autres",
+      "de": "gesellschaftsliebend; gesellig und aufgeschlossen; neigt dazu, sich mit anderen zu associieren"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 2,
+      "wordNumber": 7
+    }
+  },
+  {
+    "id": "word_018",
+    "conceptId": "concept_018",
+    "translations": {
+      "en": "hierarchy",
+      "bg": "йерархия",
+      "nl": "hiërarchie",
+      "in": "hirarki",
+      "fr": "hiérarchie",
+      "de": "Hierarchie"
+    },
+    "definitions": {
+      "en": "a system of ranking or organizing people or things on different levels",
+      "bg": "система за класиране или организиране на хора или неща на различни нива",
+      "nl": "een systeem van rangschikking of organiseren van mensen of dingen op verschillende niveaus",
+      "in": "sistem peringkat atau pengorganisasian orang atau hal pada tingkatan yang berbeda",
+      "fr": "un système de classement ou d'organisation des personnes ou des choses à différents niveaux",
+      "de": "ein System der Rangordnung oder Organisation von Menschen oder Dingen auf verschiedenen Ebenen"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 2,
+      "wordNumber": 8
+    }
+  },
+  {
+    "id": "word_019",
+    "conceptId": "concept_019",
+    "translations": {
+      "en": "innovate",
+      "bg": "иновирам",
+      "nl": "innoveren",
+      "in": "berinovasi",
+      "fr": "innover",
+      "de": "innovieren"
+    },
+    "definitions": {
+      "en": "make changes in something established by introducing new methods, ideas, or products",
+      "bg": "правя промени в нещо установено, като въвеждам нови методи, идеи или продукти",
+      "nl": "veranderingen aanbrengen in iets gevestigds door nieuwe methoden, ideeën of producten te introduceren",
+      "in": "m membuat perubahan pada sesuatu yang sudah mapan dengan memperkenalkan metode, ide, atau produk baru",
+      "fr": "apporter des changements à quelque chose d'établi en introduisant de nouvelles méthodes, idées ou produits",
+      "de": "Veränderungen an etwas Etabliertem vornehmen, indem neue Methoden, Ideen oder Produkte eingeführt werden"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 2,
+      "wordNumber": 9
+    }
+  },
+  {
+    "id": "word_020",
+    "conceptId": "concept_020",
+    "translations": {
+      "en": "judicious",
+      "bg": "разумен",
+      "nl": "omsichtig",
+      "in": "bijaksana",
+      "fr": "judicieux",
+      "de": "umsichtig"
+    },
+    "definitions": {
+      "en": "having or showing sound judgment; wise, sensible, and careful",
+      "bg": "притежаващ или показващ здрав разум; мъдър, разумен и внимателен",
+      "nl": "hebbend of tonend van goed oordeel; wijs, verstandig en voorzichtig",
+      "in": "memiliki atau menunjukkan penilaian yang sehat; bijaksana, masuk akal, dan hati-hati",
+      "fr": "ayant ou montrant un bon jugement; sage, sensé et prudent",
+      "de": "habend oder zeigend von gutem Urteilsvermögen; weise, vernünftig und vorsichtig"
+    },
+    "coord": {
+      "scroll": "A-C",
+      "page": 1,
+      "column": 2,
+      "wordNumber": 10
+    }
   }
 ]
