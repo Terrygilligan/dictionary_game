@@ -1,11 +1,20 @@
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 import { Button } from '@/shared/ui/Button'
-import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
 import { useNavigation } from '@/shared/lib/navigation'
 
 export function LandingPage() {
   const { t } = useTranslate()
   const { navigate } = useNavigation()
+
+  // Helper function to safely get translations with fallbacks
+  const safeT = (key: string, fallback?: string) => {
+    const translation = t(key)
+    // If translation equals the key (not found) and we have a fallback, use fallback
+    if (translation === key && fallback) {
+      return fallback
+    }
+    return translation
+  }
 
   const handlePlayAsGuest = () => {
     navigate('game')
@@ -17,19 +26,11 @@ export function LandingPage() {
 
   return (
     <div className="page">
-      {/* Public Header - Branding + Language Switcher Only */}
-      <div className="page__masthead page__masthead--public">
-        <div className="page__header page__header--public">
-          <h1 className="page__title">Lexicon Master</h1>
-          <LanguageSwitcher className="page__language-switcher" />
-        </div>
-        <p className="page__tagline">{t('landing.tagline')}</p>
-      </div>
-
       {/* Hero Section with Guest Entry Point */}
       <div className="panel panel--center panel--hero">
-        <h2 className="panel__title">{t('landing.welcome')}</h2>
-        <p className="panel__lead">{t('landing.description')}</p>
+        <h2 className="panel__title">{safeT('landing.welcome', 'Welcome to Lexicon Master')}</h2>
+        <p className="panel__lead">{safeT('landing.description', 'Challenge yourself with words in multiple languages while connecting with your community.')}</p>
+        <p className="panel__tagline">{safeT('landing.tagline', 'A multilingual dictionary game for your village community')}</p>
         
         {/* High-visibility Guest Button */}
         <div className="landing__guest-cta">
@@ -38,27 +39,27 @@ export function LandingPage() {
             onClick={handlePlayAsGuest}
             className="landing__guest-button"
           >
-            {t('landing.playAsGuest')}
+            {safeT('landing.playAsGuest', 'Play as Guest')}
           </Button>
           
           {/* Registration Hook */}
           <div className="landing__register-hook">
             <p className="landing__register-text">
-              {t('landing.registerHook')}
+              {safeT('landing.registerHook', 'Want to save your stats? Register an account.')}
             </p>
             <Button 
               variant="ghost" 
               onClick={handleRegister}
               className="landing__register-button"
             >
-              {t('landing.registerAccount')}
+              {safeT('landing.registerAccount', 'Register an account')}
             </Button>
           </div>
           
           {/* Privacy/GDPR Notice */}
           <div className="landing__privacy-notice">
             <p className="landing__privacy-text">
-              {t('landing.guestPrivacyNotice')}
+              {safeT('landing.guestPrivacyNotice', 'Guest sessions are temporary and will be deleted when you close your browser. No personal data is stored.')}
             </p>
           </div>
         </div>
@@ -66,32 +67,32 @@ export function LandingPage() {
 
       {/* Features Section */}
       <div className="panel panel--center">
-        <h2 className="panel__title">{t('landing.features.title')}</h2>
+        <h2 className="panel__title">{safeT('landing.features.title', 'Features')}</h2>
         
         <div className="landing__features">
           <div className="landing__feature">
-            <h3>{t('landing.features.multilingual.title')}</h3>
-            <p>{t('landing.features.multilingual.description')}</p>
+            <h3>{safeT('landing.features.multilingual.title', 'Multilingual Support')}</h3>
+            <p>{safeT('landing.features.multilingual.description', 'Play in English, Dutch, Bulgarian, Indonesian, French, and German')}</p>
           </div>
           <div className="landing__feature">
-            <h3>{t('landing.features.accessible.title')}</h3>
-            <p>{t('landing.features.accessible.description')}</p>
+            <h3>{safeT('landing.features.accessible.title', 'Fully Accessible')}</h3>
+            <p>{safeT('landing.features.accessible.description', 'Text-to-speech, speech-to-text, and keyboard navigation for everyone')}</p>
           </div>
           <div className="landing__feature">
-            <h3>{t('landing.features.village.title')}</h3>
-            <p>{t('landing.features.village.description')}</p>
+            <h3>{safeT('landing.features.village.title', 'Community Built')}</h3>
+            <p>{safeT('landing.features.village.description', 'Contributed by villagers, for villagers - building connections through language')}</p>
           </div>
         </div>
       </div>
 
       {/* How It Works Section */}
       <div className="panel">
-        <h2 className="panel__title">{t('landing.howItWorks.title')}</h2>
+        <h2 className="panel__title">{safeT('landing.howItWorks.title', 'How It Works')}</h2>
         <ol className="landing__steps">
-          <li>{t('landing.howItWorks.step1')}</li>
-          <li>{t('landing.howItWorks.step2')}</li>
-          <li>{t('landing.howItWorks.step3')}</li>
-          <li>{t('landing.howItWorks.step4')}</li>
+          <li>{safeT('landing.howItWorks.step1', 'Sign in with your email or create a new account')}</li>
+          <li>{safeT('landing.howItWorks.step2', 'Choose your preferred language')}</li>
+          <li>{safeT('landing.howItWorks.step3', 'Play dictionary games or challenge the Dealer')}</li>
+          <li>{safeT('landing.howItWorks.step4', 'Track your progress and compete with friends')}</li>
         </ol>
       </div>
     </div>

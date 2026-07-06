@@ -4,11 +4,13 @@
     "conceptId": "concept_001",
     "translations": {
       "en": "aberration",
-      "bg": "аберация"
+      "bg": "аберация",
+      "nl": "afwijking"
     },
     "definitions": {
       "en": "a departure from what is normal, usual, or expected, typically one that is unwelcome",
-      "bg": "отклонение от това, което е нормално, обичайно или очаквано, обикновено нежелано"
+      "bg": "отклонение от това, което е нормално, обичайно или очаквано, обикновено нежелано",
+      "nl": "een afwijking van wat normaal, gebruikelijk of verwacht is, meestal ongewenst"
     },
     "coord": {
       "scroll": "A-C",
@@ -22,11 +24,13 @@
     "conceptId": "concept_002",
     "translations": {
       "en": "abhor",
-      "bg": "отвращавам"
+      "bg": "отвращавам",
+      "nl": "haten"
     },
     "definitions": {
       "en": "regard with disgust and hatred",
-      "bg": "преглеждам с отвращение и омраза"
+      "bg": "преглеждам с отвращение и омраза",
+      "nl": "beschouwen met walging en haat"
     },
     "coord": {
       "scroll": "A-C",
@@ -40,11 +44,13 @@
     "conceptId": "concept_003",
     "translations": {
       "en": "abide",
-      "bg": "спазвам"
+      "bg": "спазвам",
+      "nl": "zich houden aan"
     },
     "definitions": {
       "en": "accept or act in accordance with (a rule, decision, or recommendation)",
-      "bg": "приемам или действам в съответствие с (правило, решение или препоръка)"
+      "bg": "приемам или действам в съответствие с (правило, решение или препоръка)",
+      "nl": "accepteren of handelen in overeenstemming met (een regel, beslissing of aanbeveling)"
     },
     "coord": {
       "scroll": "A-C",
@@ -58,11 +64,13 @@
     "conceptId": "concept_004",
     "translations": {
       "en": "abject",
-      "bg": "презрен"
+      "bg": "презрен",
+      "nl": "verachtelijk"
     },
     "definitions": {
       "en": "completely without pride or dignity; contemptible",
-      "bg": "напълно без гордост или достойнство; презрен"
+      "bg": "напълно без гордост или достойнство; презрен",
+      "nl": "volledig zonder trots of waardigheid; verachtelijk"
     },
     "coord": {
       "scroll": "A-C",
@@ -76,11 +84,13 @@
     "conceptId": "concept_005",
     "translations": {
       "en": "abjure",
-      "bg": "отричам се"
+      "bg": "отричам се",
+      "nl": "afzweren"
     },
     "definitions": {
       "en": "solemnly renounce or reject (a belief, cause, or claim)",
-      "bg": "торжествено се отказвам или отхвърлям (убеждение, кауза или твърдение)"
+      "bg": "торжествено се отказвам или отхвърлям (убеждение, кауза или твърдение)",
+      "nl": "plechtig afstand doen van of verwerpen (een overtuiging, zaak of claim)"
     },
     "coord": {
       "scroll": "A-C",
@@ -94,11 +104,13 @@
     "conceptId": "concept_006",
     "translations": {
       "en": "abnegation",
-      "bg": "отрицание"
+      "bg": "отрицание",
+      "nl": "verzaking"
     },
     "definitions": {
       "en": "the act or an instance of abnegating a right, claim, or privilege",
-      "bg": "действието или пример за отричане на право, иск или привилегия"
+      "bg": "действието или пример за отричане на право, иск или привилегия",
+      "nl": "de daad of het voorbeeld van het afzweren van een recht, claim of voorrecht"
     },
     "coord": {
       "scroll": "A-C",
@@ -112,11 +124,13 @@
     "conceptId": "concept_007",
     "translations": {
       "en": "abolish",
-      "bg": "премахвам"
+      "bg": "премахвам",
+      "nl": "afschaffen"
     },
     "definitions": {
       "en": "formally put an end to (a system, practice, or institution)",
-      "bg": "официално слагам край на (система, практика или институция)"
+      "bg": "официално слагам край на (система, практика или институция)",
+      "nl": "formeel een einde maken aan (een systeem, praktijk of instelling)"
     },
     "coord": {
       "scroll": "A-C",
@@ -130,11 +144,13 @@
     "conceptId": "concept_008",
     "translations": {
       "en": "abortion",
-      "bg": "аборт"
+      "bg": "аборт",
+      "nl": "abortus"
     },
     "definitions": {
       "en": "the deliberate termination of a human pregnancy",
-      "bg": "умишленото прекратяване на човешка бременност"
+      "bg": "умишленото прекратяване на човешка бременност",
+      "nl": "de opzettelijke beëindiging van een menselijke zwangerschap"
     },
     "coord": {
       "scroll": "A-C",
@@ -148,11 +164,13 @@
     "conceptId": "concept_009",
     "translations": {
       "en": "abridge",
-      "bg": "съкращавам"
+      "bg": "съкращавам",
+      "nl": "inkorten"
     },
     "definitions": {
       "en": "shorten (a book, movie, speech, or other text) without losing the sense",
-      "bg": "съкращавам (книга, филм, реч или друг текст) без да губя смисъла"
+      "bg": "съкращавам (книга, филм, реч или друг текст) без да губя смисъла",
+      "nl": "inkorten (een boek, film, toespraak of andere tekst) zonder de betekenis te verliezen"
     },
     "coord": {
       "scroll": "A-C",
@@ -166,11 +184,13 @@
     "conceptId": "concept_010",
     "translations": {
       "en": "abroad",
-      "bg": "в чужбина"
+      "bg": "в чужбина",
+      "nl": "in het buitenland"
     },
     "definitions": {
       "en": "in or to a foreign country",
-      "bg": "в или в чужда държава"
+      "bg": "в или в чужда държава",
+      "nl": "in of naar een buitenlands land"
     },
     "coord": {
       "scroll": "A-C",

@@ -26,7 +26,7 @@ function loadLexiconData(filePath) {
 function validateLexicon(lexicon) {
   const errors = [];
   const warnings = [];
-  const requiredLanguages = ['en', 'bg'];
+  const requiredLanguages = ['en', 'bg', 'nl'];
   const conceptIds = new Set();
   const wordIds = new Set();
   const languages = new Set();
