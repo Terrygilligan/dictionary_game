@@ -35,8 +35,8 @@ export function demonstrateLocalizedWord() {
     console.log('Word ID:', localizedWord.id)
     console.log('Localized word:', localizedWord.localizedWord)
     console.log('Localized definition:', localizedWord.localizedDefinition)
-    console.log('Original word:', localizedWord.word)
-    console.log('Original definition:', localizedWord.definition)
+    console.log('Original word:', localizedWord.translations.en)
+    console.log('Original definition:', localizedWord.definitions.en)
   }
 }
 

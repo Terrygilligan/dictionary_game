@@ -54,8 +54,10 @@ export function getLocalizedWordById(wordId: string): LocalizedLexiconWord | nul
   const currentLanguage = i18nService.getCurrentLanguage()
   const translations = wordTranslationRegistry.get(wordId)
   
-  let localizedWord = baseWord.word
-  let localizedDefinition = baseWord.definition
+  const firstLang = Object.keys(baseWord.translations)[0]
+  const firstDefLang = Object.keys(baseWord.definitions)[0]
+  let localizedWord = baseWord.translations.en || (firstLang ? baseWord.translations[firstLang] : '') || ''
+  let localizedDefinition = baseWord.definitions.en || (firstDefLang ? baseWord.definitions[firstDefLang] : '') || ''
 
   // Apply translations if available for current language
   if (translations && translations[currentLanguage]) {

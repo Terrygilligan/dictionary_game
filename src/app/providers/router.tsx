@@ -4,6 +4,7 @@ import { AuthPage } from '@/pages/auth'
 import { ProfilePage } from '@/pages/profile'
 import { GamesPage } from '@/pages/games'
 import { GamePage } from '@/pages/game'
+import { VillagePage } from '@/pages/village'
 import { BaseLayout } from '@/app/ui/BaseLayout'
 import { initializeI18n } from '@/shared/lib/i18n/i18nService'
 import { useNavigation } from '@/shared/lib/navigation'
@@ -116,6 +117,16 @@ export function AppRouter() {
       return (
         <BaseLayout isAuthenticated={!!user}>
           <GamePage isGuest={!user} />
+        </BaseLayout>
+      )
+    case 'village':
+      return (
+        <BaseLayout isAuthenticated={!!user}>
+          {user ? (
+            <VillagePage />
+          ) : (
+            <AuthPage onAuthSuccess={handleAuthSuccess} />
+          )}
         </BaseLayout>
       )
     default:

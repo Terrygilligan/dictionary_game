@@ -27,6 +27,7 @@
     "info": "Information",
     "home": "Home",
     "gamesRoom": "Games Room",
+    "village": "Village",
     "tagline": "Village Community Games"
   },
   "game": {
@@ -336,14 +337,6 @@
       },
       "playNow": "Play Now",
       "playGames": "Play Games",
-      "communityBridge": {
-        "title": "The Community Bridge",
-        "currentWord": "Today's Community Word",
-        "language": "Dutch",
-        "contributions": "Contributions:",
-        "contribute": "Add Translation",
-        "recentContributions": "Recent Community Contributions"
-      },
       "activeRooms": {
         "title": "Active Rooms",
         "comingSoon": "Village Tables Coming Soon",
@@ -357,6 +350,44 @@
         "newHighScore": "New high score achieved!",
         "communityContribution": "Community contribution made",
         "streakAchievement": "Streak milestone reached"
+      }
+    },
+    "village": {
+      "title": "Village Community",
+      "tagline": "Building bridges through language and collaboration",
+      "stats": {
+        "villagers": "Villagers",
+        "contributions": "Contributions",
+        "activeToday": "Active Today"
+      },
+      "tabs": {
+        "community": "Community Bridge",
+        "battles": "Village Battles"
+      },
+      "currentWord": {
+        "title": "Today's Community Word",
+        "deadline": "Contribution Deadline"
+      },
+      "contributions": {
+        "title": "Community Contributions",
+        "translation": "Translation",
+        "voteUp": "Vote Up",
+        "addTranslation": "Add Translation",
+        "addDefinition": "Add Definition"
+      },
+      "battles": {
+        "title": "Village Battles",
+        "status": {
+          "upcoming": "Upcoming",
+          "active": "Active",
+          "completed": "Completed"
+        },
+        "startTime": "Start Time",
+        "duration": "Duration",
+        "join": "Join Battle",
+        "viewDetails": "View Details",
+        "moreComing": "More battles coming soon! Help us build the village competition experience.",
+        "suggestBattle": "Suggest a Battle"
       }
     }
   }

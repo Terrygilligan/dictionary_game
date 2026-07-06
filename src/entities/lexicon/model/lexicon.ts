@@ -1,9 +1,12 @@
 import dataset from './dataset.json'
 import type { LexiconWord, WordCoordinate } from './types'
 import { seededRng } from '@/shared/lib/random'
+import { migrateToMultiLanguageFormat, addBulgarianTranslations } from './lexicon-data'
 
-// Convert JSON dataset to typed array
-const lexiconWords: LexiconWord[] = dataset as LexiconWord[]
+// Convert legacy dataset to new multi-language format
+const legacyData = dataset as any[]
+const migratedLexiconWords: LexiconWord[] = migrateToMultiLanguageFormat(legacyData)
+const lexiconWords: LexiconWord[] = addBulgarianTranslations(migratedLexiconWords)
 
 /**
  * Get a word by its coordinates (for the Dealer game)
@@ -72,4 +75,39 @@ export function getLexiconStats() {
     maxColumn: Math.max(...lexiconWords.map(word => word.coord.column)),
     maxWordNumber: Math.max(...lexiconWords.map(word => word.coord.wordNumber))
   }
+}
+
+/**
+ * Get words for a specific language
+ * Returns the localized word and definition for the requested language
+ */
+export function getWordsForLanguage(language: string): { word: string; definition: string; conceptId: string }[] {
+  return lexiconWords.map(entry => ({
+    word: entry.translations[language] || entry.translations.en || `[Missing ${language}]`,
+    definition: entry.definitions[language] || entry.definitions.en || `[Missing ${language} definition]`,
+    conceptId: entry.conceptId
+  })).filter(item => !item.word.startsWith('[Missing'))
+}
+
+/**
+ * Get random words for a specific language
+ */
+export function getRandomWordsForLanguage(count: number, language: string, seed?: number): { word: string; definition: string; conceptId: string }[] {
+  const languageWords = getWordsForLanguage(language)
+  const rng = seededRng(seed || Date.now())
+  
+  // Create a copy of the array to avoid modifying the original
+  const shuffled = [...languageWords]
+  
+  // Fisher-Yates shuffle using the seeded RNG
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1))
+    if (j >= 0 && j < shuffled.length) {
+      const temp = shuffled[i]!
+      shuffled[i] = shuffled[j]!
+      shuffled[j] = temp
+    }
+  }
+  
+  return shuffled.slice(0, Math.min(count, shuffled.length))
 }

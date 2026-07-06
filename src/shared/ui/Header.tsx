@@ -32,9 +32,16 @@ export function Header({ isAuthenticated = false }: HeaderProps) {
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('games')}
-                className="header__nav-link header__nav-link--primary"
+                className="header__nav-link"
               >
                 {t('ui.gamesRoom')}
+              </Button>
+              <Button 
+                variant="ghost" 
+                onClick={() => navigate('village')}
+                className="header__nav-link header__nav-link--primary"
+              >
+                {t('ui.village')}
               </Button>
               <Button 
                 variant="ghost" 

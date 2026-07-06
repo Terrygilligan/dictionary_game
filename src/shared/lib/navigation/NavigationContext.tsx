@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
 
-export type Page = 'landing' | 'auth' | 'games' | 'profile' | 'game'
+export type Page = 'landing' | 'auth' | 'games' | 'profile' | 'game' | 'village'
 
 interface NavigationContextType {
   currentPage: Page
@@ -18,6 +18,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     if (path === '/games') return 'games'
     if (path === '/profile') return 'profile'
     if (path === '/game') return 'game'
+    if (path === '/village') return 'village'
     return 'landing'
   })
 
@@ -36,6 +37,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
       else if (path === '/games') setCurrentPage('games')
       else if (path === '/profile') setCurrentPage('profile')
       else if (path === '/game') setCurrentPage('game')
+      else if (path === '/village') setCurrentPage('village')
     }
 
     window.addEventListener('popstate', handlePopState)

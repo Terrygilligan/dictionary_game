@@ -46,53 +46,6 @@ export function GamesPage() {
           </div>
         </section>
 
-        {/* Community Bridge */}
-        <section className="games-dashboard__section">
-          <h2 className="games-dashboard__section-title">{t('games.communityBridge.title')}</h2>
-          <div className="games-dashboard__community">
-            <div className="community-card">
-              <div className="community-card__header">
-                <h3 className="community-card__title">{t('games.communityBridge.currentWord')}</h3>
-                <span className="community-card__language">{t('games.communityBridge.language')}</span>
-              </div>
-              <div className="community-card__content">
-                <div className="community-card__word">
-                  <span className="community-card__term">Bridge</span>
-                  <span className="community-card__translation">Brug</span>
-                </div>
-                <div className="community-card__contributions">
-                  <span className="community-card__stat">{t('games.communityBridge.contributions')}</span>
-                  <span className="community-card__count">42</span>
-                </div>
-                <Button variant="ghost" className="community-card__button">
-                  {t('games.communityBridge.contribute')}
-                </Button>
-              </div>
-            </div>
-            
-            <div className="community-highlights">
-              <h4 className="community-highlights__title">{t('games.communityBridge.recentContributions')}</h4>
-              <div className="community-highlights__list">
-                <div className="contribution-item">
-                  <span className="contribution-item__word">Village</span>
-                  <span className="contribution-item__translation">Dorp</span>
-                  <span className="contribution-item__author">- Maria</span>
-                </div>
-                <div className="contribution-item">
-                  <span className="contribution-item__word">Community</span>
-                  <span className="contribution-item__translation">Gemeenschap</span>
-                  <span className="contribution-item__author">- Jan</span>
-                </div>
-                <div className="contribution-item">
-                  <span className="contribution-item__word">Learning</span>
-                  <span className="contribution-item__translation">Leren</span>
-                  <span className="contribution-item__author">- Sophie</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Active Rooms */}
         <section className="games-dashboard__section">
           <h2 className="games-dashboard__section-title">{t('games.activeRooms.title')}</h2>

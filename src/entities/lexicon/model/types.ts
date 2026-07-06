@@ -7,8 +7,9 @@ export interface WordCoordinate {
 
 export interface LexiconWord {
   id: string
-  word: string
-  definition: string
+  conceptId: string
+  translations: { [lang: string]: string } // 'en', 'bg', etc.
+  definitions: { [lang: string]: string }
   coord: WordCoordinate
 }
 
