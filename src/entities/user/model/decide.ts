@@ -80,12 +80,17 @@ export function decideUser(
       
       const events: UserEvent[] = []
       
-      if (command.totalScore !== undefined || command.matchesPlayed !== undefined) {
+      if (command.totalScore !== undefined || command.matchesPlayed !== undefined || 
+          command.village !== undefined || command.postcode !== undefined || 
+          command.shareLocationForLeaderboard !== undefined) {
         events.push({
           type: 'profile/updated',
           userId: state.user.id,
           totalScore: command.totalScore,
           matchesPlayed: command.matchesPlayed,
+          village: command.village,
+          postcode: command.postcode,
+          shareLocationForLeaderboard: command.shareLocationForLeaderboard,
           timestamp: Date.now(), // Will be replaced by injectable clock
         })
       }

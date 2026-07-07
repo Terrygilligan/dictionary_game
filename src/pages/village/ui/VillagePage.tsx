@@ -158,42 +158,46 @@ export function VillagePage() {
 
   return (
     <div className="page">
-      {/* Village Header */}
-      <div className="village__header">
-        <div className="village__identity">
-          <h1 className="village__name">{mockVillage.name}</h1>
-          <p className="village__description">{mockVillage.description}</p>
-        </div>
-        <div className="village__stats">
-          <div className="village__stat">
-            <span className="village__stat-number">{mockVillage.memberCount}</span>
-            <span className="village__stat-label">{t('village.stats.villagers')}</span>
+      {/* Village Overview Panel */}
+      <div className="panel">
+        <div className="village__overview">
+          <div className="village__identity">
+            <h2 className="village__name">{mockVillage.name}</h2>
+            <p className="village__description">{mockVillage.description}</p>
           </div>
-          <div className="village__stat">
-            <span className="village__stat-number">{mockVillage.totalContributions}</span>
-            <span className="village__stat-label">{t('village.stats.contributions')}</span>
-          </div>
-          <div className="village__stat">
-            <span className="village__stat-number">{mockVillage.activeContributors}</span>
-            <span className="village__stat-label">{t('village.stats.activeToday')}</span>
+          <div className="village__stats">
+            <div className="village__stat">
+              <span className="village__stat-number">{mockVillage.memberCount}</span>
+              <span className="village__stat-label">{t('village.stats.villagers')}</span>
+            </div>
+            <div className="village__stat">
+              <span className="village__stat-number">{mockVillage.totalContributions}</span>
+              <span className="village__stat-label">{t('village.stats.contributions')}</span>
+            </div>
+            <div className="village__stat">
+              <span className="village__stat-number">{mockVillage.activeContributors}</span>
+              <span className="village__stat-label">{t('village.stats.activeToday')}</span>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div className="village__tabs">
-        <button
-          className={`village__tab ${activeTab === 'community' ? 'village__tab--active' : ''}`}
-          onClick={() => setActiveTab('community')}
-        >
-          {t('village.tabs.community')}
-        </button>
-        <button
-          className={`village__tab ${activeTab === 'battles' ? 'village__tab--active' : ''}`}
-          onClick={() => setActiveTab('battles')}
-        >
-          {t('village.tabs.battles')}
-        </button>
+      <div className="panel">
+        <div className="village__tabs">
+          <button
+            className={`village__tab ${activeTab === 'community' ? 'village__tab--active' : ''}`}
+            onClick={() => setActiveTab('community')}
+          >
+            {t('village.tabs.community')}
+          </button>
+          <button
+            className={`village__tab ${activeTab === 'battles' ? 'village__tab--active' : ''}`}
+            onClick={() => setActiveTab('battles')}
+          >
+            {t('village.tabs.battles')}
+          </button>
+        </div>
       </div>
 
       {/* Tab Content */}

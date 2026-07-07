@@ -41,6 +41,9 @@ export interface ProfileUpdated {
   readonly userId: string
   readonly totalScore?: number
   readonly matchesPlayed?: number
+  readonly village?: string
+  readonly postcode?: string
+  readonly shareLocationForLeaderboard?: boolean
   readonly timestamp: number
 }
 

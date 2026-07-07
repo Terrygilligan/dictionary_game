@@ -8,7 +8,7 @@ interface HeaderProps {
 }
 
 export function Header({ isAuthenticated = false }: HeaderProps) {
-  const { navigate } = useNavigation()
+  const { navigate, currentPage } = useNavigation()
   const { t } = useTranslate()
 
   return (
@@ -25,28 +25,28 @@ export function Header({ isAuthenticated = false }: HeaderProps) {
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('landing')}
-                className="header__nav-link"
+                className={`header__nav-link ${currentPage === 'landing' ? 'header__nav-link--active' : ''}`}
               >
                 {t('ui.home')}
               </Button>
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('games')}
-                className="header__nav-link"
+                className={`header__nav-link ${currentPage === 'games' ? 'header__nav-link--active' : ''}`}
               >
                 {t('ui.gamesRoom')}
               </Button>
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('village')}
-                className="header__nav-link header__nav-link--primary"
+                className={`header__nav-link header__nav-link--primary ${currentPage === 'village' ? 'header__nav-link--active' : ''}`}
               >
                 {t('ui.village')}
               </Button>
               <Button 
                 variant="ghost" 
                 onClick={() => navigate('profile')}
-                className="header__nav-link"
+                className={`header__nav-link ${currentPage === 'profile' ? 'header__nav-link--active' : ''}`}
               >
                 {t('ui.profile')}
               </Button>

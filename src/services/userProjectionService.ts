@@ -7,6 +7,29 @@ import type { UserEvent, UserCreated, UserRegistered, UserUpdated, UserEmailVeri
  */
 export class UserProjectionService {
   /**
+   * Validate location fields to prevent malicious input
+   * @param village - Village name to validate
+   * @param postcode - Postcode to validate
+   * @throws Error if validation fails
+   */
+  private validateLocationFields(village?: string, postcode?: string): void {
+    // Village validation: alphanumeric, spaces, hyphens, length 2-50
+    if (village !== undefined) {
+      const villagePattern = /^[a-zA-Z0-9\s\-]{2,50}$/
+      if (!villagePattern.test(village)) {
+        throw new Error(`Invalid village format: "${village}". Only alphanumeric characters, spaces, and hyphens allowed (2-50 characters).`)
+      }
+    }
+
+    // Postcode validation: alphanumeric, spaces, hyphens, length 2-10
+    if (postcode !== undefined) {
+      const postcodePattern = /^[a-zA-Z0-9\s\-]{2,10}$/
+      if (!postcodePattern.test(postcode)) {
+        throw new Error(`Invalid postcode format: "${postcode}". Only alphanumeric characters, spaces, and hyphens allowed (2-10 characters).`)
+      }
+    }
+  }
+  /**
    * Process user events and update Firestore projections
    */
   async processUserEvent(event: UserEvent): Promise<void> {
@@ -195,6 +218,13 @@ export class UserProjectionService {
     console.log('🔍 [PROJECTION] Handling profile update for user:', userId)
     
     try {
+      // Security Guard: Validate location fields before processing
+      if (event.village !== undefined || event.postcode !== undefined) {
+        console.log('🛡️ [SECURITY] Validating location fields for user:', userId)
+        this.validateLocationFields(event.village, event.postcode)
+        console.log('✅ [SECURITY] Location fields validation passed')
+      }
+
       // Load existing profile
       const existingProfile = await dbService.loadUserProfile(userId)
       
@@ -243,11 +273,28 @@ export class UserProjectionService {
       if (event.matchesPlayed !== undefined) {
         updatedProfile.matchesPlayed = event.matchesPlayed
       }
+      if (event.village !== undefined) {
+        updatedProfile.village = event.village
+      }
+      if (event.postcode !== undefined) {
+        updatedProfile.postcode = event.postcode
+      }
+      if (event.shareLocationForLeaderboard !== undefined) {
+        updatedProfile.shareLocationForLeaderboard = event.shareLocationForLeaderboard
+      }
 
       await dbService.saveUserProfile(userId, updatedProfile)
       
       console.log(`✅ [PROJECTION] Profile updated for user ${userId}`)
     } catch (error) {
+      // Check if this is a validation error
+      if (error instanceof Error && error.message.includes('Invalid')) {
+        console.error(`🛡️ [SECURITY] Validation failed for user ${userId}:`, error.message)
+        console.error(`🚫 [SECURITY] Profile update aborted due to invalid input`)
+        // Don't re-throw validation errors to prevent them from being saved
+        return
+      }
+      
       console.error(`❌ [PROJECTION] Failed to update profile for user ${userId}:`, error)
       throw error
     }

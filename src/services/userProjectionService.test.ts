@@ -345,5 +345,261 @@ describe('UserProjectionService', () => {
       expect(mockDbService.loadUserProfile).toHaveBeenCalledWith('nonexistentUser')
       expect(mockDbService.saveUserProfile).not.toHaveBeenCalled()
     })
+
+    describe('Location Field Validation', () => {
+      it('should process valid location fields correctly', async () => {
+        const existingProfile = {
+          id: 'userLocation',
+          email: 'location@example.com',
+          displayName: 'Location User',
+          emailVerified: true,
+          createdAt: Date.now() - 1000,
+          updatedAt: Date.now() - 500,
+          stats: {
+            gamesPlayed: 5,
+            correctAnswers: 3,
+            totalQuestions: 10,
+            streak: 2,
+            highestStreak: 3,
+            updatedAt: Date.now() - 500,
+          },
+        }
+
+        mockDbService.loadUserProfile.mockResolvedValue(existingProfile)
+
+        const event = {
+          type: 'profile/updated' as const,
+          userId: 'userLocation',
+          village: 'Springfield',
+          postcode: 'SW1A 1AA',
+          shareLocationForLeaderboard: true,
+          timestamp: Date.now(),
+        }
+
+        await userProjectionService.processUserEvent(event)
+
+        expect(mockDbService.loadUserProfile).toHaveBeenCalledWith('userLocation')
+        expect(mockDbService.saveUserProfile).toHaveBeenCalledWith(
+          'userLocation',
+          expect.objectContaining({
+            ...existingProfile,
+            updatedAt: expect.any(String),
+            metadata: {
+              source: 'user-projection',
+              eventType: 'profile/updated',
+              processedAt: expect.any(String),
+            },
+            village: 'Springfield',
+            postcode: 'SW1A 1AA',
+            shareLocationForLeaderboard: true,
+          })
+        )
+      })
+
+      it('should reject malicious input in village field', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        
+        const existingProfile = {
+          id: 'userMalicious',
+          email: 'malicious@example.com',
+          displayName: 'Malicious User',
+          emailVerified: true,
+          createdAt: Date.now() - 1000,
+          updatedAt: Date.now() - 500,
+          stats: {
+            gamesPlayed: 5,
+            correctAnswers: 3,
+            totalQuestions: 10,
+            streak: 2,
+            highestStreak: 3,
+            updatedAt: Date.now() - 500,
+          },
+        }
+
+        mockDbService.loadUserProfile.mockResolvedValue(existingProfile)
+
+        const event = {
+          type: 'profile/updated' as const,
+          userId: 'userMalicious',
+          village: '<script>alert("xss")</script>',
+          timestamp: Date.now(),
+        }
+
+        await userProjectionService.processUserEvent(event)
+
+        // Should have logged validation error
+        expect(consoleLogSpy).toHaveBeenCalledWith('🛡️ [SECURITY] Validating location fields for user:', 'userMalicious')
+        expect(consoleSpy).toHaveBeenCalledWith('🛡️ [SECURITY] Validation failed for user userMalicious:', expect.stringContaining('Invalid village format'))
+        expect(consoleSpy).toHaveBeenCalledWith('🚫 [SECURITY] Profile update aborted due to invalid input')
+
+        // Should NOT have saved the profile
+        expect(mockDbService.saveUserProfile).not.toHaveBeenCalled()
+
+        consoleSpy.mockRestore()
+        consoleLogSpy.mockRestore()
+      })
+
+      it('should reject malicious input in postcode field', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        
+        const existingProfile = {
+          id: 'userPostcodeMalicious',
+          email: 'postcode@example.com',
+          displayName: 'Postcode Malicious User',
+          emailVerified: true,
+          createdAt: Date.now() - 1000,
+          updatedAt: Date.now() - 500,
+          stats: {
+            gamesPlayed: 5,
+            correctAnswers: 3,
+            totalQuestions: 10,
+            streak: 2,
+            highestStreak: 3,
+            updatedAt: Date.now() - 500,
+          },
+        }
+
+        mockDbService.loadUserProfile.mockResolvedValue(existingProfile)
+
+        const event = {
+          type: 'profile/updated' as const,
+          userId: 'userPostcodeMalicious',
+          postcode: 'SELECT * FROM users; --',
+          timestamp: Date.now(),
+        }
+
+        await userProjectionService.processUserEvent(event)
+
+        // Should have logged validation error
+        expect(consoleLogSpy).toHaveBeenCalledWith('🛡️ [SECURITY] Validating location fields for user:', 'userPostcodeMalicious')
+        expect(consoleSpy).toHaveBeenCalledWith('🛡️ [SECURITY] Validation failed for user userPostcodeMalicious:', expect.stringContaining('Invalid postcode format'))
+        expect(consoleSpy).toHaveBeenCalledWith('🚫 [SECURITY] Profile update aborted due to invalid input')
+
+        // Should NOT have saved the profile
+        expect(mockDbService.saveUserProfile).not.toHaveBeenCalled()
+
+        consoleSpy.mockRestore()
+        consoleLogSpy.mockRestore()
+      })
+
+      it('should reject village field that is too short', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        
+        const existingProfile = {
+          id: 'userShortVillage',
+          email: 'short@example.com',
+          displayName: 'Short Village User',
+          emailVerified: true,
+          createdAt: Date.now() - 1000,
+          updatedAt: Date.now() - 500,
+          stats: {
+            gamesPlayed: 5,
+            correctAnswers: 3,
+            totalQuestions: 10,
+            streak: 2,
+            highestStreak: 3,
+            updatedAt: Date.now() - 500,
+          },
+        }
+
+        mockDbService.loadUserProfile.mockResolvedValue(existingProfile)
+
+        const event = {
+          type: 'profile/updated' as const,
+          userId: 'userShortVillage',
+          village: 'A', // Too short (less than 2 characters)
+          timestamp: Date.now(),
+        }
+
+        await userProjectionService.processUserEvent(event)
+
+        expect(consoleSpy).toHaveBeenCalledWith('🛡️ [SECURITY] Validation failed for user userShortVillage:', expect.stringContaining('Invalid village format'))
+        expect(mockDbService.saveUserProfile).not.toHaveBeenCalled()
+
+        consoleSpy.mockRestore()
+        consoleLogSpy.mockRestore()
+      })
+
+      it('should reject village field that is too long', async () => {
+        const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+        
+        const existingProfile = {
+          id: 'userLongVillage',
+          email: 'long@example.com',
+          displayName: 'Long Village User',
+          emailVerified: true,
+          createdAt: Date.now() - 1000,
+          updatedAt: Date.now() - 500,
+          stats: {
+            gamesPlayed: 5,
+            correctAnswers: 3,
+            totalQuestions: 10,
+            streak: 2,
+            highestStreak: 3,
+            updatedAt: Date.now() - 500,
+          },
+        }
+
+        mockDbService.loadUserProfile.mockResolvedValue(existingProfile)
+
+        const event = {
+          type: 'profile/updated' as const,
+          userId: 'userLongVillage',
+          village: 'A'.repeat(51), // Too long (more than 50 characters)
+          timestamp: Date.now(),
+        }
+
+        await userProjectionService.processUserEvent(event)
+
+        expect(consoleSpy).toHaveBeenCalledWith('🛡️ [SECURITY] Validation failed for user userLongVillage:', expect.stringContaining('Invalid village format'))
+        expect(mockDbService.saveUserProfile).not.toHaveBeenCalled()
+
+        consoleSpy.mockRestore()
+        consoleLogSpy.mockRestore()
+      })
+
+      it('should allow valid special characters in location fields', async () => {
+        const existingProfile = {
+          id: 'userSpecialChars',
+          email: 'special@example.com',
+          displayName: 'Special Chars User',
+          emailVerified: true,
+          createdAt: Date.now() - 1000,
+          updatedAt: Date.now() - 500,
+          stats: {
+            gamesPlayed: 5,
+            correctAnswers: 3,
+            totalQuestions: 10,
+            streak: 2,
+            highestStreak: 3,
+            updatedAt: Date.now() - 500,
+          },
+        }
+
+        mockDbService.loadUserProfile.mockResolvedValue(existingProfile)
+
+        const event = {
+          type: 'profile/updated' as const,
+          userId: 'userSpecialChars',
+          village: 'St-Johns Wood', // Valid: letters, spaces, hyphens
+          postcode: 'SW1A-1AA', // Valid: letters, numbers, hyphens
+          timestamp: Date.now(),
+        }
+
+        await userProjectionService.processUserEvent(event)
+
+        expect(mockDbService.saveUserProfile).toHaveBeenCalledWith(
+          'userSpecialChars',
+          expect.objectContaining({
+            village: 'St-Johns Wood',
+            postcode: 'SW1A-1AA',
+          })
+        )
+      })
+    })
   })
 })

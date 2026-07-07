@@ -17,6 +17,9 @@ export interface User {
   readonly createdAt: number
   readonly lastLoginAt?: number
   readonly stats: UserStats
+  readonly village?: string
+  readonly postcode?: string
+  readonly shareLocationForLeaderboard?: boolean
 }
 
 export interface UserProfile {

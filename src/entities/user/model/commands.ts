@@ -33,6 +33,9 @@ export interface UpdateProfile {
   readonly type: 'profile/update'
   readonly totalScore?: number
   readonly matchesPlayed?: number
+  readonly village?: string
+  readonly postcode?: string
+  readonly shareLocationForLeaderboard?: boolean
 }
 
 export interface UpdateStats {

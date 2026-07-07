@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 import { Button } from '@/shared/ui/Button'
-import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
 import { BackendTester } from '@/components/BackendTester'
 import { authService } from '@/services/auth'
 import { userService } from '@/services/userService'
-import type { User, UserStats } from '@/entities/user'
+import { userStore } from '@/entities/user'
+import type { User, UserStats, UpdateProfile } from '@/entities/user'
 
 interface ProfilePageProps {
   user: User
@@ -23,6 +23,12 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
     updatedAt: Date.now(),
   })
   const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [locationForm, setLocationForm] = useState({
+    village: user.village || '',
+    postcode: user.postcode || '',
+    shareLocationForLeaderboard: user.shareLocationForLeaderboard || false,
+  })
 
   // Load user statistics from Firestore
   useEffect(() => {
@@ -66,6 +72,36 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
     }
   }
 
+  const handleLocationSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    try {
+      setIsSaving(true)
+      
+      const updateCommand: UpdateProfile = {
+        type: 'profile/update',
+        village: locationForm.village || undefined,
+        postcode: locationForm.postcode || undefined,
+        shareLocationForLeaderboard: locationForm.shareLocationForLeaderboard,
+      }
+      
+      userStore.dispatch(updateCommand)
+      
+      console.log('✅ Location settings saved successfully')
+    } catch (error) {
+      console.error('❌ Failed to save location settings:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleLocationChange = (field: keyof typeof locationForm, value: string | boolean) => {
+    setLocationForm(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
   if (isLoading) {
     return (
       <div className="page">
@@ -78,14 +114,6 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
 
   return (
     <div className="page">
-      <div className="page__masthead">
-        <div className="page__header">
-          <h1 className="page__title">{t('profile.title')}</h1>
-          <LanguageSwitcher className="page__language-switcher" />
-        </div>
-        <p className="page__tagline">{t('profile.manageProfile')}</p>
-      </div>
-
       <div className="panel">
         <div className="profile__header">
           <div className="profile__avatar">
@@ -136,6 +164,61 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="panel">
+        <h3 className="profile__section-title">{t('profile.locationSettings')}</h3>
+        <form onSubmit={handleLocationSubmit} className="profile__location-form">
+          <div className="form-group">
+            <label htmlFor="village" className="form-label">
+              {t('profile.village')}
+            </label>
+            <input
+              type="text"
+              id="village"
+              className="form-input"
+              value={locationForm.village}
+              onChange={(e) => handleLocationChange('village', e.target.value)}
+              placeholder={t('profile.villagePlaceholder')}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="postcode" className="form-label">
+              {t('profile.postcode')}
+            </label>
+            <input
+              type="text"
+              id="postcode"
+              className="form-input"
+              value={locationForm.postcode}
+              onChange={(e) => handleLocationChange('postcode', e.target.value)}
+              placeholder={t('profile.postcodePlaceholder')}
+            />
+          </div>
+          
+          <div className="form-group">
+            <label className="form-checkbox">
+              <input
+                type="checkbox"
+                checked={locationForm.shareLocationForLeaderboard}
+                onChange={(e) => handleLocationChange('shareLocationForLeaderboard', e.target.checked)}
+              />
+              <span className="form-checkbox-text">
+                {t('profile.shareLocationForLeaderboard')}
+              </span>
+            </label>
+            <p className="form-help">
+              {t('profile.shareLocationForLeaderboardHelp')}
+            </p>
+          </div>
+          
+          <div className="form-actions">
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? t('ui.saving') : t('ui.save')}
+            </Button>
+          </div>
+        </form>
       </div>
 
       <div className="panel">
