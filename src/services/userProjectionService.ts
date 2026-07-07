@@ -1,5 +1,4 @@
 import { dbService } from './db'
-import { encryptUserProfile } from '@/shared/lib/security/cryptoShreddingBrowser'
 import type { UserEvent, UserCreated, UserRegistered, UserUpdated, ProfileUpdated, StatsUpdated } from '@/entities/user'
 
 /**
@@ -104,18 +103,15 @@ export class UserProjectionService {
         }
       }
 
-      // 🔍 DEBUG LOG: About to encrypt and save user profile
-      console.log('🔍 [PROJECTION] About to encrypt user profile for:', {
+      // 🔍 DEBUG LOG: About to save user profile (encryption handled by dbService)
+      console.log('🔍 [PROJECTION] About to save user profile for:', {
         userId,
         hasStats: !!userProfile.stats,
         profileSize: JSON.stringify(userProfile).length
       })
 
-      // 🔒 GDPR: Apply AES-256-GCM encryption before writing to Firestore
-      const encryptedProfile = await encryptUserProfile(userProfile)
-      
       const profileData = {
-        ...encryptedProfile,
+        ...userProfile,
         updatedAt: new Date().toISOString(),
         metadata: {
           source: 'user-projection',
@@ -124,8 +120,8 @@ export class UserProjectionService {
         }
       }
 
-      // 🔍 DEBUG LOG: Writing encrypted profile to Firestore
-      console.log('🔍 [PROJECTION] Writing encrypted profile to Firestore for user:', userId)
+      // 🔍 DEBUG LOG: Writing profile to Firestore (encryption handled by dbService)
+      console.log('🔍 [PROJECTION] Writing profile to Firestore for user:', userId)
       
       await dbService.saveUserProfile(userId, profileData)
       
@@ -179,13 +175,7 @@ export class UserProjectionService {
         }
       }
 
-      // 🔒 GDPR: Apply encryption before saving
-      const encryptedProfile = await encryptUserProfile(updatedProfile)
-      
-      await dbService.saveUserProfile(userId, {
-        ...encryptedProfile,
-        updatedAt: new Date().toISOString(),
-      })
+      await dbService.saveUserProfile(userId, updatedProfile)
       
       console.log(`✅ [PROJECTION] User updated for user ${userId}`)
     } catch (error) {
@@ -251,13 +241,7 @@ export class UserProjectionService {
         updatedProfile.matchesPlayed = event.matchesPlayed
       }
 
-      // 🔒 GDPR: Apply encryption before saving
-      const encryptedProfile = await encryptUserProfile(updatedProfile)
-      
-      await dbService.saveUserProfile(userId, {
-        ...encryptedProfile,
-        updatedAt: new Date().toISOString(),
-      })
+      await dbService.saveUserProfile(userId, updatedProfile)
       
       console.log(`✅ [PROJECTION] Profile updated for user ${userId}`)
     } catch (error) {
@@ -333,13 +317,7 @@ export class UserProjectionService {
         updatedProfile.highestStreak = event.highestStreak
       }
 
-      // 🔒 GDPR: Apply encryption before saving
-      const encryptedProfile = await encryptUserProfile(updatedProfile)
-      
-      await dbService.saveUserProfile(userId, {
-        ...encryptedProfile,
-        updatedAt: new Date().toISOString(),
-      })
+      await dbService.saveUserProfile(userId, updatedProfile)
       
       console.log(`✅ [PROJECTION] Stats updated for user ${userId}`)
     } catch (error) {

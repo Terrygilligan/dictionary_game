@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { userProjectionService } from './userProjectionService'
 import { dbService } from './db'
-import { encryptUserProfile } from '@/shared/lib/security/cryptoShreddingBrowser'
 import type { UserRegistered, UserCreated } from '@/entities/user'
 
 // Mock dependencies
@@ -15,10 +14,6 @@ describe('UserProjectionService', () => {
     vi.clearAllMocks()
     mockDbService.saveUserProfile = vi.fn().mockResolvedValue(undefined)
     mockDbService.loadUserProfile = vi.fn().mockResolvedValue(null)
-    vi.mocked(encryptUserProfile).mockResolvedValue({
-      encrypted: 'encrypted-data',
-      iv: 'iv-string',
-    })
   })
 
   describe('processUserEvent', () => {
@@ -34,29 +29,23 @@ describe('UserProjectionService', () => {
 
       await userProjectionService.processUserEvent(event)
 
-      expect(vi.mocked(encryptUserProfile)).toHaveBeenCalledWith({
-        id: 'user123',
-        email: 'test@example.com',
-        displayName: 'Test User',
-        emailVerified: false,
-        createdAt: event.createdAt,
-        updatedAt: expect.any(Number),
-        stats: {
-          gamesPlayed: 0,
-          correctAnswers: 0,
-          totalQuestions: 0,
-          streak: 0,
-          highestStreak: 0,
-          updatedAt: expect.any(Number),
-        }
-      })
-
       expect(mockDbService.saveUserProfile).toHaveBeenCalledWith(
         'user123',
         expect.objectContaining({
-          encrypted: 'encrypted-data',
-          iv: 'iv-string',
+          id: 'user123',
+          email: 'test@example.com',
+          displayName: 'Test User',
+          emailVerified: false,
+          createdAt: event.createdAt,
           updatedAt: expect.any(String),
+          stats: {
+            gamesPlayed: 0,
+            correctAnswers: 0,
+            totalQuestions: 0,
+            streak: 0,
+            highestStreak: 0,
+            updatedAt: expect.any(Number),
+          },
           metadata: {
             source: 'user-projection',
             eventType: 'user/registered',
@@ -77,29 +66,23 @@ describe('UserProjectionService', () => {
 
       await userProjectionService.processUserEvent(event)
 
-      expect(vi.mocked(encryptUserProfile)).toHaveBeenCalledWith({
-        id: 'user456',
-        email: 'created@example.com',
-        displayName: 'Created User',
-        emailVerified: false,
-        createdAt: event.createdAt,
-        updatedAt: expect.any(Number),
-        stats: {
-          gamesPlayed: 0,
-          correctAnswers: 0,
-          totalQuestions: 0,
-          streak: 0,
-          highestStreak: 0,
-          updatedAt: expect.any(Number),
-        }
-      })
-
       expect(mockDbService.saveUserProfile).toHaveBeenCalledWith(
         'user456',
         expect.objectContaining({
-          encrypted: 'encrypted-data',
-          iv: 'iv-string',
+          id: 'user456',
+          email: 'created@example.com',
+          displayName: 'Created User',
+          emailVerified: false,
+          createdAt: event.createdAt,
           updatedAt: expect.any(String),
+          stats: {
+            gamesPlayed: 0,
+            correctAnswers: 0,
+            totalQuestions: 0,
+            streak: 0,
+            highestStreak: 0,
+            updatedAt: expect.any(Number),
+          },
           metadata: {
             source: 'user-projection',
             eventType: 'user/created',
@@ -140,17 +123,20 @@ describe('UserProjectionService', () => {
       await userProjectionService.processUserEvent(event)
 
       expect(mockDbService.loadUserProfile).toHaveBeenCalledWith('user789')
-      expect(vi.mocked(encryptUserProfile)).toHaveBeenCalledWith({
-        ...existingProfile,
-        updatedAt: expect.any(String),
-        metadata: {
-          source: 'user-projection',
-          eventType: 'profile/updated',
-          processedAt: expect.any(String),
-        },
-        totalScore: 100,
-        matchesPlayed: 10,
-      })
+      expect(mockDbService.saveUserProfile).toHaveBeenCalledWith(
+        'user789',
+        expect.objectContaining({
+          ...existingProfile,
+          updatedAt: expect.any(String),
+          metadata: {
+            source: 'user-projection',
+            eventType: 'profile/updated',
+            processedAt: expect.any(String),
+          },
+          totalScore: 100,
+          matchesPlayed: 10,
+        })
+      )
     })
 
     it('should handle stats/updated events with existing profile', async () => {
@@ -187,20 +173,23 @@ describe('UserProjectionService', () => {
       await userProjectionService.processUserEvent(event)
 
       expect(mockDbService.loadUserProfile).toHaveBeenCalledWith('user999')
-      expect(vi.mocked(encryptUserProfile)).toHaveBeenCalledWith({
-        ...existingProfile,
-        updatedAt: expect.any(String),
-        metadata: {
-          source: 'user-projection',
-          eventType: 'stats/updated',
-          processedAt: expect.any(String),
-        },
-        gamesPlayed: 6,
-        correctAnswers: 4,
-        totalQuestions: 12,
-        streak: 3,
-        highestStreak: 4,
-      })
+      expect(mockDbService.saveUserProfile).toHaveBeenCalledWith(
+        'user999',
+        expect.objectContaining({
+          ...existingProfile,
+          updatedAt: expect.any(String),
+          metadata: {
+            source: 'user-projection',
+            eventType: 'stats/updated',
+            processedAt: expect.any(String),
+          },
+          gamesPlayed: 6,
+          correctAnswers: 4,
+          totalQuestions: 12,
+          streak: 3,
+          highestStreak: 4,
+        })
+      )
     })
 
     it('should create basic profile when none exists for profile/updated', async () => {
@@ -264,11 +253,11 @@ describe('UserProjectionService', () => {
         eventType: 'user/registered',
       }))
 
-      expect(consoleSpy).toHaveBeenCalledWith('🔍 [PROJECTION] About to encrypt user profile for:', expect.objectContaining({
+      expect(consoleSpy).toHaveBeenCalledWith('🔍 [PROJECTION] About to save user profile for:', expect.objectContaining({
         userId: 'debuguser',
       }))
 
-      expect(consoleSpy).toHaveBeenCalledWith('🔍 [PROJECTION] Writing encrypted profile to Firestore for user:', 'debuguser')
+      expect(consoleSpy).toHaveBeenCalledWith('🔍 [PROJECTION] Writing profile to Firestore for user:', 'debuguser')
 
       expect(consoleSpy).toHaveBeenCalledWith('✅ [PROJECTION] User profile saved to Firestore for user debuguser')
 

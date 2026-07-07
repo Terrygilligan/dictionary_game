@@ -144,7 +144,7 @@ class FirestoreDBService implements DatabaseService {
 
   async saveUserProfile(userId: string, profile: any): Promise<void> {
     try {
-      const profileRef = doc(this.db, 'users', userId, 'profile')
+      const userRef = doc(this.db, 'users', userId)
       
       // Encrypt sensitive profile data before saving
       const encryptedProfile = await encryptUserProfile(profile)
@@ -154,7 +154,7 @@ class FirestoreDBService implements DatabaseService {
         updatedAt: serverTimestamp(),
       }
       
-      await setDoc(profileRef, profileData, { merge: true })
+      await setDoc(userRef, profileData, { merge: true })
       console.log(`Encrypted profile saved for user ${userId}`)
     } catch (error) {
       console.error('Failed to save user profile:', error)
@@ -164,8 +164,8 @@ class FirestoreDBService implements DatabaseService {
 
   async loadUserProfile(userId: string): Promise<any | null> {
     try {
-      const profileRef = doc(this.db, 'users', userId, 'profile')
-      const snapshot = await getDoc(profileRef)
+      const userRef = doc(this.db, 'users', userId)
+      const snapshot = await getDoc(userRef)
       
       if (!snapshot.exists()) {
         return null
@@ -201,14 +201,14 @@ class FirestoreDBService implements DatabaseService {
 
   async saveUserStats(userId: string, stats: any): Promise<void> {
     try {
-      const statsRef = doc(this.db, 'users', userId, 'stats')
+      const userRef = doc(this.db, 'users', userId)
       
       const statsData = {
         ...stats,
         updatedAt: serverTimestamp(),
       }
       
-      await setDoc(statsRef, statsData, { merge: true })
+      await setDoc(userRef, statsData, { merge: true })
       console.log(`Stats saved for user ${userId}`)
     } catch (error) {
       console.error('Failed to save user stats:', error)
@@ -218,8 +218,8 @@ class FirestoreDBService implements DatabaseService {
 
   async loadUserStats(userId: string): Promise<any | null> {
     try {
-      const statsRef = doc(this.db, 'users', userId, 'stats')
-      const snapshot = await getDoc(statsRef)
+      const userRef = doc(this.db, 'users', userId)
+      const snapshot = await getDoc(userRef)
       
       if (!snapshot.exists()) {
         return null
