@@ -16,7 +16,8 @@ export function GamesPage() {
         <section className="games-dashboard__section">
           <h2 className="games-dashboard__section-title">{t('games.quickPlay.title')}</h2>
           <div className="games-dashboard__quick-play">
-            <div className="game-card game-card--large">
+            <div className="game-card game-card--large game-card--solo">
+              <div className="game-card__icon">🏃‍♂️</div>
               <div className="game-card__content">
                 <h3 className="game-card__title">{t('games.modes.solo.title')}</h3>
                 <p className="game-card__description">{t('games.modes.solo.description')}</p>
@@ -30,7 +31,8 @@ export function GamesPage() {
               </div>
             </div>
             
-            <div className="game-card game-card--large">
+            <div className="game-card game-card--large game-card--versus">
+              <div className="game-card__icon">⚔️</div>
               <div className="game-card__content">
                 <h3 className="game-card__title">{t('games.modes.versus.title')}</h3>
                 <p className="game-card__description">{t('games.modes.versus.description')}</p>

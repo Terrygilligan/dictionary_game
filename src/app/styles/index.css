@@ -1157,6 +1157,33 @@ body {
   min-height: 200px;
 }
 
+.game-card__icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Mode-specific card styling */
+.game-card--solo {
+  border-left: 4px solid #10b981;
+  background: linear-gradient(135deg, var(--background-alt) 0%, rgba(16, 185, 129, 0.05) 100%);
+}
+
+.game-card--solo:hover {
+  border-color: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.game-card--versus {
+  border-left: 4px solid #f59e0b;
+  background: linear-gradient(135deg, var(--background-alt) 0%, rgba(245, 158, 11, 0.05) 100%);
+}
+
+.game-card--versus:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+}
+
 .game-card__content {
   display: flex;
   flex-direction: column;
