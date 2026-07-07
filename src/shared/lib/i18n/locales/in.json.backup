@@ -140,6 +140,55 @@
     }
   },
   "games": {
+    "title": "Pusat Permainan",
+    "tagline": "Pilih petualangan Anda dan terhubung dengan komunitas desa Anda melalui permainan pembelajaran bahasa",
+    "quickPlay": {
+      "title": "Zona Bermain Cepat"
+    },
+    "modes": {
+      "solo": {
+        "title": "Solo Sprint",
+        "description": "Tantang diri Anda untuk mendefinisikan atau menerjemahkan sebanyak mungkin kata dalam batas waktu yang ditetapkan",
+        "duration": "5 menit",
+        "difficulty": "Sedang"
+      },
+      "versus": {
+        "title": "Village Versus",
+        "description": "Mode kompetitif di mana Anda dan tetangga bersaing untuk skor tertinggi menggunakan dek kata yang sama",
+        "players": "2-8 pemain",
+        "duration": "10 menit"
+      },
+      "bridge": {
+        "title": "Community Bridge",
+        "description": "Mode kolaboratif di mana pemain bekerja sama untuk membangun \"Community Lexicon\" dengan menambah definisi untuk kata-kata baru dalam bahasa ibu mereka"
+      }
+    },
+    "playNow": "Main Sekarang",
+    "playGames": "Mainkan Permainan",
+    "communityBridge": {
+      "title": "Community Bridge",
+      "currentWord": "Kata Komunitas Hari Ini",
+      "language": "Belanda",
+      "contributions": "Kontribusi:",
+      "contribute": "Tambah Terjemahan",
+      "recentContributions": "Kontribusi Komunitas Terbaru"
+    },
+    "activeRooms": {
+      "title": "Ruang Aktif",
+      "comingSoon": "Meja Desa Akan Datang",
+      "description": "Buat dan bergabung dalam permainan grup kecil dengan teman-teman dari desa Anda. Sempurna untuk sesi pembelajaran yang intim!",
+      "notifyMe": "Beri Tahu Saya Saat Tersedia"
+    },
+    "recentActivity": {
+      "title": "Aktivitas Terbaru"
+    },
+    "activity": {
+      "newHighScore": "Skor tinggi baru dicapai!",
+      "communityContribution": "Kontribusi komunitas dibuat",
+      "streakAchievement": "Pencapaian beruntun tercapai"
+    }
+  },
+  "games": {
     "title": "Hub Permainan",
     "tagline": "Pilih petualangan Anda dan terhubung dengan komunitas desa Anda melalui permainan pembelajaran bahasa",
     "quickPlay": {

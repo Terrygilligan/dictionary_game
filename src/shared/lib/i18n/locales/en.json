@@ -161,6 +161,47 @@
       "step4": "Track your progress and compete with friends"
     }
   },
+  "games": {
+    "title": "Games Hub",
+    "tagline": "Choose your adventure and connect with your village community through language learning games",
+    "quickPlay": {
+      "title": "Quick Play Zone"
+    },
+    "modes": {
+      "solo": {
+        "title": "Solo Sprint",
+        "description": "Challenge yourself to define or translate as many words as possible within a set time limit",
+        "duration": "5 minutes",
+        "difficulty": "Medium"
+      },
+      "versus": {
+        "title": "Village Versus",
+        "description": "A competitive mode where you and your neighbors compete for the highest score using the same deck of words",
+        "players": "2-8 players",
+        "duration": "10 minutes"
+      },
+      "bridge": {
+        "title": "Community Bridge",
+        "description": "A collaborative mode where players work together to build a \"Community Lexicon\" by adding definitions for new words in their mother tongue"
+      }
+    },
+    "playNow": "Play Now",
+    "playGames": "Play Games",
+    "activeRooms": {
+      "title": "Active Rooms",
+      "comingSoon": "Village Tables Coming Soon",
+      "description": "Create and join small group games with friends from your village. Perfect for intimate learning sessions!",
+      "notifyMe": "Notify Me When Available"
+    },
+    "recentActivity": {
+      "title": "Recent Activity"
+    },
+    "activity": {
+      "newHighScore": "New high score achieved!",
+      "communityContribution": "Community contribution made",
+      "streakAchievement": "Streak milestone reached"
+    }
+  },
   "accessibility": {
     "screenReaderOnly": "Screen reader only",
     "keyboardHint": "Press Enter to select, Escape to cancel",
