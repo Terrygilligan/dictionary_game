@@ -426,3 +426,43 @@ Complete the user experience for Village Beta testing by implementing proper nav
 
 ### Tests
 Language switching tested across all 6 languages. Navigation flow verified. Accessibility compliance checked with keyboard navigation and screen reader compatibility.
+
+---
+
+## 0003 — Email Verification Event System & Firestore Structure Refactor
+
+**Date:** 2026-07-07
+**Status:** implemented
+
+### Goal
+Resolve two critical issues: (1) FirebaseError 'Invalid document reference' due to incorrect Firestore subcollection paths, and (2) emailVerified field not updating when users verify their email through Firebase Auth.
+
+### Architectural rationale
+
+- **Event-Driven Architecture.** Implemented comprehensive event system for email verification using USER_EMAIL_VERIFIED events, maintaining the pure event sourcing pattern with proper decider/evolver separation.
+
+- **Firestore Structure Simplification.** Refactored from subcollection approach (`users/{userId}/profile`) to main document approach (`users/{userId}`) to resolve document reference errors and simplify security rules.
+
+- **Reactive State Management.** Created useEmailVerification hook that automatically detects emailVerified changes in Firebase Auth and dispatches domain events, ensuring real-time synchronization between Auth and Firestore.
+
+- **GDPR Compliance Maintenance.** Preserved AES-256-GCM encryption throughout the refactor while centralizing encryption logic in the database service to prevent double encryption.
+
+- **Clean Architecture Integration.** Added EmailVerificationTracker component to provider composition root for zero-impact side effect handling without polluting component tree.
+
+### Implementation details
+
+- **Event System.** Added UserEmailVerified event interface, VerifyUserEmail command, and complete decide/evolve logic for email verification domain events.
+
+- **Auth Detection Hook.** Implemented useEmailVerification with useRef-based state tracking to detect false→true transitions in emailVerified status.
+
+- **Projection Service Updates.** Added handleEmailVerifiedProjection method that loads existing profiles, updates emailVerified field, and maintains audit trails with verifiedAt timestamps.
+
+- **Firestore Refactor.** Updated dbService methods to write directly to main user documents instead of subcollections, simplifying the data model and security rules.
+
+- **Testing Coverage.** Added comprehensive test cases for email verification events and updated existing tests to match new Firestore structure.
+
+### Files modified
+`src/entities/user/model/events.ts`, `src/entities/user/model/commands.ts`, `src/entities/user/model/decide.ts`, `src/entities/user/model/evolve.ts`, `src/services/db.ts`, `src/services/userProjectionService.ts`, `src/hooks/useEmailVerification.ts`, `src/components/EmailVerificationTracker.tsx`, `src/app/providers/AppProviders.tsx`, `firestore.rules`, `src/services/userProjectionService.test.ts`.
+
+### Tests
+All 10/10 tests passing including 2 new email verification test cases. Firestore document reference errors resolved. Email verification flow tested and verified with comprehensive debug logging. Build successful with no TypeScript errors.

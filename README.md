@@ -60,5 +60,19 @@ UI  --command-->  decide(state, command)  --events-->  log (append-only)
 - Randomness (deck shuffling) happens in `buildDeck` *before* dispatch and is
   captured in the `game/started` event, keeping the log deterministic.
 
+### User Authentication & Email Verification
+
+The app implements a comprehensive event-driven user system with Firebase Auth integration:
+
+- **Event-Driven User State**: All user changes (registration, email verification, profile updates) flow through the event sourcing system with proper domain events.
+- **Email Verification**: Automatic detection of email verification changes via React hooks, dispatching `USER_EMAIL_VERIFIED` events to update Firestore in real-time.
+- **GDPR Compliance**: All user data encrypted with AES-256-GCM before Firestore writes, maintaining privacy and compliance.
+- **Firestore Projection**: User data stored in main documents (`users/{userId}`) with service account write permissions for projections.
+
+**Email Verification Flow:**
+```
+User verifies email → useEmailVerification hook detects change → USER_EMAIL_VERIFIED event → Firestore updated
+```
+
 See [`SCRATCHPAD.md`](./SCRATCHPAD.md) for the per-feature rationale required by
 the agentic workflow, and [`AGENTS.md`](./AGENTS.md) for contributor rules.

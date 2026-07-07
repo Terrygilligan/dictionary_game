@@ -59,6 +59,13 @@ All three must pass.
 - **Blind Arbiter Pattern:** The domain state acts as an opaque container for secret information (e.g., the target word). No selector may expose private state until an explicit `reveal` event is processed.
 - **Offline-First:** All data dependencies must be bundled within the app. No runtime API calls for game data.
 
+## User Domain & Authentication
+
+- **Event-Driven Auth:** All user state changes (registration, email verification, profile updates) must flow through the event sourcing system with proper USER_REGISTERED, USER_EMAIL_VERIFIED, and PROFILE_UPDATED events.
+- **Firestore Projection:** User data is projected to Firestore using the main document structure (`users/{userId}`) rather than subcollections, with GDPR-compliant AES-256-GCM encryption applied before all writes.
+- **Reactive Verification:** Email verification status changes are automatically detected via React hooks and dispatched as domain events, ensuring real-time synchronization between Firebase Auth and Firestore projections.
+- **Service Account Access:** Firestore security rules allow the service account to write user projections while maintaining user privacy through proper access controls.
+
 ## Accessibility
 
 - **TTS/STT Integration:** The app must prioritize Web Speech APIs for interaction, enabling a "Blind Arbiter" experience where the AI "Dealer" speaks and listens, rather than relying on visual text.
