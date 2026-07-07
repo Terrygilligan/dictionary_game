@@ -63,6 +63,17 @@ export function decideUser(
         timestamp: Date.now(), // Will be replaced by injectable clock
       }]
 
+    case 'user/verify-email':
+      // Only verify email if user exists and is authenticated
+      if (!state.user || state.authStatus !== 'authenticated') return []
+      
+      return [{
+        type: 'user/email-verified',
+        userId: command.userId,
+        email: command.email,
+        verifiedAt: Date.now(), // Will be replaced by injectable clock
+      }]
+
     case 'profile/update':
       // Only update profile if user exists and is authenticated
       if (!state.user || state.authStatus !== 'authenticated') return []

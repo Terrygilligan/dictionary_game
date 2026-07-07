@@ -60,6 +60,15 @@ export function evolveUser(state: UserState, event: UserEvent): UserState {
         } : state.user,
       }
 
+    case 'user/email-verified':
+      return {
+        ...state,
+        user: state.user ? {
+          ...state.user,
+          emailVerified: true,
+        } : state.user,
+      }
+
     case 'profile/updated':
       return {
         ...state,

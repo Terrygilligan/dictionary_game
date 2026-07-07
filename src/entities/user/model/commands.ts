@@ -23,6 +23,12 @@ export interface UpdateUser {
   readonly displayName?: string
 }
 
+export interface VerifyUserEmail {
+  readonly type: 'user/verify-email'
+  readonly userId: string
+  readonly email: string
+}
+
 export interface UpdateProfile {
   readonly type: 'profile/update'
   readonly totalScore?: number
@@ -58,6 +64,7 @@ export type UserCommand =
   | RegisterUser
   | AuthenticateUser
   | UpdateUser
+  | VerifyUserEmail
   | UpdateProfile
   | UpdateStats
   | AddFriend

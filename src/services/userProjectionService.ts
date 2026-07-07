@@ -1,5 +1,5 @@
 import { dbService } from './db'
-import type { UserEvent, UserCreated, UserRegistered, UserUpdated, ProfileUpdated, StatsUpdated } from '@/entities/user'
+import type { UserEvent, UserCreated, UserRegistered, UserUpdated, UserEmailVerified, ProfileUpdated, StatsUpdated } from '@/entities/user'
 
 /**
  * Service for projecting user events to Firestore collections
@@ -25,6 +25,9 @@ export class UserProjectionService {
           break
         case 'user/updated':
           await this.handleUserUpdatedProjection(event)
+          break
+        case 'user/email-verified':
+          await this.handleEmailVerifiedProjection(event)
           break
         case 'profile/updated':
           await this.handleProfileProjection(event)
@@ -346,6 +349,44 @@ export class UserProjectionService {
     
     // Implementation would be similar to above
     console.log(`🔍 [PROJECTION] Friend handling not yet implemented for user ${userId}`)
+  }
+
+  /**
+   * Handle email verification projections
+   */
+  private async handleEmailVerifiedProjection(event: UserEmailVerified): Promise<void> {
+    const userId = event.userId
+    console.log('🔍 [PROJECTION] Handling email verification for user:', userId)
+
+    try {
+      // Load existing profile
+      const existingProfile = await dbService.loadUserProfile(userId)
+      
+      if (!existingProfile) {
+        console.log(`⚠️ [PROJECTION] No existing profile found for user ${userId}, cannot update email verification`)
+        return
+      }
+
+      // Update email verification status
+      const updatedProfile = {
+        ...existingProfile,
+        emailVerified: true,
+        updatedAt: new Date().toISOString(),
+        metadata: {
+          source: 'user-projection',
+          eventType: 'user/email-verified',
+          processedAt: new Date().toISOString(),
+          verifiedAt: new Date(event.verifiedAt).toISOString(),
+        }
+      }
+
+      await dbService.saveUserProfile(userId, updatedProfile)
+      
+      console.log(`✅ [PROJECTION] Email verification updated for user ${userId}`)
+    } catch (error) {
+      console.error(`❌ [PROJECTION] Failed to update email verification for user ${userId}:`, error)
+      throw error
+    }
   }
 
   /**

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { userProjectionService } from './userProjectionService'
 import { dbService } from './db'
-import type { UserRegistered, UserCreated } from '@/entities/user'
+import type { UserRegistered, UserCreated, UserEmailVerified } from '@/entities/user'
 
 // Mock dependencies
 vi.mock('./db')
@@ -282,6 +282,68 @@ describe('UserProjectionService', () => {
       expect(consoleSpy).toHaveBeenCalledWith('❌ [PROJECTION] Failed to save user profile for user erroruser:', expect.any(Error))
 
       consoleSpy.mockRestore()
+    })
+
+    it('should handle user/email-verified events', async () => {
+      const existingProfile = {
+        id: 'verifiedUser',
+        email: 'verified@example.com',
+        displayName: 'Verified User',
+        emailVerified: false,
+        createdAt: Date.now() - 1000,
+        updatedAt: Date.now() - 500,
+        stats: {
+          gamesPlayed: 5,
+          correctAnswers: 3,
+          totalQuestions: 10,
+          streak: 2,
+          highestStreak: 3,
+          updatedAt: Date.now() - 500,
+        },
+      }
+
+      mockDbService.loadUserProfile.mockResolvedValue(existingProfile)
+
+      const event: UserEmailVerified = {
+        type: 'user/email-verified',
+        userId: 'verifiedUser',
+        email: 'verified@example.com',
+        verifiedAt: Date.now(),
+      }
+
+      await userProjectionService.processUserEvent(event)
+
+      expect(mockDbService.loadUserProfile).toHaveBeenCalledWith('verifiedUser')
+      expect(mockDbService.saveUserProfile).toHaveBeenCalledWith(
+        'verifiedUser',
+        expect.objectContaining({
+          ...existingProfile,
+          emailVerified: true,
+          updatedAt: expect.any(String),
+          metadata: {
+            source: 'user-projection',
+            eventType: 'user/email-verified',
+            processedAt: expect.any(String),
+            verifiedAt: expect.any(String),
+          },
+        })
+      )
+    })
+
+    it('should handle user/email-verified events when no profile exists', async () => {
+      mockDbService.loadUserProfile.mockResolvedValue(null)
+
+      const event: UserEmailVerified = {
+        type: 'user/email-verified',
+        userId: 'nonexistentUser',
+        email: 'nonexistent@example.com',
+        verifiedAt: Date.now(),
+      }
+
+      await userProjectionService.processUserEvent(event)
+
+      expect(mockDbService.loadUserProfile).toHaveBeenCalledWith('nonexistentUser')
+      expect(mockDbService.saveUserProfile).not.toHaveBeenCalled()
     })
   })
 })

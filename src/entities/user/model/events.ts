@@ -29,6 +29,13 @@ export interface UserUpdated {
   readonly timestamp: number
 }
 
+export interface UserEmailVerified {
+  readonly type: 'user/email-verified'
+  readonly userId: string
+  readonly email: string
+  readonly verifiedAt: number
+}
+
 export interface ProfileUpdated {
   readonly type: 'profile/updated'
   readonly userId: string
@@ -84,6 +91,7 @@ export type UserEvent =
   | UserRegistered
   | UserAuthenticated
   | UserUpdated
+  | UserEmailVerified
   | ProfileUpdated
   | StatsUpdated
   | AchievementUnlocked
