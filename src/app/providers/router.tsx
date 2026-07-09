@@ -6,6 +6,7 @@ import { GamesPage } from '@/pages/games'
 import { GamePage } from '@/pages/game'
 import { VillagePage } from '@/pages/village'
 import { BaseLayout } from '@/app/ui/BaseLayout'
+import { AppProviders } from './AppProviders'
 import { initializeI18n } from '@/shared/lib/i18n/i18nService'
 import { useNavigation } from '@/shared/lib/navigation'
 import type { User } from '@/entities/user'
@@ -50,92 +51,79 @@ export function AppRouter() {
   }, [])
   */
 
-  const handleAuthSuccess = (user?: User) => {
-    // Set the user state when authentication succeeds
-    if (user) {
-      setUser(user)
-    }
-    console.log('Auth success - navigating to profile')
-    navigate('profile')
+  const handleAuthSuccess = (newUser?: User) => {
+    console.log('🔐 [AUTH] Hard reset - clearing local storage and state')
+  
+  // Clear all local storage to prevent cached state issues
+  localStorage.clear()
+  
+  // Reset store state without destroying the instance
+  if ((window as any).__resetUserStore) {
+    (window as any).__resetUserStore()
   }
+  
+  // Set the user state when authentication succeeds
+  if (newUser) {
+    console.log('✅ [AUTH] Login successful - user:', newUser.id, 'navigating to /profile')
+    setUser(newUser)
+    // Explicit navigation to profile page, ignoring any cached routes
+    navigate('profile')
+  } else {
+    console.log('⚠️ [AUTH] No user data - navigating to village')
+    navigate('village')
+  }
+}
 
   const handleSignOut = () => {
+    console.log('🔄 [AUTH] User signing out, resetting store')
+    // Reset store state without destroying the instance
+    if ((window as any).__resetUserStore) {
+      (window as any).__resetUserStore()
+    }
     setUser(null)
     navigate('landing')
   }
 
   
-  if (isLoading) {
-    return (
-      <div className="page">
-        <div className="panel panel--center">
-          <p>Loading...</p>
+  return (
+    <AppProviders>
+      {isLoading ? (
+        <div className="page">
+          <div className="panel panel--center">
+            <p>Loading...</p>
+          </div>
         </div>
-      </div>
-    )
-  }
-
-  // AuthGuard logic
-  if (currentPage === 'profile' && !user) {
-    return <AuthPage onAuthSuccess={handleAuthSuccess} />
-  }
-
-  switch (currentPage) {
-    case 'landing':
-      return (
+      ) : (
         <BaseLayout isAuthenticated={!!user}>
-          <LandingPage />
-        </BaseLayout>
-      )
-    case 'auth':
-      return (
-        <BaseLayout isAuthenticated={!!user}>
-          <AuthPage onAuthSuccess={handleAuthSuccess} />
-        </BaseLayout>
-      )
-    case 'games':
-      return (
-        <BaseLayout isAuthenticated={!!user}>
-          {user ? (
-            <GamesPage />
-          ) : (
-            <AuthPage onAuthSuccess={handleAuthSuccess} />
+          {currentPage === 'landing' && <LandingPage />}
+          {currentPage === 'auth' && <AuthPage onAuthSuccess={handleAuthSuccess} />}
+          {currentPage === 'games' && (
+            user ? (
+              <GamesPage />
+            ) : (
+              <AuthPage onAuthSuccess={handleAuthSuccess} />
+            )
           )}
-        </BaseLayout>
-      )
-    case 'profile':
-      return (
-        <BaseLayout isAuthenticated={!!user}>
-          {user ? (
-            <ProfilePage user={user} onSignOut={handleSignOut} />
-          ) : (
-            <AuthPage onAuthSuccess={handleAuthSuccess} />
+          {currentPage === 'profile' && (
+            user ? (
+              <ProfilePage key={`profile-${user.id}`} user={user} onSignOut={handleSignOut} />
+            ) : (
+              <AuthPage onAuthSuccess={handleAuthSuccess} />
+            )
           )}
-        </BaseLayout>
-      )
-    case 'game':
-      return (
-        <BaseLayout isAuthenticated={!!user}>
-          <GamePage isGuest={!user} />
-        </BaseLayout>
-      )
-    case 'village':
-      return (
-        <BaseLayout isAuthenticated={!!user}>
-          {user ? (
-            <VillagePage />
-          ) : (
-            <AuthPage onAuthSuccess={handleAuthSuccess} />
+          {currentPage === 'game' && <GamePage isGuest={!user} />}
+          {currentPage === 'village' && (
+            user ? (
+              <VillagePage />
+            ) : (
+              <AuthPage onAuthSuccess={handleAuthSuccess} />
+            )
           )}
+          {!['landing', 'auth', 'games', 'profile', 'game', 'village'].includes(currentPage) && <LandingPage />}
         </BaseLayout>
-      )
-    default:
-      return (
-        <BaseLayout isAuthenticated={!!user}>
-          <LandingPage />
-        </BaseLayout>
-      )
-  }
+      )}
+    </AppProviders>
+  )
 }
 
 /**

@@ -19,18 +19,27 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const initialize = async () => {
       try {
+        // Prevent race conditions by ensuring single initialization
+        if (isInitialized) return
+        
+        console.log('🌐 [I18N] Initializing with single source of truth')
         await initializeI18n()
-        setCurrentLanguage(i18nService.getCurrentLanguage())
+        const language = i18nService.getCurrentLanguage()
+        console.log('🌐 [I18N] Set language to:', language)
+        setCurrentLanguage(language)
         setIsInitialized(true)
       } catch (error) {
         console.error('Failed to initialize i18n:', error)
+        // Fallback to default language
+        setCurrentLanguage('en')
+        setIsInitialized(true)
       }
     }
 
     if (!isInitialized) {
       initialize()
     }
-  }, [isInitialized])
+  }, []) // Remove isInitialized dependency to prevent re-initialization
 
   const setLanguage = async (language: SupportedLanguage) => {
     try {

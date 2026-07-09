@@ -149,13 +149,19 @@ class I18nServiceImpl implements I18nService {
   async initialize(): Promise<void> {
     try {
       // Try to get saved language from localStorage
-      const savedLanguage = localStorage.getItem('lexicon-master-language') as SupportedLanguage
+      let savedLanguage: SupportedLanguage | null = null
+      try {
+        savedLanguage = localStorage.getItem('lexicon-master-language') as SupportedLanguage
+      } catch (error) {
+        console.warn('🌐 [I18N] localStorage not accessible, using default language')
+      }
       
       // Use saved language if valid, otherwise use default
-      const initialLanguage = this.getAvailableLanguages().includes(savedLanguage) 
+      const initialLanguage = savedLanguage && this.getAvailableLanguages().includes(savedLanguage) 
         ? savedLanguage 
         : this.config.defaultLanguage
       
+      console.log('🌐 [I18N] Initializing with language:', initialLanguage)
       await this.setLanguage(initialLanguage)
     } catch (error) {
       console.error('Failed to initialize i18n service:', error)

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { UserStoreContext } from './context.ts'
 import { createUserStore, type UserStore } from './userStore.ts'
 
@@ -10,5 +10,20 @@ export interface UserProviderProps {
 
 export function UserProvider({ children, store }: UserProviderProps) {
   const [userStore] = useState<UserStore>(() => store ?? createUserStore())
+
+  // Expose reset method globally for router to call when needed
+  useEffect(() => {
+    // Make reset method available globally for logout/login scenarios
+    (window as any).__resetUserStore = () => {
+      console.log('🔄 [USER_PROVIDER] Global store reset requested')
+      userStore.resetState()
+    }
+    
+    return () => {
+      // Cleanup global reference
+      delete (window as any).__resetUserStore
+    }
+  }, [userStore])
+
   return <UserStoreContext.Provider value={userStore}>{children}</UserStoreContext.Provider>
 }
