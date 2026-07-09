@@ -1,10 +1,22 @@
+import { useEffect } from 'react'
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 import { Button } from '@/shared/ui/Button'
 import { useNavigation } from '@/shared/lib/navigation'
+import { useGameDispatch } from '@/features/play-round'
 
 export function LandingPage() {
   const { t } = useTranslate()
-  const { navigate } = useNavigation()
+  const { navigate, currentPage } = useNavigation()
+  const dispatch = useGameDispatch()
+
+  // Debug info
+  console.log('🏠 [LANDING] LandingPage rendering, currentPage:', currentPage)
+
+  // Reset game state when landing page loads
+  useEffect(() => {
+    console.log('🔄 [LANDING] Resetting game state on landing page load')
+    dispatch({ type: 'resetGame', reason: 'navigation-change' })
+  }, [dispatch])
 
   // Helper function to safely get translations with fallbacks
   const safeT = (key: string, fallback?: string) => {
@@ -17,11 +29,27 @@ export function LandingPage() {
   }
 
   const handlePlayAsGuest = () => {
-    navigate('game')
+    console.log('🎮 [LANDING] Play as Guest button clicked!')
+    console.log('📍 [LANDING] Current page:', currentPage)
+    console.log('📍 [LANDING] Navigate function type:', typeof navigate)
+    try {
+      navigate('game')
+      console.log('✅ [LANDING] Navigation to game succeeded')
+    } catch (error) {
+      console.error('❌ [LANDING] Navigation to game failed:', error)
+    }
   }
 
   const handleRegister = () => {
-    navigate('auth')
+    console.log('📝 [LANDING] Register button clicked!')
+    console.log('📍 [LANDING] Current page:', currentPage)
+    console.log('📍 [LANDING] Navigate function type:', typeof navigate)
+    try {
+      navigate('auth')
+      console.log('✅ [LANDING] Navigation to auth succeeded')
+    } catch (error) {
+      console.error('❌ [LANDING] Navigation to auth failed:', error)
+    }
   }
 
   return (
@@ -62,6 +90,28 @@ export function LandingPage() {
               {safeT('landing.guestPrivacyNotice', 'Guest sessions are temporary and will be deleted when you close your browser. No personal data is stored.')}
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Debug Section */}
+      <div className="panel panel--center">
+        <h2 className="panel__title">🔧 Debug Tools</h2>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Button onClick={() => console.log('🧪 [DEBUG] Test button clicked!')}>
+            Test Button
+          </Button>
+          <Button onClick={() => (window as any).runButtonDiagnostics()}>
+            Run Diagnostics
+          </Button>
+          <Button onClick={() => (window as any).testDOMStructure()}>
+            Test DOM
+          </Button>
+          <Button onClick={() => (window as any).testNavigation()}>
+            Test Navigation
+          </Button>
+        </div>
+        <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          Current page: {currentPage} | Open console for detailed logs
         </div>
       </div>
 

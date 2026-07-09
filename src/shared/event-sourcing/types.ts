@@ -2,11 +2,17 @@
  * Every event that has been committed to the log is wrapped in an envelope
  * carrying identity and ordering metadata. The envelope is immutable; the
  * derived state is *only ever* a fold over these envelopes' `event` payloads.
+ * 
+ * Following Event-Driven Architecture Blueprint compliance with explicit multi-tenant isolation.
  */
 export interface EventEnvelope<TEvent> {
   readonly id: string
   readonly seq: number
   readonly timestamp: number
+  /** Unique identifier for the tenant (user, organization, etc.) */
+  readonly tenant_id: string
+  /** Unique identifier for the aggregate (game session, entity instance) */
+  readonly aggregate_id: string
   readonly event: TEvent
 }
 

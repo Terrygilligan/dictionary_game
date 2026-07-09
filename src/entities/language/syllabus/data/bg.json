@@ -1,0 +1,788 @@
+{
+  "languageCode": "bg",
+  "languageName": "Bulgarian",
+  "nativeName": "Български",
+  "version": "1.0.0",
+  "lastUpdated": 1699516800000,
+  "stages": [
+    {
+      "stage": "INFANT",
+      "description": "Basic Bulgarian vocabulary for beginners - essential words and simple phrases",
+      "topics": [
+        {
+          "id": "greetings",
+          "name": "Здравей и довиждане",
+          "description": "Basic greetings and farewells",
+          "concepts": ["hello", "goodbye", "please", "thank_you"],
+          "estimatedTime": 15,
+          "objectives": [
+            "Learn basic greetings",
+            "Use polite expressions",
+            "Recognize common phrases"
+          ]
+        },
+        {
+          "id": "basic_objects",
+          "name": "Основни предмети",
+          "description": "Everyday objects and items",
+          "concepts": ["house", "book", "table", "chair"],
+          "estimatedTime": 20,
+          "prerequisites": ["greetings"],
+          "objectives": [
+            "Identify common objects",
+            "Use object names in sentences",
+            "Connect objects to daily life"
+          ]
+        }
+      ],
+      "concepts": [
+        {
+          "englishConcept": "hello",
+          "targetTerm": "здравей",
+          "pronunciation": "ZDRA-vay",
+          "partOfSpeech": "interjection",
+          "difficulty": 1,
+          "example": "Здравей, как си?",
+          "culturalNotes": "Used for informal greeting with friends and family"
+        },
+        {
+          "englishConcept": "goodbye",
+          "targetTerm": "довиждане",
+          "pronunciation": "do-VEED-zha-ne",
+          "partOfSpeech": "interjection",
+          "difficulty": 1,
+          "example": "Довиждане, до утре!",
+          "culturalNotes": "Formal and informal farewell"
+        },
+        {
+          "englishConcept": "please",
+          "targetTerm": "моля",
+          "pronunciation": "MO-lya",
+          "partOfSpeech": "interjection",
+          "difficulty": 1,
+          "example": "Моля, помогни ми.",
+          "culturalNotes": "Used for 'please' and 'you're welcome'"
+        },
+        {
+          "englishConcept": "thank_you",
+          "targetTerm": "благодаря",
+          "pronunciation": "bla-go-da-RYA",
+          "partOfSpeech": "interjection",
+          "difficulty": 1,
+          "example": "Благодаря за помощта.",
+          "culturalNotes": "Essential polite expression"
+        },
+        {
+          "englishConcept": "house",
+          "targetTerm": "къща",
+          "pronunciation": "KUSHT-ta",
+          "partOfSpeech": "noun",
+          "difficulty": 1,
+          "example": "Това е моята къща.",
+          "relatedConcepts": ["table", "chair"]
+        },
+        {
+          "englishConcept": "book",
+          "targetTerm": "книга",
+          "pronunciation": "KNEE-ga",
+          "partOfSpeech": "noun",
+          "difficulty": 1,
+          "example": "Чета интересна книга.",
+          "culturalNotes": "Bulgarian literature has rich traditions"
+        },
+        {
+          "englishConcept": "table",
+          "targetTerm": "маса",
+          "pronunciation": "MA-sa",
+          "partOfSpeech": "noun",
+          "difficulty": 1,
+          "example": "Книгата е на масата.",
+          "relatedConcepts": ["house", "chair"]
+        },
+        {
+          "englishConcept": "chair",
+          "targetTerm": "стол",
+          "pronunciation": "STOL",
+          "partOfSpeech": "noun",
+          "difficulty": 1,
+          "example": "Седям на стола.",
+          "relatedConcepts": ["table", "house"]
+        }
+      ],
+      "totalConcepts": 8,
+      "sessionLength": 5,
+      "prerequisites": [],
+      "assessmentCriteria": {
+        "accuracyThreshold": 80,
+        "conceptMasteryThreshold": 6,
+        "timeLimit": 180
+      }
+    },
+    {
+      "stage": "TODDLER",
+      "description": "Building vocabulary with common actions, family members, and basic descriptions",
+      "topics": [
+        {
+          "id": "family",
+          "name": "Семейство",
+          "description": "Family members and relationships",
+          "concepts": ["mother", "father", "sister", "brother", "family"],
+          "estimatedTime": 25,
+          "prerequisites": ["greetings"],
+          "objectives": [
+            "Name family members",
+            "Describe family relationships",
+            "Use family terms in context"
+          ]
+        },
+        {
+          "id": "actions",
+          "name": "Действия",
+          "description": "Common verbs and daily actions",
+          "concepts": ["eat", "drink", "sleep", "walk", "run"],
+          "estimatedTime": 30,
+          "objectives": [
+            "Use basic action verbs",
+            "Describe daily activities",
+            "Form simple sentences"
+          ]
+        },
+        {
+          "id": "descriptions",
+          "name": "Описания",
+          "description": "Basic adjectives and descriptions",
+          "concepts": ["big", "small", "good", "bad", "beautiful"],
+          "estimatedTime": 20,
+          "objectives": [
+            "Use descriptive adjectives",
+            "Compare objects",
+            "Express opinions"
+          ]
+        }
+      ],
+      "concepts": [
+        {
+          "englishConcept": "mother",
+          "targetTerm": "майка",
+          "pronunciation": "MAY-ka",
+          "partOfSpeech": "noun",
+          "difficulty": 2,
+          "example": "Майката готви вечеря.",
+          "relatedConcepts": ["father", "family"]
+        },
+        {
+          "englishConcept": "father",
+          "targetTerm": "баща",
+          "pronunciation": "BASH-ta",
+          "partOfSpeech": "noun",
+          "difficulty": 2,
+          "example": "Бащата чете книга.",
+          "relatedConcepts": ["mother", "family"]
+        },
+        {
+          "englishConcept": "sister",
+          "targetTerm": "сестра",
+          "pronunciation": "SES-tra",
+          "partOfSpeech": "noun",
+          "difficulty": 2,
+          "example": "Сестра ми играе на двора.",
+          "relatedConcepts": ["brother", "family"]
+        },
+        {
+          "englishConcept": "brother",
+          "targetTerm": "брат",
+          "pronunciation": "BRAT",
+          "partOfSpeech": "noun",
+          "difficulty": 2,
+          "example": "Брат ми учи в училище.",
+          "relatedConcepts": ["sister", "family"]
+        },
+        {
+          "englishConcept": "family",
+          "targetTerm": "семейство",
+          "pronunciation": "se-MEY-stvo",
+          "partOfSpeech": "noun",
+          "difficulty": 2,
+          "example": "Семейството яде заедно.",
+          "relatedConcepts": ["mother", "father", "sister", "brother"]
+        },
+        {
+          "englishConcept": "eat",
+          "targetTerm": "ям",
+          "pronunciation": "YAM",
+          "partOfSpeech": "verb",
+          "difficulty": 2,
+          "example": "Аз ям ябълка.",
+          "culturalNotes": "Important verb in Bulgarian cuisine culture"
+        },
+        {
+          "englishConcept": "drink",
+          "targetTerm": "пия",
+          "pronunciation": "PEE-ya",
+          "partOfSpeech": "verb",
+          "difficulty": 2,
+          "example": "Пия вода през деня."
+        },
+        {
+          "englishConcept": "sleep",
+          "targetTerm": "спя",
+          "pronunciation": "SPYA",
+          "partOfSpeech": "verb",
+          "difficulty": 2,
+          "example": "Спя осем часа nightly."
+        },
+        {
+          "englishConcept": "walk",
+          "targetTerm": "ходя",
+          "pronunciation": "HO-dya",
+          "partOfSpeech": "verb",
+          "difficulty": 2,
+          "example": "Ходя в парка всеки ден."
+        },
+        {
+          "englishConcept": "run",
+          "targetTerm": "тичам",
+          "pronunciation": "tee-CHAM",
+          "partOfSpeech": "verb",
+          "difficulty": 2,
+          "example": "Тичам сутрин."
+        },
+        {
+          "englishConcept": "big",
+          "targetTerm": "голям",
+          "pronunciation": "go-LYAM",
+          "partOfSpeech": "adjective",
+          "difficulty": 2,
+          "example": "Къщата е голяма.",
+          "relatedConcepts": ["small"]
+        },
+        {
+          "englishConcept": "small",
+          "targetTerm": "малък",
+          "pronunciation": "MAL-lak",
+          "partOfSpeech": "adjective",
+          "difficulty": 2,
+          "example": "Книгата е малка.",
+          "relatedConcepts": ["big"]
+        },
+        {
+          "englishConcept": "good",
+          "targetTerm": "добър",
+          "pronunciation": "DO-bur",
+          "partOfSpeech": "adjective",
+          "difficulty": 2,
+          "example": "Това е добра идея.",
+          "relatedConcepts": ["bad"]
+        },
+        {
+          "englishConcept": "bad",
+          "targetTerm": "лош",
+          "pronunciation": "LOSH",
+          "partOfSpeech": "adjective",
+          "difficulty": 2,
+          "example": "Времето е лошо днес.",
+          "relatedConcepts": ["good"]
+        },
+        {
+          "englishConcept": "beautiful",
+          "targetTerm": "красив",
+          "pronunciation": "kra-SEEV",
+          "partOfSpeech": "adjective",
+          "difficulty": 2,
+          "example": "Цветята са красиви.",
+          "culturalNotes": "Often used to describe Bulgarian nature and people"
+        }
+      ],
+      "totalConcepts": 15,
+      "sessionLength": 10,
+      "prerequisites": ["INFANT"],
+      "assessmentCriteria": {
+        "accuracyThreshold": 75,
+        "conceptMasteryThreshold": 12,
+        "timeLimit": 300
+      }
+    },
+    {
+      "stage": "SCHOOLER",
+      "description": "Contextual understanding with complex sentences, time expressions, and abstract concepts",
+      "topics": [
+        {
+          "id": "time",
+          "name": "Време",
+          "description": "Time expressions and daily schedules",
+          "concepts": ["today", "tomorrow", "yesterday", "morning", "evening", "night"],
+          "estimatedTime": 30,
+          "prerequisites": ["actions"],
+          "objectives": [
+            "Use time expressions correctly",
+            "Describe daily routines",
+            "Understand temporal relationships"
+          ]
+        },
+        {
+          "id": "nature",
+          "name": "Природа",
+          "description": "Natural world and weather",
+          "concepts": ["sun", "moon", "star", "rain", "snow", "wind", "flower", "tree"],
+          "estimatedTime": 35,
+          "objectives": [
+            "Describe weather conditions",
+            "Name natural elements",
+            "Connect nature to seasons"
+          ]
+        },
+        {
+          "id": "emotions",
+          "name": "Емоции",
+          "description": "Feelings and emotional expressions",
+          "concepts": ["happy", "sad", "angry", "tired", "excited", "scared"],
+          "estimatedTime": 25,
+          "objectives": [
+            "Express emotions appropriately",
+            "Understand emotional contexts",
+            "Use emotion words in conversation"
+          ]
+        }
+      ],
+      "concepts": [
+        {
+          "englishConcept": "today",
+          "targetTerm": "днес",
+          "pronunciation": "DNES",
+          "partOfSpeech": "adverb",
+          "difficulty": 3,
+          "example": "Днес е хубаво време.",
+          "relatedConcepts": ["tomorrow", "yesterday"]
+        },
+        {
+          "englishConcept": "tomorrow",
+          "targetTerm": "утре",
+          "pronunciation": "OO-tre",
+          "partOfSpeech": "adverb",
+          "difficulty": 3,
+          "example": "Утре имам изпит.",
+          "relatedConcepts": ["today", "yesterday"]
+        },
+        {
+          "englishConcept": "yesterday",
+          "targetTerm": "вчера",
+          "pronunciation": "VCHER-a",
+          "partOfSpeech": "adverb",
+          "difficulty": 3,
+          "example": "Вчера четох книга.",
+          "relatedConcepts": ["today", "tomorrow"]
+        },
+        {
+          "englishConcept": "morning",
+          "targetTerm": "сутрин",
+          "pronunciation": "SOO-trin",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Сутрин пия кафе."
+        },
+        {
+          "englishConcept": "evening",
+          "targetTerm": "вечер",
+          "pronunciation": "VEH-cher",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Вечер гледам телевизия."
+        },
+        {
+          "englishConcept": "night",
+          "targetTerm": "нощ",
+          "pronunciation": "NOSHT",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Нощта е тъмна и спокойна."
+        },
+        {
+          "englishConcept": "sun",
+          "targetTerm": "слънце",
+          "pronunciation": "SLUN-tse",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Слънцето грее силно.",
+          "culturalNotes": "Important in Bulgarian culture and folklore"
+        },
+        {
+          "englishConcept": "moon",
+          "targetTerm": "луна",
+          "pronunciation": "LOO-na",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Луната е пълна днес.",
+          "relatedConcepts": ["star"]
+        },
+        {
+          "englishConcept": "star",
+          "targetTerm": "звезда",
+          "pronunciation": "zvez-DA",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Виждам звезди на небето.",
+          "relatedConcepts": ["moon"]
+        },
+        {
+          "englishConcept": "rain",
+          "targetTerm": "дъжд",
+          "pronunciation": "DUZHD",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Вали дъжд от сутрин."
+        },
+        {
+          "englishConcept": "snow",
+          "targetTerm": "сняг",
+          "pronunciation": "SNIAG",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Снягът покрива планините.",
+          "culturalNotes": "Important in Bulgarian winter traditions"
+        },
+        {
+          "englishConcept": "wind",
+          "targetTerm": "вятър",
+          "pronunciation": "VYAT-tur",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Вятърът духа силно."
+        },
+        {
+          "englishConcept": "flower",
+          "targetTerm": "цвете",
+          "pronunciation": "TSVET-te",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Цветето е красиво.",
+          "relatedConcepts": ["tree"]
+        },
+        {
+          "englishConcept": "tree",
+          "targetTerm": "дърво",
+          "pronunciation": "DUR-vo",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Дървото е високо.",
+          "relatedConcepts": ["flower"]
+        },
+        {
+          "englishConcept": "happy",
+          "targetTerm": "щастлив",
+          "pronunciation": "SHTAST-liv",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Аз съм щастлив днес.",
+          "relatedConcepts": ["sad"]
+        },
+        {
+          "englishConcept": "sad",
+          "targetTerm": "тъжен",
+          "pronunciation": "TU-zhen",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Той е тъжен заради новините.",
+          "relatedConcepts": ["happy"]
+        },
+        {
+          "englishConcept": "angry",
+          "targetTerm": "ядосан",
+          "pronunciation": "YA-do-san",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Тя е ядосана на мен."
+        },
+        {
+          "englishConcept": "tired",
+          "targetTerm": "уморен",
+          "pronunciation": "oo-MO-ren",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Аз съм уморен след работа."
+        },
+        {
+          "englishConcept": "excited",
+          "targetTerm": "въодушевен",
+          "pronunciation": "vo-oo-doo-SHEV-en",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Децата са въодушевени за празника."
+        },
+        {
+          "englishConcept": "scared",
+          "targetTerm": "уплашен",
+          "pronunciation": "oo-PLASH-en",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Детето е уплашено от тъмното."
+        }
+      ],
+      "totalConcepts": 20,
+      "sessionLength": 15,
+      "prerequisites": ["TODDLER"],
+      "assessmentCriteria": {
+        "accuracyThreshold": 70,
+        "conceptMasteryThreshold": 15,
+        "timeLimit": 420
+      }
+    },
+    {
+      "stage": "CONVERSATIONAL",
+      "description": "Advanced usage with complex grammar, abstract thinking, and cultural fluency",
+      "topics": [
+        {
+          "id": "culture",
+          "name": "Култура",
+          "description": "Bulgarian culture, traditions, and customs",
+          "concepts": ["tradition", "custom", "holiday", "festival", "music", "dance", "food"],
+          "estimatedTime": 40,
+          "prerequisites": ["emotions", "nature"],
+          "objectives": [
+            "Understand cultural concepts",
+            "Discuss traditions appropriately",
+            "Connect language to cultural context"
+          ]
+        },
+        {
+          "id": "abstract",
+          "name": "Абстрактни концепции",
+          "description": "Abstract ideas and complex thinking",
+          "concepts": ["freedom", "justice", "love", "hope", "wisdom", "truth", "dream"],
+          "estimatedTime": 45,
+          "objectives": [
+            "Use abstract concepts correctly",
+            "Express complex ideas",
+            "Engage in philosophical discussions"
+          ]
+        },
+        {
+          "id": "professional",
+          "name": "Професионален език",
+          "description": "Work and professional communication",
+          "concepts": ["work", "career", "business", "meeting", "project", "success", "failure"],
+          "estimatedTime": 35,
+          "objectives": [
+            "Use professional vocabulary",
+            "Communicate in work contexts",
+            "Understand business expressions"
+          ]
+        }
+      ],
+      "concepts": [
+        {
+          "englishConcept": "tradition",
+          "targetTerm": "традиция",
+          "pronunciation": "tra-DEE-tsi-ya",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Традицията е важна за българите.",
+          "culturalNotes": "Bulgaria has rich cultural traditions"
+        },
+        {
+          "englishConcept": "custom",
+          "targetTerm": "обичай",
+          "pronunciation": "o-BO-chay",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Това е стар български обичай.",
+          "relatedConcepts": ["tradition"]
+        },
+        {
+          "englishConcept": "holiday",
+          "targetTerm": "празник",
+          "pronunciation": "PRAZ-nik",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Коледа е любим празник.",
+          "relatedConcepts": ["festival"]
+        },
+        {
+          "englishConcept": "festival",
+          "targetTerm": "фестивал",
+          "pronunciation": "fes-ti-VAL",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Фестивалът е в София.",
+          "relatedConcepts": ["holiday"]
+        },
+        {
+          "englishConcept": "music",
+          "targetTerm": "музика",
+          "pronunciation": "mu-ZI-ka",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Българската музика е красива.",
+          "culturalNotes": "Bulgarian folk music is internationally recognized"
+        },
+        {
+          "englishConcept": "dance",
+          "targetTerm": "танц",
+          "pronunciation": "TANTS",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Танцувам на народна музика.",
+          "relatedConcepts": ["music"]
+        },
+        {
+          "englishConcept": "food",
+          "targetTerm": "храна",
+          "pronunciation": "KHRA-na",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Българската храна е вкусна.",
+          "culturalNotes": "Bulgarian cuisine is diverse and flavorful"
+        },
+        {
+          "englishConcept": "freedom",
+          "targetTerm": "свобода",
+          "pronunciation": "svo-BO-da",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "Свободата е ценна.",
+          "culturalNotes": "Important concept in Bulgarian history"
+        },
+        {
+          "englishConcept": "justice",
+          "targetTerm": "справедливост",
+          "pronunciation": "spra-vee-dee-LIVOST",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "Справедливостта е важна."
+        },
+        {
+          "englishConcept": "love",
+          "targetTerm": "любов",
+          "pronunciation": "lyu-BOV",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "Любовта е красива.",
+          "culturalNotes": "Universal concept with Bulgarian cultural expressions"
+        },
+        {
+          "englishConcept": "hope",
+          "targetTerm": "надежда",
+          "pronunciation": "na-DAY-zhda",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "Надеждата умира последна."
+        },
+        {
+          "englishConcept": "wisdom",
+          "targetTerm": "мъдрост",
+          "pronunciation": "MUD-rost",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "Мъдростта идва с възрастта."
+        },
+        {
+          "englishConcept": "truth",
+          "targetTerm": "истина",
+          "pronunciation": "ees-TEE-na",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "Истината ще ви направи свободни."
+        },
+        {
+          "englishConcept": "dream",
+          "targetTerm": "мечта",
+          "pronunciation": "MECH-ta",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "Мечтата ни движат напред."
+        },
+        {
+          "englishConcept": "work",
+          "targetTerm": "работа",
+          "pronunciation": "ra-BO-ta",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Работата е важна за живота.",
+          "relatedConcepts": ["career", "business"]
+        },
+        {
+          "englishConcept": "career",
+          "targetTerm": "кариера",
+          "pronunciation": "ka-ri-E-ra",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Кариерата изисква усилия.",
+          "relatedConcepts": ["work"]
+        },
+        {
+          "englishConcept": "business",
+          "targetTerm": "бизнес",
+          "pronunciation": "BIZ-nes",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Бизнесът е конкурентен.",
+          "relatedConcepts": ["work"]
+        },
+        {
+          "englishConcept": "meeting",
+          "targetTerm": "събрание",
+          "pronunciation": "sub-RA-nie",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Събранието е в десет часа."
+        },
+        {
+          "englishConcept": "project",
+          "targetTerm": "проект",
+          "pronunciation": "pro-YEKT",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Проектът е успешен."
+        },
+        {
+          "englishConcept": "success",
+          "targetTerm": "успех",
+          "pronunciation": "US-pekh",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Успехът идва с труд.",
+          "relatedConcepts": ["failure"]
+        },
+        {
+          "englishConcept": "failure",
+          "targetTerm": "неуспех",
+          "pronunciation": "ne-US-pekh",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Неуспехът е учител.",
+          "relatedConcepts": ["success"]
+        }
+      ],
+      "totalConcepts": 21,
+      "sessionLength": 20,
+      "prerequisites": ["SCHOOLER"],
+      "assessmentCriteria": {
+        "accuracyThreshold": 65,
+        "conceptMasteryThreshold": 17,
+        "timeLimit": 600
+      }
+    }
+  ],
+  "configuration": {
+    "defaultSessionLength": 15,
+    "maxConceptsPerSession": 10,
+    "repetitionThreshold": 3,
+    "masteryThreshold": 0.8
+  },
+  "culturalContext": {
+    "learningApproach": "Communicative approach with cultural immersion, emphasizing real-world usage and cultural understanding",
+    "culturalNotes": [
+      "Bulgarian uses Cyrillic alphabet, which is important for reading and writing",
+      "Bulgarian has cases and verb aspects that require careful attention",
+      "Head nodding means 'no' and shaking means 'yes' - opposite of many cultures",
+      "Bulgarian culture values hospitality and family relationships",
+      "Traditional festivals and customs play important role in language learning"
+    ],
+    "commonDifficulties": [
+      "Mastering Cyrillic alphabet pronunciation",
+      "Understanding verb aspects (perfective vs imperfective)",
+      "Grammatical cases and their usage",
+      "Formal vs informal address forms",
+      "Word order flexibility in sentences"
+    ]
+  }
+}

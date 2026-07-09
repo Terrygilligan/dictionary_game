@@ -14,7 +14,15 @@ function useGameStore(): GameStore {
 /** Subscribes to the derived game state via the store's event log. */
 export function useGameState(): GameState {
   const store = useGameStore()
-  return useSyncExternalStore(store.subscribe, store.getState, store.getState)
+  // Use default tenant/aggregate for single-player games
+  const tenant_id = 'game-tenant'
+  const aggregate_id = 'game-session'
+  
+  return useSyncExternalStore(
+    (listener) => store.subscribe(tenant_id, aggregate_id, listener),
+    () => store.getState(tenant_id, aggregate_id),
+    () => store.getState(tenant_id, aggregate_id)
+  )
 }
 
 /** Returns a stable command dispatcher bound to the current store. */

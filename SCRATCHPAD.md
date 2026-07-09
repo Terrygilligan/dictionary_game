@@ -466,3 +466,54 @@ Resolve two critical issues: (1) FirebaseError 'Invalid document reference' due 
 
 ### Tests
 All 10/10 tests passing including 2 new email verification test cases. Firestore document reference errors resolved. Email verification flow tested and verified with comprehensive debug logging. Build successful with no TypeScript errors.
+
+---
+
+## 0002 — SuperAdmin Dashboard with AuditProjection and EventStreamDashboard
+
+**Date:** 2026-07-09
+**Status:** planning
+
+### Goal
+Implement a comprehensive SuperAdmin Dashboard for real-time audit and visualization of all system events across the multi-tenant EventStore. This will provide administrative oversight of the Lexicon Master application's event-driven architecture.
+
+### Architectural rationale
+
+- **Event-Driven Audit Trail.** Leverage the existing multi-tenant EventStore to create a read-optimized AuditProjection that processes and indexes events for real-time dashboard visualization without impacting write performance.
+
+- **Feature-Sliced Design Compliance.** The dashboard will be structured as:
+  - `shared/` — audit projection types and event aggregation utilities
+  - `entities/` — audit entity with projection logic and event processors
+  - `features/` — `super-admin-dashboard` feature with React components and hooks
+  - `pages/` — admin page composition
+  - `app/` — route integration and admin-only access control
+
+- **Real-Time Event Streaming.** Subscribe to the EventBus across all tenants to build live projections of:
+  - User authentication and registration events
+  - Game sessions and difficulty adjustments
+  - Audio processing and AI agent interactions
+  - System performance and error events
+  - Multi-tenant activity metrics
+
+- **Projection Pattern.** Create an AuditProjection service that:
+  - Consumes events from all tenant streams
+  - Maintains read-optimized aggregates for dashboard queries
+  - Provides filtering, pagination, and search capabilities
+  - Stores historical analytics without affecting write path
+
+- **Security & Access Control.** Implement admin-only access using Firebase auth claims and ensure audit log integrity with tamper-evident event sequencing.
+
+- **Performance Optimization.** Use event batching, efficient indexing, and React virtualization to handle high-volume event streams without UI degradation.
+
+### Implementation details
+
+- **AuditProjection Service.** Multi-tenant event processor that builds and maintains dashboard-ready data structures from the immutable event log.
+
+- **EventStreamDashboard Component.** React dashboard with real-time updates, filtering by tenant/event type, and visual analytics for system health monitoring.
+
+- **Event Aggregation.** Time-windowed statistics, error rate tracking, and user activity heatmaps derived from event streams.
+
+- **Admin Authentication.** Firebase custom claims and route guards to restrict dashboard access to authorized administrators.
+
+### Files to be created
+`src/entities/audit/model/`, `src/services/auditProjectionService.ts`, `src/features/super-admin-dashboard/`, `src/pages/admin/`, dashboard UI components and routing integration.

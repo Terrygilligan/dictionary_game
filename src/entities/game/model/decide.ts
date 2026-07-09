@@ -10,10 +10,18 @@ import { selectCurrentRound, selectAnswerForRound } from './selectors.ts'
  * log only ever records legitimate transitions.
  */
 export const decideGame: Decider<GameState, GameCommand, GameEvent> = (state, command) => {
+  // Extract tenant and aggregate information from command
+  const { tenant_id, aggregate_id } = command
+
   switch (command.type) {
     case 'startGame': {
       if (command.deck.length === 0) return []
-      return [{ type: 'game/started', deck: command.deck }]
+      return [{ 
+        type: 'game/started', 
+        deck: command.deck,
+        tenant_id,
+        aggregate_id
+      }]
     }
 
     case 'submitAnswer': {
@@ -31,14 +39,26 @@ export const decideGame: Decider<GameState, GameCommand, GameEvent> = (state, co
           roundIndex: state.currentRound,
           choiceId: choice.id,
           correct: choice.correct,
+          tenant_id,
+          aggregate_id,
         },
-        { type: 'streak/updated', streak: nextStreak },
+        { 
+          type: 'streak/updated', 
+          streak: nextStreak,
+          tenant_id,
+          aggregate_id
+        },
       ]
     }
 
     case 'resetStreak': {
       if (state.streak === 0) return []
-      return [{ type: 'streak/updated', streak: 0 }]
+      return [{ 
+        type: 'streak/updated', 
+        streak: 0,
+        tenant_id,
+        aggregate_id
+      }]
     }
 
     case 'nextRound': {
@@ -47,14 +67,39 @@ export const decideGame: Decider<GameState, GameCommand, GameEvent> = (state, co
       const isLastRound = state.currentRound >= state.deck.length - 1
       if (isLastRound) {
         const correct = state.answers.filter((a) => a.correct).length
-        return [{ type: 'game/finished', correct, total: state.deck.length }]
+        return [{ 
+          type: 'game/finished', 
+          correct, 
+          total: state.deck.length,
+          tenant_id,
+          aggregate_id
+        }]
       }
-      return [{ type: 'round/advanced', toRoundIndex: state.currentRound + 1 }]
+      return [{ 
+        type: 'round/advanced', 
+        toRoundIndex: state.currentRound + 1,
+        tenant_id,
+        aggregate_id
+      }]
     }
 
     case 'setLanguage': {
       if (state.currentLanguage === command.language) return []
-      return [{ type: 'language/changed', language: command.language }]
+      return [{ 
+        type: 'language/changed', 
+        language: command.language,
+        tenant_id,
+        aggregate_id
+      }]
+    }
+
+    case 'resetGame': {
+      return [{ 
+        type: 'game/reset', 
+        reason: command.reason,
+        tenant_id,
+        aggregate_id
+      }]
     }
 
     default:

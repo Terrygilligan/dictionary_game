@@ -5,17 +5,19 @@ import { ProfilePage } from '@/pages/profile'
 import { GamesPage } from '@/pages/games'
 import { GamePage } from '@/pages/game'
 import { VillagePage } from '@/pages/village'
+import { AdminPage } from '@/pages/admin/AdminPage'
 import { BaseLayout } from '@/app/ui/BaseLayout'
-import { AppProviders } from './AppProviders'
 import { initializeI18n } from '@/shared/lib/i18n/i18nService'
 import { useNavigation } from '@/shared/lib/navigation'
 import type { User } from '@/entities/user'
 
 export function AppRouter() {
-  const { currentPage, navigate } = useNavigation()
+  const { currentPage, navigate, isNavigating } = useNavigation()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-
+  const [isVoidTransition, setIsVoidTransition] = useState(false)
+  
+  
   // Initialize i18n and check auth state on mount
   useEffect(() => {
     const initialize = async () => {
@@ -36,6 +38,25 @@ export function AppRouter() {
     initialize()
   }, [])
 
+  // NAV_START event listener for Void transition
+  useEffect(() => {
+    const handleNavStart = () => {
+      console.log('🕳️ [ROUTER] NAV_START received - initiating Void transition')
+      setIsVoidTransition(true)
+      
+      // Force component tree destruction for 50ms
+      const timeout = setTimeout(() => {
+        console.log('🕳️ [ROUTER] Void transition complete - resuming render')
+        setIsVoidTransition(false)
+      }, 50)
+      
+      return () => clearTimeout(timeout)
+    }
+
+    window.addEventListener('NAV_START', handleNavStart)
+    return () => window.removeEventListener('NAV_START', handleNavStart)
+  }, [])
+
   // Listen to auth state changes
   // TODO: Re-enable when Firebase is configured
   /*
@@ -52,8 +73,6 @@ export function AppRouter() {
   */
 
   const handleAuthSuccess = (newUser?: User) => {
-    console.log('🔐 [AUTH] Hard reset - clearing local storage and state')
-  
   // Clear all local storage to prevent cached state issues
   localStorage.clear()
   
@@ -64,18 +83,15 @@ export function AppRouter() {
   
   // Set the user state when authentication succeeds
   if (newUser) {
-    console.log('✅ [AUTH] Login successful - user:', newUser.id, 'navigating to /profile')
     setUser(newUser)
     // Explicit navigation to profile page, ignoring any cached routes
     navigate('profile')
   } else {
-    console.log('⚠️ [AUTH] No user data - navigating to village')
     navigate('village')
   }
 }
 
   const handleSignOut = () => {
-    console.log('🔄 [AUTH] User signing out, resetting store')
     // Reset store state without destroying the instance
     if ((window as any).__resetUserStore) {
       (window as any).__resetUserStore()
@@ -86,43 +102,42 @@ export function AppRouter() {
 
   
   return (
-    <AppProviders>
+    <>
       {isLoading ? (
         <div className="page">
           <div className="panel panel--center">
             <p>Loading...</p>
           </div>
         </div>
+      ) : isVoidTransition ? (
+        <BaseLayout isAuthenticated={!!user}>
+          <div className="page">
+            <div className="panel panel--center">
+              <p>Transitioning...</p>
+            </div>
+          </div>
+        </BaseLayout>
       ) : (
         <BaseLayout isAuthenticated={!!user}>
-          {currentPage === 'landing' && <LandingPage />}
-          {currentPage === 'auth' && <AuthPage onAuthSuccess={handleAuthSuccess} />}
-          {currentPage === 'games' && (
-            user ? (
-              <GamesPage />
-            ) : (
-              <AuthPage onAuthSuccess={handleAuthSuccess} />
-            )
-          )}
-          {currentPage === 'profile' && (
-            user ? (
-              <ProfilePage key={`profile-${user.id}`} user={user} onSignOut={handleSignOut} />
-            ) : (
-              <AuthPage onAuthSuccess={handleAuthSuccess} />
-            )
-          )}
-          {currentPage === 'game' && <GamePage isGuest={!user} />}
-          {currentPage === 'village' && (
-            user ? (
-              <VillagePage />
-            ) : (
-              <AuthPage onAuthSuccess={handleAuthSuccess} />
-            )
-          )}
-          {!['landing', 'auth', 'games', 'profile', 'game', 'village'].includes(currentPage) && <LandingPage />}
+          {(() => {
+            switch (currentPage) {
+              case 'games':
+                return <GamesPage />
+              case 'profile':
+                return user ? <ProfilePage user={user} onSignOut={handleSignOut} /> : null
+              case 'landing':
+                return <LandingPage />
+              case 'village':
+                return <VillagePage />
+              case 'auth':
+                return <AuthPage onAuthSuccess={handleAuthSuccess} />
+              default:
+                return <LandingPage />
+            }
+          })()}
         </BaseLayout>
       )}
-    </AppProviders>
+    </>
   )
 }
 

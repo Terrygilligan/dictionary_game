@@ -9,6 +9,7 @@ export const initialGameState: GameState = {
   answers: [],
   streak: 0,
   currentLanguage: 'en',
+  currentDifficulty: 5, // Default difficulty level
 }
 
 /** Pure fold: `(state, event) -> nextState`. Exhaustive over `GameEvent`. */
@@ -22,6 +23,7 @@ export const evolveGame: Evolve<GameState, GameEvent> = (state, event) => {
         answers: [],
         streak: 0,
         currentLanguage: state.currentLanguage,
+        currentDifficulty: state.currentDifficulty,
       }
     case 'answer/submitted':
       return {
@@ -43,6 +45,39 @@ export const evolveGame: Evolve<GameState, GameEvent> = (state, event) => {
       return { ...state, currentLanguage: event.language }
     case 'game/finished':
       return { ...state, status: 'finished' }
+    case 'difficulty/adjusted':
+      return { ...state, currentDifficulty: event.newDifficulty }
+    case 'audio/recorded':
+      // Audio events are handled by AI agents, not game state evolution
+      return state
+    case 'audio/transcribed':
+      // Audio transcribed events are handled by AI agents
+      return state
+    case 'audio/generation-failed':
+      // Audio failure events are handled by AI agents
+      return state
+    case 'term/assigned':
+      // Term assignment events are handled by AI agents
+      return state
+    case 'feedback/generated':
+      // Feedback events are handled by AI agents
+      return state
+    case 'audio/ready':
+      // Audio ready events are handled by UI components
+      return state
+    case 'audio/played':
+      // Audio played events are handled by UI components
+      return state
+    case 'voice/settings-updated':
+      // Voice settings are handled by configuration
+      return state
+    case 'game/reset':
+      // Reset game to initial state
+      return {
+        ...initialGameState,
+        currentLanguage: state.currentLanguage,
+        currentDifficulty: state.currentDifficulty,
+      }
     default:
       return assertNever(event)
   }

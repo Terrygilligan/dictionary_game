@@ -12,7 +12,7 @@
  * Runtime caching means we never need a build-generated precache list, so this
  * file can stay static and dependency-free. Bump CACHE_VERSION to invalidate.
  */
-const CACHE_VERSION = 'v1'
+const CACHE_VERSION = 'v2'
 const CACHE_NAME = `lexicon-master-${CACHE_VERSION}`
 const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg']
 

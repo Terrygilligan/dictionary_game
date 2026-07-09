@@ -386,6 +386,7 @@ body {
   padding: 1rem 1.25rem;
   background: linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
   border-bottom: 1px solid #ffffff14;
+  pointer-events: none; /* Allow clicks to pass through */
 }
 
 .app__header--public {
@@ -394,6 +395,18 @@ body {
   align-items: center;
   max-width: 640px;
   margin: 0 auto;
+  pointer-events: auto; /* Re-enable for header content */
+}
+
+.app__nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.app__nav .button {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
 }
 
 .app__branding {
@@ -500,6 +513,10 @@ body {
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
+  /* Fix: Allow clicks through potential overlays */
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 150; /* Higher than header z-index: 100 */
 }
 
 .village__tab:hover {
@@ -509,6 +526,13 @@ body {
 .village__tab--active {
   color: var(--accent-strong);
   border-bottom-color: var(--accent-strong);
+}
+
+/* Global fix: Ensure all clickable elements are above header overlay */
+button, .button, input[type="button"], input[type="submit"], [role="button"] {
+  position: relative;
+  z-index: 150 !important;
+  pointer-events: auto !important;
 }
 
 .village__content {
@@ -1085,6 +1109,66 @@ body {
   background: color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
+/* Form Styles */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ffffff2e;
+  border-radius: 8px;
+  background: #ffffff0a;
+  color: var(--text);
+  font-size: 1rem;
+  transition: border-color 0.15s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.form-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.form-checkbox input[type="checkbox"] {
+  margin-top: 0.25rem;
+  flex-shrink: 0;
+}
+
+.form-checkbox-text {
+  flex: 1;
+}
+
+.form-help {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
 .language__flag {
   width: 24px;
   height: 18px;
@@ -1468,6 +1552,9 @@ body {
   top: 0;
   z-index: 100;
   backdrop-filter: blur(8px);
+  /* The Fix: Let clicks pass through the header container, 
+     but stop them at the content inside. */
+  pointer-events: none; 
 }
 
 .header__container {
@@ -1483,6 +1570,8 @@ body {
   gap: 1rem;
   padding: 1rem 0;
   min-height: 4rem;
+  /* Re-enable pointer events for header content */
+  pointer-events: auto; 
 }
 
 .header__brand {
@@ -1527,6 +1616,19 @@ body {
 .header__nav-link--primary:hover {
   background: var(--accent);
   border-color: var(--accent);
+}
+
+.header__nav-link--active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.3);
+  font-weight: 600;
+}
+
+.header__nav-link--active:hover {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
 }
 
 .header__actions {

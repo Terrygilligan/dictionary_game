@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { GameScreen } from '@/features/play-round'
 import { DictionarySelection } from '@/features/main-game'
+import { GameStatsTracker } from '@/features/play-round/model/GameStatsTracker'
 import { Button } from '@/shared/ui/Button'
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
+import { useNavigation } from '@/shared/lib/navigation'
 import { i18nService } from '@/shared/lib/i18n/i18nService'
 
 type GameMode = 'quiz' | 'dictionary'
@@ -14,7 +16,17 @@ interface GamePageProps {
 export function GamePage({ isGuest = false }: GamePageProps) {
   const [gameMode, setGameMode] = useState<GameMode>('quiz')
   const { t } = useTranslate()
+  const { currentPage } = useNavigation()
   const currentLanguage = i18nService.getCurrentLanguage()
+
+  // Reset game state when navigating away from game page
+  useEffect(() => {
+    console.log('🎮 [GAMEPAGE] Current page:', currentPage)
+    
+    return () => {
+      console.log('🔄 [GAMEPAGE] Unmounting, game state will be reset by GameScreen')
+    }
+  }, [currentPage])
 
   // Guest notice
   if (isGuest) {
@@ -29,7 +41,8 @@ export function GamePage({ isGuest = false }: GamePageProps) {
             </Button>
           </div>
         </header>
-        <GameScreen language={currentLanguage} />
+        <GameStatsTracker />
+        <GameScreen language={currentLanguage} resetOnUnmount={true} />
       </main>
     )
   }
@@ -46,7 +59,8 @@ export function GamePage({ isGuest = false }: GamePageProps) {
             </Button>
           </div>
         </header>
-        <GameScreen language={currentLanguage} />
+        <GameStatsTracker />
+        <GameScreen language={currentLanguage} resetOnUnmount={true} />
       </main>
     )
   }

@@ -1,11 +1,42 @@
-import { useState } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 import { Button } from '@/shared/ui/Button'
 import type { Village, VillageBattle } from '@/entities/village'
+import { useNavigation } from '@/shared/lib/navigation'
 
 export function VillagePage() {
   const { t } = useTranslate()
+  const { currentPage } = useNavigation()
   const [activeTab, setActiveTab] = useState<'community' | 'battles'>('community')
+
+  // Ghost render detection
+  if (currentPage !== 'village') {
+    console.error('🏘️ [VILLAGE] GHOST RENDER DETECTED - currentPage:', currentPage, 'expected: village')
+    return null
+  }
+
+  // Debug: Check if currentPage is actually changing
+  useEffect(() => {
+    console.log('🔄 [VILLAGE] Page changed to:', currentPage)
+    console.log('🔄 [VILLAGE] Should render:', currentPage === 'village' ? 'VillagePage' : 'Other page')
+  }, [currentPage])
+
+  // Debug: Log when VillagePage mounts/unmounts
+  useEffect(() => {
+    console.log('🏘️ [VILLAGE] VillagePage MOUNTED - Fresh component instance')
+    console.log('🏘️ [VILLAGE] Current page:', currentPage)
+    console.log('🏘️ [VILLAGE] State isolation: NO user context accessed')
+    console.log('🏘️ [VILLAGE] Active tab:', activeTab)
+    
+    return () => {
+      console.log('🏘️ [VILLAGE] VillagePage UNMOUNTED - Component cleanup')
+    }
+  }, [currentPage, activeTab])
+
+  // Debug: Log tab changes
+  useEffect(() => {
+    console.log('🔄 [VILLAGE] Tab changed to:', activeTab)
+  }, [activeTab])
 
   // Mock data - in real app this would come from village entity/store
   const mockVillage: Village = {
@@ -182,20 +213,74 @@ export function VillagePage() {
         </div>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation - FORCE VISIBLE */}
+      <div style={{ 
+        position: 'fixed', 
+        top: '100px', 
+        left: '50%', 
+        transform: 'translateX(-50%)',
+        zIndex: 9999,
+        backgroundColor: 'rgba(255, 0, 0, 0.9)',
+        color: 'white',
+        padding: '2rem',
+        border: '3px solid yellow',
+        borderRadius: '8px',
+        fontSize: '1.5rem'
+      }}>
+        🚨 TABS ARE HERE! 🚨
+        <div style={{ marginTop: '1rem', fontSize: '1rem' }}>
+          Active Tab: {activeTab}
+        </div>
+        <div style={{ marginTop: '1rem' }}>
+          <button 
+            onClick={() => setActiveTab('community')}
+            style={{ 
+              backgroundColor: 'green', 
+              color: 'white', 
+              border: '2px solid white', 
+              padding: '0.5rem 1rem', 
+              margin: '0.25rem',
+              cursor: 'pointer'
+            }}
+          >
+            COMMUNITY TAB
+          </button>
+          <button 
+            onClick={() => setActiveTab('battles')}
+            style={{ 
+              backgroundColor: 'orange', 
+              color: 'white', 
+              border: '2px solid white', 
+              padding: '0.5rem 1rem', 
+              margin: '0.25rem',
+              cursor: 'pointer'
+            }}
+          >
+            BATTLES TAB
+          </button>
+        </div>
+      </div>
+
+      {/* Original Tab Navigation */}
       <div className="panel">
         <div className="village__tabs">
           <button
             className={`village__tab ${activeTab === 'community' ? 'village__tab--active' : ''}`}
-            onClick={() => setActiveTab('community')}
+            onClick={() => {
+              console.log('🏘️ [VILLAGE] Community tab clicked')
+              setActiveTab('community')
+            }}
           >
-            {t('village.tabs.community')}
+            {t('village.tabs.community') || 'Community'}
           </button>
           <button
             className={`village__tab ${activeTab === 'battles' ? 'village__tab--active' : ''}`}
-            onClick={() => setActiveTab('battles')}
+            onClick={() => {
+              console.log('🏘️ [VILLAGE] Battles tab clicked')
+              setActiveTab('battles')
+            }}
           >
-            {t('village.tabs.battles')}
+            {t('village.tabs.battles') || 'Battles'}
           </button>
         </div>
       </div>
@@ -208,3 +293,6 @@ export function VillagePage() {
     </div>
   )
 }
+
+// Apply memo to prevent double execution from BaseLayout re-renders
+export default memo(VillagePage)

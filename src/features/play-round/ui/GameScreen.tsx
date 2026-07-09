@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import {
   selectCurrentAnswer,
   selectCurrentRound,
@@ -18,11 +18,23 @@ export interface GameScreenProps {
   deckOptions?: DeckOptions
   /** Language for the game (defaults to 'en'). */
   language?: string
+  /** Reset game state when navigating away from game page */
+  resetOnUnmount?: boolean
 }
 
-export function GameScreen({ deckOptions, language = 'en' }: GameScreenProps) {
+export function GameScreen({ deckOptions, language = 'en', resetOnUnmount = false }: GameScreenProps) {
   const state = useGameState()
   const dispatch = useGameDispatch()
+
+  // Reset game state when navigating away
+  useEffect(() => {
+    return () => {
+      if (resetOnUnmount && state.status !== 'idle') {
+        console.log('🔄 [GAME] Auto-resetting game state on unmount')
+        dispatch({ type: 'resetGame', reason: 'navigation-change' })
+      }
+    }
+  }, [dispatch, resetOnUnmount, state.status])
 
   const startGame = useCallback(() => {
     console.log(`🎮 GameScreen.startGame: Starting game with language "${language}"`)
@@ -38,6 +50,11 @@ export function GameScreen({ deckOptions, language = 'en' }: GameScreenProps) {
   )
 
   const nextRound = useCallback(() => dispatch({ type: 'nextRound' }), [dispatch])
+
+  const resetGame = useCallback(() => {
+    console.log('🔄 [GAME] Resetting game state')
+    dispatch({ type: 'resetGame', reason: 'manual-reset' })
+  }, [dispatch])
 
   
   if (state.status === 'idle') {

@@ -18,6 +18,7 @@ export {
   selectProgress,
   selectIsLastRound,
   selectCurrentLanguage,
+  selectCurrentDifficulty,
 } from './model/selectors.ts'
 
 // --- Main Game (the "Dictionary Game" — phased selection + Blind Arbiter) ---

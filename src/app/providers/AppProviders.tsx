@@ -3,7 +3,6 @@ import { GameProvider } from '@/features/play-round'
 import { I18nProvider } from '@/shared/lib/i18n/I18nProvider'
 import { NavigationProvider } from '@/shared/lib/navigation'
 import { UserProvider } from '@/entities/user'
-import { GameStatsTracker } from '@/features/play-round/model/GameStatsTracker'
 import { EmailVerificationTracker } from '@/components/EmailVerificationTracker'
 
 /** Composition root for cross-cutting providers. */
@@ -14,7 +13,6 @@ export function AppProviders({ children }: { children: ReactNode }) {
         <UserProvider>
           <EmailVerificationTracker />
           <GameProvider>
-            <GameStatsTracker />
             {children}
           </GameProvider>
         </UserProvider>

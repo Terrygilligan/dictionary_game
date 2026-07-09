@@ -8,7 +8,13 @@ export class UserService {
   /**
    * Save user stats to Firestore after game completion
    */
-  async saveUserStats(userId: string, stats: UserStats): Promise<void> {
+  async saveUserStats(userId: string, stats: UserStats, currentPage?: string): Promise<void> {
+    // Subscription guard: only save when on profile or game pages
+    if (currentPage && currentPage !== 'profile' && currentPage !== 'game') {
+      console.log(`🛡️ [USER_SERVICE] Save blocked - not on profile/game page: ${currentPage}`)
+      return
+    }
+
     try {
       await dbService.saveUserStats(userId, stats)
       console.log(`✅ Stats saved to Firestore for user ${userId}`)
@@ -21,7 +27,13 @@ export class UserService {
   /**
    * Load user stats from Firestore
    */
-  async loadUserStats(userId: string): Promise<UserStats | null> {
+  async loadUserStats(userId: string, currentPage?: string): Promise<UserStats | null> {
+    // Subscription guard: only load when on profile page
+    if (currentPage && currentPage !== 'profile') {
+      console.log(`🛡️ [USER_SERVICE] Load blocked - not on profile page: ${currentPage}`)
+      return null
+    }
+
     try {
       const stats = await dbService.loadUserStats(userId)
       if (stats) {

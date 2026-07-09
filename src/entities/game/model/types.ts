@@ -36,4 +36,6 @@ export interface GameState {
   readonly streak: number
   /** Current language for the game (defaults to 'en'). */
   readonly currentLanguage: string
+  /** Current difficulty level (1-10), adjusted by AI agents. */
+  readonly currentDifficulty: number
 }

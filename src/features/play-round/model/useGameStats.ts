@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useGameState } from './useGame.ts'
 import { useUserDispatch, useCurrentUser } from '@/entities/user/model/useUser.ts'
 import { userService } from '@/services/userService'
+import { useNavigationCleanup } from '@/shared/lib/navigation/useAtomicReset'
 import type { UserCommand } from '@/entities/user/model'
 
 /**
@@ -12,6 +13,11 @@ export function useGameStats() {
   const gameState = useGameState()
   const userDispatch = useUserDispatch()
   const currentUser = useCurrentUser()
+
+  // Register cleanup function for navigation changes
+  useNavigationCleanup(() => {
+    console.log('🧹 [GAME_STATS] Navigation cleanup - clearing game stats state')
+  })
 
   useEffect(() => {
     // Only update stats for authenticated users when game finishes
@@ -35,7 +41,7 @@ export function useGameStats() {
       })
 
       // Get current stats from Firestore
-      userService.loadUserStats(currentUser.id).then(currentStats => {
+      userService.loadUserStats(currentUser.id, 'game').then(currentStats => {
         // Handle case where user has no stats yet
         if (!currentStats) {
           console.log('No existing stats found for user, creating new stats entry')
@@ -70,7 +76,7 @@ export function useGameStats() {
           updatedAt: Date.now(),
         }
 
-        userService.saveUserStats(currentUser.id, updatedStats)
+        userService.saveUserStats(currentUser.id, updatedStats, 'game')
       }).catch(error => {
         console.error('Failed to load/save user stats:', error)
       })

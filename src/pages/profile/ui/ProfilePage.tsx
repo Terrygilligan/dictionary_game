@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, memo } from 'react'
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 import { Button } from '@/shared/ui/Button'
 import { BackendTester } from '@/components/BackendTester'
 import { authService } from '@/services/auth'
-import { userService } from '@/services/userService'
 import { userStore } from '@/entities/user'
-import type { User, UserStats, UpdateProfile } from '@/entities/user'
+import { useUserStats } from '@/entities/user/model/UserStatsContext'
+import { useNavigation } from '@/shared/lib/navigation'
+import { userService } from '@/services/userService'
+import type { User, UpdateProfile } from '@/entities/user'
 
 interface ProfilePageProps {
   user: User
@@ -14,15 +16,21 @@ interface ProfilePageProps {
 
 export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
   const { t, currentLanguage, setLanguage, availableLanguages, getLanguageDisplayName } = useTranslate()
-  const [userStats, setUserStats] = useState<UserStats>({
-    gamesPlayed: 0,
-    correctAnswers: 0,
-    totalQuestions: 0,
-    streak: 0,
-    highestStreak: 0,
-    updatedAt: Date.now(),
-  })
-  const [isLoading, setIsLoading] = useState(false)
+  const { currentPage } = useNavigation()
+
+  // Ghost render detection
+  if (currentPage !== 'profile') {
+    console.error('👻 [PROFILE] GHOST RENDER DETECTED - currentPage:', currentPage, 'expected: profile')
+    return null
+  }
+
+  // Debug: Log when ProfilePage renders
+  console.log('👤 [PROFILE] ProfilePage rendering for user:', user.displayName)
+  console.log('👤 [PROFILE] User email:', user.email)
+  
+  // Consume centralized user stats from provider
+  const { userStats, statsLoading, statsError, refetchStats } = useUserStats()
+  
   const [isSaving, setIsSaving] = useState(false)
   const [locationForm, setLocationForm] = useState({
     village: user.village || '',
@@ -30,36 +38,23 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
     shareLocationForLeaderboard: user.shareLocationForLeaderboard || false,
   })
 
-  // Load user statistics from Firestore
-  useEffect(() => {
-    const loadUserStats = async () => {
-      if (!user) return
-      
-      try {
-        setIsLoading(true)
-        const stats = await userService.loadUserStats(user.id)
-        
-        if (stats) {
-          setUserStats(stats)
-        }
-      } catch (error) {
-        console.error('Failed to load user stats:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadUserStats()
-  }, [user])
-
   // Calculate accuracy percentage
-  const accuracy = userService.calculateAccuracy(userStats)
+  const accuracy = userService.calculateAccuracy(userStats || {
+    gamesPlayed: 0,
+    correctAnswers: 0,
+    totalQuestions: 0,
+    streak: 0,
+    highestStreak: 0,
+    updatedAt: Date.now(),
+  })
 
   const handleLanguageChange = async (language: string) => {
+    console.log('🌐 [PROFILE] Language change clicked:', language)
     try {
       await setLanguage(language as any)
+      console.log('✅ [PROFILE] Language changed to:', language)
     } catch (error) {
-      console.error('Failed to change language:', error)
+      console.error('❌ [PROFILE] Failed to change language:', error)
     }
   }
 
@@ -102,7 +97,7 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
     }))
   }
 
-  if (isLoading) {
+  if (statsLoading) {
     return (
       <div className="page">
         <div className="panel panel--center">
@@ -125,15 +120,15 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
 
         <div className="profile__stats">
           <div className="profile__stat">
-            <p className="profile__stat-value">{userStats.gamesPlayed}</p>
+            <p className="profile__stat-value">{userStats?.gamesPlayed || 0}</p>
             <p className="profile__stat-label">{t('profile.gamesPlayed')}</p>
           </div>
           <div className="profile__stat">
-            <p className="profile__stat-value">{userStats.correctAnswers}</p>
+            <p className="profile__stat-value">{userStats?.correctAnswers || 0}</p>
             <p className="profile__stat-label">{t('profile.correctAnswers')}</p>
           </div>
           <div className="profile__stat">
-            <p className="profile__stat-value">{userStats.totalQuestions}</p>
+            <p className="profile__stat-value">{userStats?.totalQuestions || 0}</p>
             <p className="profile__stat-label">{t('profile.totalQuestions')}</p>
           </div>
           <div className="profile__stat">
@@ -141,7 +136,7 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
             <p className="profile__stat-label">{t('profile.accuracy')}</p>
           </div>
           <div className="profile__stat">
-            <p className="profile__stat-value">{userStats.highestStreak}</p>
+            <p className="profile__stat-value">{userStats?.highestStreak || 0}</p>
             <p className="profile__stat-label">{t('profile.highestStreak')}</p>
           </div>
         </div>
@@ -224,8 +219,8 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
       <div className="panel">
         <h3 className="profile__section-title">{t('profile.recentActivity')}</h3>
         <p className="panel__lead">
-          {userStats.gamesPlayed > 0 
-            ? t('profile.activityDescription', { count: userStats.gamesPlayed })
+          {(userStats?.gamesPlayed || 0) > 0 
+            ? t('profile.activityDescription', { count: userStats?.gamesPlayed || 0 })
             : t('profile.noActivity')
           }
         </p>
@@ -241,3 +236,6 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
     </div>
   )
 }
+
+// Apply memo to prevent double execution from BaseLayout re-renders
+export default memo(ProfilePage)

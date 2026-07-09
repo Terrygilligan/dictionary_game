@@ -1,0 +1,787 @@
+{
+  "languageCode": "fr",
+  "languageName": "French",
+  "nativeName": "Français",
+  "version": "1.0.0",
+  "lastUpdated": 1699516800000,
+  "stages": [
+    {
+      "stage": "INFANT",
+      "description": "Basic French vocabulary for beginners - essential words and simple phrases",
+      "topics": [
+        {
+          "id": "greetings",
+          "name": "Salutations et au revoir",
+          "description": "Basic greetings and farewells",
+          "concepts": ["hello", "goodbye", "please", "thank_you"],
+          "estimatedTime": 15,
+          "objectives": [
+            "Learn basic greetings",
+            "Use polite expressions",
+            "Recognize common phrases"
+          ]
+        },
+        {
+          "id": "basic_objects",
+          "name": "Objets de base",
+          "description": "Everyday objects and items",
+          "concepts": ["house", "book", "table", "chair"],
+          "estimatedTime": 20,
+          "prerequisites": ["greetings"],
+          "objectives": [
+            "Identify common objects",
+            "Use object names in sentences",
+            "Connect objects to daily life"
+          ]
+        }
+      ],
+      "concepts": [
+        {
+          "englishConcept": "hello",
+          "targetTerm": "bonjour",
+          "pronunciation": "bon-ZHOOR",
+          "partOfSpeech": "interjection",
+          "difficulty": 1,
+          "example": "Bonjour, comment allez-vous?",
+          "culturalNotes": "Used for both 'hello' and 'good morning'"
+        },
+        {
+          "englishConcept": "goodbye",
+          "targetTerm": "au revoir",
+          "pronunciation": "oh reh-VWAHR",
+          "partOfSpeech": "interjection",
+          "difficulty": 1,
+          "example": "Au revoir, à demain!"
+        },
+        {
+          "englishConcept": "please",
+          "targetTerm": "s'il vous plaît",
+          "pronunciation": "seel voo PLEH",
+          "partOfSpeech": "interjection",
+          "difficulty": 1,
+          "example": "S'il vous plaît, aidez-moi.",
+          "culturalNotes": "Literally 'if it pleases you'"
+        },
+        {
+          "englishConcept": "thank_you",
+          "targetTerm": "merci",
+          "pronunciation": "mer-SEE",
+          "partOfSpeech": "interjection",
+          "difficulty": 1,
+          "example": "Merci beaucoup!",
+          "culturalNotes": "Essential polite expression"
+        },
+        {
+          "englishConcept": "house",
+          "targetTerm": "maison",
+          "pronunciation": "may-ZOHN",
+          "partOfSpeech": "noun",
+          "difficulty": 1,
+          "example": "C'est ma maison.",
+          "relatedConcepts": ["table", "chair"]
+        },
+        {
+          "englishConcept": "book",
+          "targetTerm": "livre",
+          "pronunciation": "LEE-vruh",
+          "partOfSpeech": "noun",
+          "difficulty": 1,
+          "example": "Je lis un livre intéressant.",
+          "culturalNotes": "French literature has rich traditions"
+        },
+        {
+          "englishConcept": "table",
+          "targetTerm": "table",
+          "pronunciation": "TAH-bluh",
+          "partOfSpeech": "noun",
+          "difficulty": 1,
+          "example": "Le livre est sur la table.",
+          "relatedConcepts": ["house", "chair"]
+        },
+        {
+          "englishConcept": "chair",
+          "targetTerm": "chaise",
+          "pronunciation": "shehz",
+          "partOfSpeech": "noun",
+          "difficulty": 1,
+          "example": "Je m'assois sur la chaise.",
+          "relatedConcepts": ["table", "house"]
+        }
+      ],
+      "totalConcepts": 8,
+      "sessionLength": 5,
+      "prerequisites": [],
+      "assessmentCriteria": {
+        "accuracyThreshold": 80,
+        "conceptMasteryThreshold": 6,
+        "timeLimit": 180
+      }
+    },
+    {
+      "stage": "TODDLER",
+      "description": "Building vocabulary with common actions, family members, and basic descriptions",
+      "topics": [
+        {
+          "id": "family",
+          "name": "Famille",
+          "description": "Family members and relationships",
+          "concepts": ["mother", "father", "sister", "brother", "family"],
+          "estimatedTime": 25,
+          "prerequisites": ["greetings"],
+          "objectives": [
+            "Name family members",
+            "Describe family relationships",
+            "Use family terms in context"
+          ]
+        },
+        {
+          "id": "actions",
+          "name": "Actions",
+          "description": "Common verbs and daily actions",
+          "concepts": ["eat", "drink", "sleep", "walk", "run"],
+          "estimatedTime": 30,
+          "objectives": [
+            "Use basic action verbs",
+            "Describe daily activities",
+            "Form simple sentences"
+          ]
+        },
+        {
+          "id": "descriptions",
+          "name": "Descriptions",
+          "description": "Basic adjectives and descriptions",
+          "concepts": ["big", "small", "good", "bad", "beautiful"],
+          "estimatedTime": 20,
+          "objectives": [
+            "Use descriptive adjectives",
+            "Compare objects",
+            "Express opinions"
+          ]
+        }
+      ],
+      "concepts": [
+        {
+          "englishConcept": "mother",
+          "targetTerm": "mère",
+          "pronunciation": "mehr",
+          "partOfSpeech": "noun",
+          "difficulty": 2,
+          "example": "La mère cuisine le dîner.",
+          "relatedConcepts": ["father", "family"]
+        },
+        {
+          "englishConcept": "father",
+          "targetTerm": "père",
+          "pronunciation": "pehr",
+          "partOfSpeech": "noun",
+          "difficulty": 2,
+          "example": "Le père lit un livre.",
+          "relatedConcepts": ["mother", "family"]
+        },
+        {
+          "englishConcept": "sister",
+          "targetTerm": "sœur",
+          "pronunciation": "suhr",
+          "partOfSpeech": "noun",
+          "difficulty": 2,
+          "example": "Ma sœur joue dans le jardin.",
+          "relatedConcepts": ["brother", "family"]
+        },
+        {
+          "englishConcept": "brother",
+          "targetTerm": "frère",
+          "pronunciation": "frehr",
+          "partOfSpeech": "noun",
+          "difficulty": 2,
+          "example": "Mon frère étudie à l'école.",
+          "relatedConcepts": ["sister", "family"]
+        },
+        {
+          "englishConcept": "family",
+          "targetTerm": "famille",
+          "pronunciation": "fah-MEEL",
+          "partOfSpeech": "noun",
+          "difficulty": 2,
+          "example": "La famille mange ensemble.",
+          "relatedConcepts": ["mother", "father", "sister", "brother"]
+        },
+        {
+          "englishConcept": "eat",
+          "targetTerm": "manger",
+          "pronunciation": "mahn-ZHAY",
+          "partOfSpeech": "verb",
+          "difficulty": 2,
+          "example": "Je mange une pomme.",
+          "culturalNotes": "Important verb in French cuisine culture"
+        },
+        {
+          "englishConcept": "drink",
+          "targetTerm": "boire",
+          "pronunciation": "BWAHR",
+          "partOfSpeech": "verb",
+          "difficulty": 2,
+          "example": "Je bois de l'eau pendant la journée."
+        },
+        {
+          "englishConcept": "sleep",
+          "targetTerm": "dormir",
+          "pronunciation": "dor-MEER",
+          "partOfSpeech": "verb",
+          "difficulty": 2,
+          "example": "Je dors huit heures par nuit."
+        },
+        {
+          "englishConcept": "walk",
+          "targetTerm": "marcher",
+          "pronunciation": "mar-SHAY",
+          "partOfSpeech": "verb",
+          "difficulty": 2,
+          "example": "Je marche dans le parc tous les jours."
+        },
+        {
+          "englishConcept": "run",
+          "targetTerm": "courir",
+          "pronunciation": "koo-REER",
+          "partOfSpeech": "verb",
+          "difficulty": 2,
+          "example": "Je cours le matin."
+        },
+        {
+          "englishConcept": "big",
+          "targetTerm": "grand",
+          "pronunciation": "grahn",
+          "partOfSpeech": "adjective",
+          "difficulty": 2,
+          "example": "La maison est grande.",
+          "relatedConcepts": ["small"]
+        },
+        {
+          "englishConcept": "small",
+          "targetTerm": "petit",
+          "pronunciation": "puh-TEE",
+          "partOfSpeech": "adjective",
+          "difficulty": 2,
+          "example": "Le livre est petit.",
+          "relatedConcepts": ["big"]
+        },
+        {
+          "englishConcept": "good",
+          "targetTerm": "bon",
+          "pronunciation": "bohn",
+          "partOfSpeech": "adjective",
+          "difficulty": 2,
+          "example": "C'est une bonne idée.",
+          "relatedConcepts": ["bad"]
+        },
+        {
+          "englishConcept": "bad",
+          "targetTerm": "mauvais",
+          "pronunciation": "moh-VEH",
+          "partOfSpeech": "adjective",
+          "difficulty": 2,
+          "example": "Le temps est mauvais aujourd'hui.",
+          "relatedConcepts": ["good"]
+        },
+        {
+          "englishConcept": "beautiful",
+          "targetTerm": "beau",
+          "pronunciation": "boh",
+          "partOfSpeech": "adjective",
+          "difficulty": 2,
+          "example": "Les fleurs sont belles.",
+          "culturalNotes": "Often used to describe French aesthetics and culture"
+        }
+      ],
+      "totalConcepts": 15,
+      "sessionLength": 10,
+      "prerequisites": ["INFANT"],
+      "assessmentCriteria": {
+        "accuracyThreshold": 75,
+        "conceptMasteryThreshold": 12,
+        "timeLimit": 300
+      }
+    },
+    {
+      "stage": "SCHOOLER",
+      "description": "Contextual understanding with complex sentences, time expressions, and abstract concepts",
+      "topics": [
+        {
+          "id": "time",
+          "name": "Temps",
+          "description": "Time expressions and daily schedules",
+          "concepts": ["today", "tomorrow", "yesterday", "morning", "evening", "night"],
+          "estimatedTime": 30,
+          "prerequisites": ["actions"],
+          "objectives": [
+            "Use time expressions correctly",
+            "Describe daily routines",
+            "Understand temporal relationships"
+          ]
+        },
+        {
+          "id": "nature",
+          "name": "Nature",
+          "description": "Natural world and weather",
+          "concepts": ["sun", "moon", "star", "rain", "snow", "wind", "flower", "tree"],
+          "estimatedTime": 35,
+          "objectives": [
+            "Describe weather conditions",
+            "Name natural elements",
+            "Connect nature to seasons"
+          ]
+        },
+        {
+          "id": "emotions",
+          "name": "Émotions",
+          "description": "Feelings and emotional expressions",
+          "concepts": ["happy", "sad", "angry", "tired", "excited", "scared"],
+          "estimatedTime": 25,
+          "objectives": [
+            "Express emotions appropriately",
+            "Understand emotional contexts",
+            "Use emotion words in conversation"
+          ]
+        }
+      ],
+      "concepts": [
+        {
+          "englishConcept": "today",
+          "targetTerm": "aujourd'hui",
+          "pronunciation": "oh-zhoor-DWEE",
+          "partOfSpeech": "adverb",
+          "difficulty": 3,
+          "example": "Aujourd'hui, il fait beau.",
+          "relatedConcepts": ["tomorrow", "yesterday"]
+        },
+        {
+          "englishConcept": "tomorrow",
+          "targetTerm": "demain",
+          "pronunciation": "duh-MAN",
+          "partOfSpeech": "adverb",
+          "difficulty": 3,
+          "example": "J'ai un examen demain.",
+          "relatedConcepts": ["today", "yesterday"]
+        },
+        {
+          "englishConcept": "yesterday",
+          "targetTerm": "hier",
+          "pronunciation": "ee-EHR",
+          "partOfSpeech": "adverb",
+          "difficulty": 3,
+          "example": "Hier, j'ai lu un livre.",
+          "relatedConcepts": ["today", "tomorrow"]
+        },
+        {
+          "englishConcept": "morning",
+          "targetTerm": "matin",
+          "pronunciation": "mah-TAN",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Je bois du café le matin."
+        },
+        {
+          "englishConcept": "evening",
+          "targetTerm": "soir",
+          "pronunciation": "SWAHR",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Le soir, je regarde la télévision."
+        },
+        {
+          "englishConcept": "night",
+          "targetTerm": "nuit",
+          "pronunciation": "NWEE",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "La nuit est sombre et calme."
+        },
+        {
+          "englishConcept": "sun",
+          "targetTerm": "soleil",
+          "pronunciation": "so-LAY",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Le soleil brille fort.",
+          "culturalNotes": "Important in French culture and geography"
+        },
+        {
+          "englishConcept": "moon",
+          "targetTerm": "lune",
+          "pronunciation": "loon",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "La lune est pleine ce soir.",
+          "relatedConcepts": ["star"]
+        },
+        {
+          "englishConcept": "star",
+          "targetTerm": "étoile",
+          "pronunciation": "ay-TWAHL",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Je vois des étoiles dans le ciel.",
+          "relatedConcepts": ["moon"]
+        },
+        {
+          "englishConcept": "rain",
+          "targetTerm": "pluie",
+          "pronunciation": "ploo-EE",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Il pleut depuis ce matin."
+        },
+        {
+          "englishConcept": "snow",
+          "targetTerm": "neige",
+          "pronunciation": "nehzh",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "La neige couvre les montagnes.",
+          "culturalNotes": "Important in French winter traditions and Alps culture"
+        },
+        {
+          "englishConcept": "wind",
+          "targetTerm": "vent",
+          "pronunciation": "vahn",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "Le vent souffle fort."
+        },
+        {
+          "englishConcept": "flower",
+          "targetTerm": "fleur",
+          "pronunciation": "fluhr",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "La fleur est belle.",
+          "relatedConcepts": ["tree"]
+        },
+        {
+          "englishConcept": "tree",
+          "targetTerm": "arbre",
+          "pronunciation": "ahr-bruh",
+          "partOfSpeech": "noun",
+          "difficulty": 3,
+          "example": "L'arbre est très grand.",
+          "relatedConcepts": ["flower"]
+        },
+        {
+          "englishConcept": "happy",
+          "targetTerm": "heureux",
+          "pronunciation": "uh-RUH",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Je suis heureux aujourd'hui.",
+          "relatedConcepts": ["sad"]
+        },
+        {
+          "englishConcept": "sad",
+          "targetTerm": "triste",
+          "pronunciation": "treest",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Il est triste à cause des nouvelles.",
+          "relatedConcepts": ["happy"]
+        },
+        {
+          "englishConcept": "angry",
+          "targetTerm": "en colère",
+          "pronunciation": "ahn ko-LAIR",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Elle est en colère contre moi."
+        },
+        {
+          "englishConcept": "tired",
+          "targetTerm": "fatigué",
+          "pronunciation": "fah-tee-GAY",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Je suis fatigué après le travail."
+        },
+        {
+          "englishConcept": "excited",
+          "targetTerm": "excité",
+          "pronunciation": "ex-see-TAY",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "Les enfants sont excités pour les vacances."
+        },
+        {
+          "englishConcept": "scared",
+          "targetTerm": "effrayé",
+          "pronunciation": "eh-fray-YAY",
+          "partOfSpeech": "adjective",
+          "difficulty": 3,
+          "example": "L'enfant a peur de l'obscurité."
+        }
+      ],
+      "totalConcepts": 20,
+      "sessionLength": 15,
+      "prerequisites": ["TODDLER"],
+      "assessmentCriteria": {
+        "accuracyThreshold": 70,
+        "conceptMasteryThreshold": 15,
+        "timeLimit": 420
+      }
+    },
+    {
+      "stage": "CONVERSATIONAL",
+      "description": "Advanced usage with complex grammar, abstract thinking, and cultural fluency",
+      "topics": [
+        {
+          "id": "culture",
+          "name": "Culture",
+          "description": "French culture, traditions, and customs",
+          "concepts": ["tradition", "custom", "holiday", "festival", "music", "dance", "food"],
+          "estimatedTime": 40,
+          "prerequisites": ["emotions", "nature"],
+          "objectives": [
+            "Understand cultural concepts",
+            "Discuss traditions appropriately",
+            "Connect language to cultural context"
+          ]
+        },
+        {
+          "id": "abstract",
+          "name": "Concepts abstraits",
+          "description": "Abstract ideas and complex thinking",
+          "concepts": ["freedom", "justice", "love", "hope", "wisdom", "truth", "dream"],
+          "estimatedTime": 45,
+          "objectives": [
+            "Use abstract concepts correctly",
+            "Express complex ideas",
+            "Engage in philosophical discussions"
+          ]
+        },
+        {
+          "id": "professional",
+          "name": "Langage professionnel",
+          "description": "Work and professional communication",
+          "concepts": ["work", "career", "business", "meeting", "project", "success", "failure"],
+          "estimatedTime": 35,
+          "objectives": [
+            "Use professional vocabulary",
+            "Communicate in work contexts",
+            "Understand business expressions"
+          ]
+        }
+      ],
+      "concepts": [
+        {
+          "englishConcept": "tradition",
+          "targetTerm": "tradition",
+          "pronunciation": "tra-dee-SYOHN",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "La tradition est importante pour les Français.",
+          "culturalNotes": "France has rich cultural traditions"
+        },
+        {
+          "englishConcept": "custom",
+          "targetTerm": "coutume",
+          "pronunciation": "koo-TOOM",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "C'est une vieille coutume française.",
+          "relatedConcepts": ["tradition"]
+        },
+        {
+          "englishConcept": "holiday",
+          "targetTerm": "fête",
+          "pronunciation": "feht",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Noël est ma fête préférée.",
+          "relatedConcepts": ["festival"]
+        },
+        {
+          "englishConcept": "festival",
+          "targetTerm": "festival",
+          "pronunciation": "fes-tee-VAHL",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Le festival de Cannes est célèbre.",
+          "relatedConcepts": ["holiday"]
+        },
+        {
+          "englishConcept": "music",
+          "targetTerm": "musique",
+          "pronunciation": "moo-ZEEK",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "La musique française est belle.",
+          "culturalNotes": "French music has international recognition"
+        },
+        {
+          "englishConcept": "dance",
+          "targetTerm": "danse",
+          "pronunciation": "dahns",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Je danse sur la musique folklorique.",
+          "relatedConcepts": ["music"]
+        },
+        {
+          "englishConcept": "food",
+          "targetTerm": "nourriture",
+          "pronunciation": "noo-ree-TOOR",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "La nourriture française est excellente.",
+          "culturalNotes": "French cuisine is world-renowned"
+        },
+        {
+          "englishConcept": "freedom",
+          "targetTerm": "liberté",
+          "pronunciation": "lee-ber-TAY",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "La liberté est précieuse.",
+          "culturalNotes": "Important concept in French history and motto"
+        },
+        {
+          "englishConcept": "justice",
+          "targetTerm": "justice",
+          "pronunciation": "zhoos-TEES",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "La justice est importante."
+        },
+        {
+          "englishConcept": "love",
+          "targetTerm": "amour",
+          "pronunciation": "ah-MOOR",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "L'amour est beau.",
+          "culturalNotes": "Universal concept with French cultural expressions"
+        },
+        {
+          "englishConcept": "hope",
+          "targetTerm": "espoir",
+          "pronunciation": "es-PWAHR",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "L'espoir me fait avancer."
+        },
+        {
+          "englishConcept": "wisdom",
+          "targetTerm": "sagesse",
+          "pronunciation": "sah-JESS",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "La sagesse vient avec l'âge."
+        },
+        {
+          "englishConcept": "truth",
+          "targetTerm": "vérité",
+          "pronunciation": "vay-ree-TAY",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "La vérité vous rendra libre."
+        },
+        {
+          "englishConcept": "dream",
+          "targetTerm": "rêve",
+          "pronunciation": "rehv",
+          "partOfSpeech": "noun",
+          "difficulty": 5,
+          "example": "Les rêves nous font avancer."
+        },
+        {
+          "englishConcept": "work",
+          "targetTerm": "travail",
+          "pronunciation": "trah-VYE",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Le travail est important pour la vie.",
+          "relatedConcepts": ["career", "business"]
+        },
+        {
+          "englishConcept": "career",
+          "targetTerm": "carrière",
+          "pronunciation": "kah-ree-EHR",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "La carrière exige des efforts.",
+          "relatedConcepts": ["work"]
+        },
+        {
+          "englishConcept": "business",
+          "targetTerm": "affaires",
+          "pronunciation": "ah-FEHR",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Les affaires sont compétitives.",
+          "relatedConcepts": ["work"]
+        },
+        {
+          "englishConcept": "meeting",
+          "targetTerm": "réunion",
+          "pronunciation": "ray-oo-NYOHN",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "La réunion est à dix heures."
+        },
+        {
+          "englishConcept": "project",
+          "targetTerm": "projet",
+          "pronunciation": "pro-ZHAY",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Le projet est réussi."
+        },
+        {
+          "englishConcept": "success",
+          "targetTerm": "succès",
+          "pronunciation": "sook-SAY",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "Le succès vient avec le travail.",
+          "relatedConcepts": ["failure"]
+        },
+        {
+          "englishConcept": "failure",
+          "targetTerm": "échec",
+          "pronunciation": "ay-SHEK",
+          "partOfSpeech": "noun",
+          "difficulty": 4,
+          "example": "L'échec est un professeur.",
+          "relatedConcepts": ["success"]
+        }
+      ],
+      "totalConcepts": 21,
+      "sessionLength": 20,
+      "prerequisites": ["SCHOOLER"],
+      "assessmentCriteria": {
+        "accuracyThreshold": 65,
+        "conceptMasteryThreshold": 17,
+        "timeLimit": 600
+      }
+    }
+  ],
+  "configuration": {
+    "defaultSessionLength": 15,
+    "maxConceptsPerSession": 10,
+    "repetitionThreshold": 3,
+    "masteryThreshold": 0.8
+  },
+  "culturalContext": {
+    "learningApproach": "Communicative approach with cultural immersion, emphasizing real-world usage and cultural understanding",
+    "culturalNotes": [
+      "French uses Latin alphabet with accents, important for proper pronunciation",
+      "French has gendered nouns requiring careful attention",
+      "Formal 'vous' vs informal 'tu' address forms are culturally important",
+      "French culture values politeness and formal communication",
+      "Literary and philosophical traditions play important role in language"
+    ],
+    "commonDifficulties": [
+      "Mastering French pronunciation and nasal sounds",
+      "Understanding gendered articles and agreements",
+      "Verb conjugations and irregular verbs",
+      "Formal vs informal address usage",
+      "Complex sentence structures and subjunctive mood"
+    ]
+  }
+}
