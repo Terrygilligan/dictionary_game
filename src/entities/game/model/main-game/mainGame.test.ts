@@ -40,7 +40,12 @@ const layout: LexiconLayout = {
 
 /** Applies a command through decide -> evolve, mirroring the store. */
 function run(state: MainGameState, command: MainGameCommand): MainGameState {
-  return decideMainGame(state, command).reduce<MainGameState>(evolveMainGame, state)
+  const commandWithIdentity = {
+    ...command,
+    tenant_id: 'test-tenant',
+    aggregate_id: 'test-aggregate'
+  }
+  return decideMainGame(state, commandWithIdentity).reduce<MainGameState>(evolveMainGame, state)
 }
 
 /** Drives the machine to `ready` with the coordinate pointing at `w-secret`. */

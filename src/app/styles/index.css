@@ -1710,3 +1710,66 @@ button, .button, input[type="button"], input[type="submit"], [role="button"] {
     align-self: flex-end;
   }
 }
+
+
+/* Jump Menu Styles */
+.landing__jump-menu {
+  position: sticky;
+  top: 80px;
+  z-index: 90;
+  background: linear-gradient(180deg, var(--bg-panel), var(--bg-panel-2));
+  border: 1px solid #ffffff14;
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin: 2rem 0;
+  backdrop-filter: blur(8px);
+}
+
+.landing__jump-nav {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.landing__jump-item {
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  position: relative;
+  z-index: 150;
+}
+
+.landing__jump-item:hover {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.landing__jump-item--active {
+  background: var(--accent-strong);
+  color: white;
+  border-color: var(--accent-strong);
+  font-weight: 600;
+}
+
+/* Responsive adjustments for jump menu */
+@media (max-width: 768px) {
+  .landing__jump-nav {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .landing__jump-item {
+    width: 100%;
+    text-align: center;
+    max-width: 200px;
+  }
+}

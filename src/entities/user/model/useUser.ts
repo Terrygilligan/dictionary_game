@@ -1,30 +1,30 @@
-import { useCallback, useContext, useSyncExternalStore } from 'react'
-import type { UserCommand, UserState } from './index.ts'
-import { UserStoreContext } from './context.ts'
-import type { UserStore } from './userStore.ts'
+import { useCallback } from 'react'
+import { useUserStore } from './context.ts'
+import type { UserCommand } from './commands.ts'
 
-function useUserStore(): UserStore {
-  const store = useContext(UserStoreContext)
-  if (!store) {
-    throw new Error('useUser hooks must be used within a <UserProvider>')
-  }
-  return store
-}
-
-/** Subscribes to the derived user state via the store's event log. */
-export function useUserState(): UserState {
+/**
+ * Hook for dispatching user commands
+ */
+export function useUserDispatch() {
   const store = useUserStore()
-  return useSyncExternalStore(store.subscribe, store.getState, store.getState)
+  
+  return useCallback((command: UserCommand) => {
+    store.dispatch(command)
+  }, [store])
 }
 
-/** Returns a stable command dispatcher bound to the current store. */
-export function useUserDispatch(): (command: UserCommand) => void {
-  const store = useUserStore()
-  return useCallback((command: UserCommand) => store.dispatch(command), [store])
-}
-
-/** Returns the current user if authenticated, null otherwise. */
+/**
+ * Hook for getting the current user from the store
+ */
 export function useCurrentUser() {
-  const state = useUserState()
-  return state.user
+  const store = useUserStore()
+  return store.getState('default', 'default').user
+}
+
+/**
+ * Hook for getting user authentication status
+ */
+export function useAuthStatus() {
+  const store = useUserStore()
+  return store.getState('default', 'default').authStatus
 }

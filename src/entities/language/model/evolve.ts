@@ -8,10 +8,9 @@
  * manage developmental stages, and maintain learning analytics.
  */
 
-import type { LinguisticState, DevelopmentalStage, MissedWord, FocusTopic } from './state.ts'
+import type { LinguisticState, MissedWord, FocusTopic } from './state.ts'
 import type { GameEvent } from '@/entities/game'
 import { 
-  initialLinguisticState,
   determineDevelopmentalStage,
   isReadyForStageProgression,
   getNextStage,
@@ -247,7 +246,7 @@ function updateDifficultyLevel(state: LinguisticState): LinguisticState {
  * - Reset current streak if starting fresh
  * - Update focus topics based on missed words
  */
-function handleGameStarted(state: LinguisticState, event: Extract<GameEvent, { type: 'game/started' }>): LinguisticState {
+function handleGameStarted(state: LinguisticState, _event: Extract<GameEvent, { type: 'game/started' }>): LinguisticState {
   // Update focus topics based on missed words
   const updatedFocusTopics = updateFocusTopics(state)
   

@@ -309,22 +309,29 @@ export class AuditSelectors {
       }
 
       const point = points.get(timestamp)!
-      point.count++
-      
-      if (event.metadata.category === 'error') {
-        point.errorCount++
+      // Create new point with updated count instead of mutating readonly property
+      const updatedPoint: TimeSeriesDataPoint = {
+        ...point,
+        count: point.count + 1,
+        errorCount: event.metadata.category === 'error' ? point.errorCount + 1 : point.errorCount
       }
+      points.set(timestamp, updatedPoint)
     }
 
     // Calculate unique tenants and average sizes
-    for (const point of points.values()) {
+    for (const [timestamp, point] of points.entries()) {
       const pointEvents = events.filter(e => {
         const pointTimestamp = Math.floor(e.timestamp / intervalMs) * intervalMs
         return pointTimestamp === point.timestamp
       })
 
-      point.uniqueTenants = new Set(pointEvents.map(e => e.tenantId)).size
-      point.avgSize = pointEvents.reduce((sum, e) => sum + e.metadata.eventSize, 0) / pointEvents.length
+      // Create new point with updated values instead of mutating readonly properties
+      const updatedPoint: TimeSeriesDataPoint = {
+        ...point,
+        uniqueTenants: new Set(pointEvents.map(e => e.tenantId)).size,
+        avgSize: pointEvents.reduce((sum, e) => sum + e.metadata.eventSize, 0) / pointEvents.length
+      }
+      points.set(timestamp, updatedPoint)
     }
 
     return Array.from(points.values()).sort((a, b) => a.timestamp - b.timestamp)
@@ -525,7 +532,7 @@ export class AuditSelectors {
     for (const [type, typeEvents] of typeGroups) {
       const count = typeEvents.length
       const percentage = (count / totalEvents) * 100
-      const category = typeEvents[0].metadata.category
+      const category = typeEvents[0]?.metadata.category ?? 'unknown'
       const avgSize = typeEvents.reduce((sum, e) => sum + e.metadata.eventSize, 0) / typeEvents.length
 
       distribution.push({

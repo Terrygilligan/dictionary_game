@@ -111,6 +111,8 @@ export function createEventLogService<TState, TEvent extends { type: string }>(
         id: nextId(),
         seq: baseSeq + index,
         timestamp: clock.now(),
+        tenant_id: 'default-tenant',
+        aggregate_id: 'default-aggregate',
         event,
       }))
       log = { ...log, events: [...log.events, ...committed] }

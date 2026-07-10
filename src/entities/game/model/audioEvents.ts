@@ -443,6 +443,7 @@ export function createVoiceSettingsUpdatedEvent(
       similarity_boost: number
       style: string
       use_speaker_boost: boolean
+      optimize_streaming_latency: number
     }
   }
 ): VoiceSettingsUpdatedEvent {

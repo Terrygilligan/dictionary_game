@@ -17,6 +17,32 @@ export interface EventBus<TEvent extends { type: string }> {
   subscribeAll(listener: Listener<TEvent>): () => void
 }
 
+/**
+ * SubscribeWrapper helper for services that need to subscribe to all events
+ * without explicitly specifying event types. Maintains type safety while simplifying usage.
+ */
+export function createSubscribeWrapper<TEvent extends { type: string }>(
+  bus: EventBus<TEvent>
+): (listener: Listener<TEvent>) => () => void {
+  return (listener: Listener<TEvent>) => bus.subscribeAll(listener)
+}
+
+/**
+ * TypedSubscribeWrapper helper for services that need to subscribe to specific event types
+ * with automatic type inference from the listener function.
+ */
+export function createTypedSubscribeWrapper<TEvent extends { type: string }>(
+  bus: EventBus<TEvent>
+): <TType extends TEvent['type']>(
+  type: TType,
+  listener: Listener<Extract<TEvent, { type: TType }>>
+) => () => void {
+  return <TType extends TEvent['type']>(
+    type: TType,
+    listener: Listener<Extract<TEvent, { type: TType }>>
+  ) => bus.subscribe(type, listener)
+}
+
 export function createEventBus<TEvent extends { type: string }>(): EventBus<TEvent> {
   const channels = new Map<string, Set<Listener<TEvent>>>()
   const wildcard = new Set<Listener<TEvent>>()

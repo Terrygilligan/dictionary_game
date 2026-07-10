@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { userProjectionService } from '@/services/userProjectionService'
 import type { User } from '@/entities/user'
 
 /**
@@ -25,17 +24,23 @@ export function useEmailVerification(currentUser: User | null) {
         verifiedAt: Date.now()
       })
 
-      // Dispatch USER_EMAIL_VERIFIED event to projection service
-      userProjectionService.processUserEvent({
-        type: 'user/email-verified',
+      // TODO: Re-implement email verification event dispatch
+      // userProjectionService was deleted - need to re-implement or use alternative approach
+      console.log('📧 [EMAIL_VERIFICATION] Email verification detected:', {
         userId: currentUser.id,
         email: currentUser.email,
-        verifiedAt: Date.now(),
-      }).then(() => {
-        console.log('✅ [EMAIL_VERIFICATION] USER_EMAIL_VERIFIED event processed')
-      }).catch((error) => {
-        console.error('❌ [EMAIL_VERIFICATION] Failed to process USER_EMAIL_VERIFIED event:', error)
+        verifiedAt: Date.now()
       })
+      // userProjectionService.processUserEvent({
+      //   type: 'user/email-verified',
+      //   userId: currentUser.id,
+      //   email: currentUser.email,
+      //   verifiedAt: Date.now(),
+      // }).then(() => {
+      //   console.log('✅ [EMAIL_VERIFICATION] USER_EMAIL_VERIFIED event processed')
+      // }).catch((error) => {
+      //   console.error('❌ [EMAIL_VERIFICATION] Failed to process USER_EMAIL_VERIFIED event:', error)
+      // })
     }
 
     // Update the ref for next comparison

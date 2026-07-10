@@ -2,6 +2,7 @@ import type { EventStore } from '../shared/event-sourcing/eventStore.ts'
 import type { GameEvent } from '../entities/game/model/events.ts'
 import type { UserEvent } from '../entities/user/model/events.ts'
 import type { VillageEvent } from '../entities/village/model/events.ts'
+import { createSubscribeWrapper } from '../shared/event-bus/eventBus.ts'
 import type {
   AuditEvent,
   TenantMetrics,
@@ -302,19 +303,24 @@ export function createAuditProjectionService(
   }
 
   const subscribeToStores = () => {
+    // Create subscribe wrappers for each store
+    const gameSubscribe = createSubscribeWrapper(gameStore.bus)
+    const userSubscribe = createSubscribeWrapper(userStore.bus)
+    const villageSubscribe = createSubscribeWrapper(villageStore.bus)
+
     // Subscribe to game store events
-    gameStore.bus.subscribe((event: GameEvent) => {
+    gameSubscribe((event: GameEvent) => {
       // This is a simplified approach - in practice, we'd need to know tenant/aggregate info
       log('Game event received:', event.type)
     })
 
     // Subscribe to user store events
-    userStore.bus.subscribe((event: UserEvent) => {
+    userSubscribe((event: UserEvent) => {
       log('User event received:', event.type)
     })
 
     // Subscribe to village store events
-    villageStore.bus.subscribe((event: VillageEvent) => {
+    villageSubscribe((event: VillageEvent) => {
       log('Village event received:', event.type)
     })
   }

@@ -20,47 +20,52 @@ const deck: RoundSpec[] = [round('alpha', 'alpha-a'), round('beta', 'beta-b')]
 
 /** Applies a command through decide -> evolve, mirroring the store. */
 function run(state: GameState, command: GameCommand): GameState {
-  return decideGame(state, command).reduce<GameState>(evolveGame, state)
+  const commandWithIdentity = {
+    ...command,
+    tenant_id: 'test-tenant',
+    aggregate_id: 'test-aggregate'
+  }
+  return decideGame(state, commandWithIdentity).reduce<GameState>(evolveGame, state)
 }
 
 describe('game domain', () => {
   it('starts a game from an empty state', () => {
-    const state = run(initialGameState, { type: 'startGame', deck })
+    const state = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
     expect(state.status).toBe('playing')
     expect(state.deck).toHaveLength(2)
     expect(state.currentRound).toBe(0)
   })
 
   it('ignores startGame with an empty deck', () => {
-    expect(decideGame(initialGameState, { type: 'startGame', deck: [] })).toEqual([])
+    expect(decideGame(initialGameState, { type: 'startGame', deck: [], tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })).toEqual([])
   })
 
   it('records a submitted answer with correctness', () => {
-    const started = run(initialGameState, { type: 'startGame', deck })
-    const answered = run(started, { type: 'submitAnswer', choiceId: 'alpha-a' })
+    const started = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+    const answered = run(started, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
     expect(answered.answers).toEqual([
       { roundIndex: 0, choiceId: 'alpha-a', correct: true },
     ])
   })
 
   it('rejects a second answer for the same round', () => {
-    const started = run(initialGameState, { type: 'startGame', deck })
-    const answered = run(started, { type: 'submitAnswer', choiceId: 'alpha-a' })
-    expect(decideGame(answered, { type: 'submitAnswer', choiceId: 'alpha-b' })).toEqual([])
+    const started = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+    const answered = run(started, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+    expect(decideGame(answered, { type: 'submitAnswer', choiceId: 'alpha-b', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })).toEqual([])
   })
 
   it('cannot advance before answering', () => {
-    const started = run(initialGameState, { type: 'startGame', deck })
-    expect(decideGame(started, { type: 'nextRound' })).toEqual([])
+    const started = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+    expect(decideGame(started, { type: 'nextRound', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })).toEqual([])
   })
 
   it('finishes after the last round and derives the final score', () => {
-    let state = run(initialGameState, { type: 'startGame', deck })
-    state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a' }) // correct
-    state = run(state, { type: 'nextRound' })
+    let state = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+    state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }) // correct
+    state = run(state, { type: 'nextRound', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
     expect(state.currentRound).toBe(1)
-    state = run(state, { type: 'submitAnswer', choiceId: 'beta-a' }) // wrong
-    state = run(state, { type: 'nextRound' })
+    state = run(state, { type: 'submitAnswer', choiceId: 'beta-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }) // wrong
+    state = run(state, { type: 'nextRound', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
 
     expect(state.status).toBe('finished')
     expect(selectScore(state)).toBe(1)
@@ -68,11 +73,11 @@ describe('game domain', () => {
 
   it('produces a deterministic event sequence for a full game', () => {
     const commands: GameCommand[] = [
-      { type: 'startGame', deck },
-      { type: 'submitAnswer', choiceId: 'alpha-a' },
-      { type: 'nextRound' },
-      { type: 'submitAnswer', choiceId: 'beta-b' },
-      { type: 'nextRound' },
+      { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' },
+      { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' },
+      { type: 'nextRound', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' },
+      { type: 'submitAnswer', choiceId: 'beta-b', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' },
+      { type: 'nextRound', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' },
     ]
 
     let state = initialGameState
@@ -97,42 +102,42 @@ describe('game domain', () => {
 
   describe('streak', () => {
     it('increments on consecutive correct answers', () => {
-      let state = run(initialGameState, { type: 'startGame', deck })
+      let state = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
       expect(selectStreak(state)).toBe(0)
-      state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a' }) // correct
+      state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }) // correct
       expect(selectStreak(state)).toBe(1)
-      state = run(state, { type: 'nextRound' })
-      state = run(state, { type: 'submitAnswer', choiceId: 'beta-b' }) // correct
+      state = run(state, { type: 'nextRound', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+      state = run(state, { type: 'submitAnswer', choiceId: 'beta-b', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }) // correct
       expect(selectStreak(state)).toBe(2)
     })
 
     it('resets to 0 on an incorrect answer', () => {
-      let state = run(initialGameState, { type: 'startGame', deck })
-      state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a' }) // correct
+      let state = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+      state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }) // correct
       expect(selectStreak(state)).toBe(1)
-      state = run(state, { type: 'nextRound' })
-      state = run(state, { type: 'submitAnswer', choiceId: 'beta-a' }) // wrong
+      state = run(state, { type: 'nextRound', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+      state = run(state, { type: 'submitAnswer', choiceId: 'beta-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }) // wrong
       expect(selectStreak(state)).toBe(0)
     })
 
     it('emits answer/submitted before streak/updated', () => {
-      const started = run(initialGameState, { type: 'startGame', deck })
-      const events = decideGame(started, { type: 'submitAnswer', choiceId: 'alpha-a' })
+      const started = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+      const events = decideGame(started, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
       expect(events.map((e) => e.type)).toEqual(['answer/submitted', 'streak/updated'])
       expect(events[1]).toEqual({ type: 'streak/updated', streak: 1 })
     })
 
     it('resetStreak clears a non-zero streak', () => {
-      let state = run(initialGameState, { type: 'startGame', deck })
-      state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a' }) // correct
+      let state = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+      state = run(state, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }) // correct
       expect(selectStreak(state)).toBe(1)
-      state = run(state, { type: 'resetStreak' })
+      state = run(state, { type: 'resetStreak', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
       expect(selectStreak(state)).toBe(0)
     })
 
     it('resetStreak is a no-op when the streak is already 0', () => {
-      const started = run(initialGameState, { type: 'startGame', deck })
-      expect(decideGame(started, { type: 'resetStreak' })).toEqual([])
+      const started = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+      expect(decideGame(started, { type: 'resetStreak', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })).toEqual([])
     })
   })
 })

@@ -115,7 +115,7 @@ export class AuditProjection {
     this.log('Starting AuditProjection...')
     
     // Subscribe to the global event bus
-    this.eventBus.subscribe((event: GameEvent | UserEvent | VillageEvent) => this.handleEvent(event))
+    this.eventBus.subscribeAll((event: GameEvent | UserEvent | VillageEvent) => this.handleEvent(event))
     
     this.isStarted = true
     this.log('AuditProjection started successfully')
@@ -156,7 +156,7 @@ export class AuditProjection {
    * Handle incoming events from the EventBus
    * This is the core event processing logic
    */
-  private handleEvent(event: GameEvent | UserEvent | VillageEvent, envelope?: EventEnvelope<GameEvent | UserEvent | VillageEvent>): void {
+  private handleEvent(event: GameEvent | UserEvent | VillageEvent, _envelope?: EventEnvelope<GameEvent | UserEvent | VillageEvent>): void {
     if (!this.isStarted) {
       return
     }
@@ -241,9 +241,9 @@ export class AuditProjection {
     const totalTenants = this.byTenant.size
     const eventTypes = Array.from(this.byEventType.keys())
     
-    const oldestEvent = this.entries.length > 0 ? this.entries[0].timestamp : null
+    const oldestEvent = this.entries.length > 0 ? this.entries[0]?.timestamp ?? null : null
     const newestEvent = this.entries.length > 0 
-      ? this.entries[this.entries.length - 1].timestamp 
+      ? this.entries[this.entries.length - 1]?.timestamp ?? null 
       : null
 
     const eventsPerSecond = this.calculateEventsPerSecond()

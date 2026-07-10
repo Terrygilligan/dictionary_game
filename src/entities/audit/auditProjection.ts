@@ -16,8 +16,7 @@ import type { EventEnvelope } from '@/shared/event-sourcing'
 import type { GameEvent } from '@/entities/game'
 import type { AudioEvent } from '@/entities/game/model/audioEvents.ts'
 import type { UserEvent } from '@/entities/user'
-import type { LanguageEvent } from '@/entities/language'
-import { createEventBus } from '@/shared/event-sourcing'
+import { createEventBus } from '@/shared/event-bus'
 
 /**
  * Audit Log Entry Structure
@@ -29,7 +28,7 @@ export interface AuditLogEntry {
   /** Unique identifier for this audit entry */
   readonly id: string
   /** Full event envelope from event store */
-  readonly eventEnvelope: EventEnvelope<GameEvent | AudioEvent | UserEvent | LanguageEvent>
+  readonly eventEnvelope: EventEnvelope<GameEvent | AudioEvent | UserEvent>
   /** Event type for quick filtering */
   readonly eventType: string
   /** Tenant identifier for multi-tenant tracking */
@@ -137,7 +136,7 @@ export interface EventFilter {
  */
 export class AuditProjection {
   private readonly auditLog = new Map<string, AuditLogEntry>()
-  private readonly eventBus = createEventBus<GameEvent | AudioEvent | UserEvent | LanguageEvent>()
+  private readonly eventBus = createEventBus<GameEvent | AudioEvent | UserEvent>()
   private readonly config: AuditLogConfig
   private cleanupInterval?: NodeJS.Timeout
   private eventCounter = 0
@@ -171,7 +170,7 @@ export class AuditProjection {
     console.log('🔍 [AUDIT] Starting event subscription')
 
     // Subscribe to all events from the event bus
-    this.eventBus.subscribe((event) => {
+    this.eventBus.subscribeAll((event: GameEvent | AudioEvent | UserEvent) => {
       this.processEvent(event)
     })
   }
@@ -179,7 +178,7 @@ export class AuditProjection {
   /**
    * Process incoming event and add to audit log
    */
-  private processEvent(event: GameEvent | AudioEvent | UserEvent | LanguageEvent): void {
+  private processEvent(event: GameEvent | AudioEvent | UserEvent): void {
     const startTime = this.config.enablePerformanceMonitoring ? Date.now() : undefined
 
     try {
@@ -203,7 +202,7 @@ export class AuditProjection {
    * Create audit log entry from event
    */
   private createAuditLogEntry(
-    event: GameEvent | AudioEvent | UserEvent | LanguageEvent,
+    event: GameEvent | AudioEvent | UserEvent,
     startTime?: number
   ): AuditLogEntry {
     const timestamp = Date.now()
@@ -213,7 +212,7 @@ export class AuditProjection {
     const category = this.categorizeEvent(event)
 
     // Create event envelope for audit purposes
-    const eventEnvelope: EventEnvelope<GameEvent | AudioEvent | UserEvent | LanguageEvent> = {
+    const eventEnvelope: EventEnvelope<GameEvent | AudioEvent | UserEvent> = {
       id: `audit_${timestamp}_${this.eventCounter}`,
       seq: this.eventCounter,
       timestamp,
@@ -340,7 +339,7 @@ export class AuditProjection {
       
       const excessCount = this.auditLog.size - this.config.maxEvents
       for (let i = 0; i < excessCount; i++) {
-        this.auditLog.delete(entries[i].id)
+        if (entries[i]?.id) this.auditLog.delete(entries[i]!.id)
         removedCount++
       }
     }

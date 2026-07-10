@@ -77,7 +77,7 @@ export class AuditQueryEngine {
     const startTime = performance.now()
     
     const entries = auditLog.byTenant.get(tenantId) || []
-    const limited = options?.limit ? entries.slice(0, options.limit) : entries
+    const limited = options?.limit ? [...entries].slice(0, options.limit) : [...entries]
     
     return {
       items: limited,
@@ -207,7 +207,7 @@ export class AuditQueryEngine {
     const startTime = performance.now()
     
     const entries = auditLog.byEventType.get(eventType) || []
-    const limited = options?.limit ? entries.slice(0, options.limit) : entries
+    const limited = options?.limit ? [...entries].slice(0, options.limit) : [...entries]
     
     return {
       items: limited,
