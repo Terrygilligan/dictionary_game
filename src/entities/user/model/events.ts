@@ -1,4 +1,17 @@
-export interface UserCreated {
+/**
+ * Base interface for all user events with explicit multi-tenant isolation
+ * Following Command Identity Directive - ALL events MUST inherit identity metadata
+ */
+export interface BaseUserEvent {
+  /** Unique identifier for the tenant (inherited from command) */
+  readonly tenant_id: string
+  /** Unique identifier for the aggregate (inherited from command) */
+  readonly aggregate_id: string
+  /** Type discriminator for the specific event */
+  readonly type: string
+}
+
+export interface UserCreated extends BaseUserEvent {
   readonly type: 'user/created'
   readonly userId: string
   readonly email: string
@@ -6,7 +19,7 @@ export interface UserCreated {
   readonly createdAt: number
 }
 
-export interface UserRegistered {
+export interface UserRegistered extends BaseUserEvent {
   readonly type: 'user/registered'
   readonly userId: string
   readonly email: string
@@ -15,28 +28,28 @@ export interface UserRegistered {
   readonly createdAt: number
 }
 
-export interface UserAuthenticated {
+export interface UserAuthenticated extends BaseUserEvent {
   readonly type: 'user/authenticated'
   readonly userId: string
   readonly token: string // Handled by auth service, not exposed to UI
   readonly timestamp: number
 }
 
-export interface UserUpdated {
+export interface UserUpdated extends BaseUserEvent {
   readonly type: 'user/updated'
   readonly userId: string
   readonly displayName?: string
   readonly timestamp: number
 }
 
-export interface UserEmailVerified {
+export interface UserEmailVerified extends BaseUserEvent {
   readonly type: 'user/email-verified'
   readonly userId: string
   readonly email: string
   readonly verifiedAt: number
 }
 
-export interface ProfileUpdated {
+export interface ProfileUpdated extends BaseUserEvent {
   readonly type: 'profile/updated'
   readonly userId: string
   readonly totalScore?: number
@@ -47,7 +60,7 @@ export interface ProfileUpdated {
   readonly timestamp: number
 }
 
-export interface AchievementUnlocked {
+export interface AchievementUnlocked extends BaseUserEvent {
   readonly type: 'achievement/unlocked'
   readonly userId: string
   readonly achievementId: string
@@ -57,21 +70,21 @@ export interface AchievementUnlocked {
   readonly unlockedAt: number
 }
 
-export interface FriendAdded {
+export interface FriendAdded extends BaseUserEvent {
   readonly type: 'friend/added'
   readonly userId: string
   readonly friendId: string
   readonly timestamp: number
 }
 
-export interface FriendRemoved {
+export interface FriendRemoved extends BaseUserEvent {
   readonly type: 'friend/removed'
   readonly userId: string
   readonly friendId: string
   readonly timestamp: number
 }
 
-export interface StatsUpdated {
+export interface StatsUpdated extends BaseUserEvent {
   readonly type: 'stats/updated'
   readonly userId: string
   readonly gamesPlayed?: number
@@ -82,7 +95,7 @@ export interface StatsUpdated {
   readonly timestamp: number
 }
 
-export interface SyncCompleted {
+export interface SyncCompleted extends BaseUserEvent {
   readonly type: 'sync/completed'
   readonly userId: string
   readonly eventsSynced: number

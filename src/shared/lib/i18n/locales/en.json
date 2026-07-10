@@ -28,6 +28,8 @@
     "home": "Home",
     "gamesRoom": "Games Room",
     "village": "Village",
+    "signIn": "Sign In",
+    "admin": "Admin",
     "tagline": "Village Community Games"
   },
   "game": {

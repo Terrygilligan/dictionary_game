@@ -7,6 +7,8 @@ import { EmailVerificationTracker } from '@/components/EmailVerificationTracker'
 
 /** Composition root for cross-cutting providers. */
 export function AppProviders({ children }: { children: ReactNode }) {
+  console.log('🏗️ [APP_PROVIDERS] Providers rendering')
+  
   return (
     <NavigationProvider>
       <I18nProvider>

@@ -1,8 +1,6 @@
-import { type ReactNode, useEffect, useState } from 'react'
+import { type ReactNode, useEffect } from 'react'
 import { Header } from '@/shared/ui/Header'
-import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
 import { useNavigation } from '@/shared/lib/navigation'
-import { Button } from '@/shared/ui/Button'
 
 interface BaseLayoutProps {
   children: ReactNode
@@ -11,77 +9,26 @@ interface BaseLayoutProps {
 
 export function BaseLayout({ children, isAuthenticated }: BaseLayoutProps) {
   const { currentPage, navigate } = useNavigation()
-  const [renderKey, setRenderKey] = useState(0)
   
-  // Layout locking: Ensure layout state matches navigation context
-  const navigationCurrentPage = currentPage
-  
-  // Listen for NAV_COMPLETE to force layout re-render
+  // Debug: Track BaseLayout renders to identify duplication
   useEffect(() => {
-    const handleNavComplete = () => {
-      console.log('🔄 [LAYOUT] NAV_COMPLETE received - forcing layout re-render')
-      setRenderKey(prev => prev + 1)
+    console.log('🏗️ [BASELAYOUT] Render triggered:', { currentPage, isAuthenticated })
+    
+    return () => {
+      console.log('[BASE_LAYOUT] Unmounting.')
     }
+  }, [currentPage, isAuthenticated])
 
-    window.addEventListener('NAV_COMPLETE', handleNavComplete)
-    return () => window.removeEventListener('NAV_COMPLETE', handleNavComplete)
-  }, [])
-  
-  // Synchronization check - prevent mismatched layout shell rendering
-  if (!navigationCurrentPage) {
-    console.error('� [LAYOUT] SYNC GUARD - No currentPage from navigation context')
-    return null
+  // Allow layout to render while navigation context initializes
+  if (!currentPage) {
+    console.log('⌛ [LAYOUT] Initializing navigation...')
   }
 
-  if (isAuthenticated) {
-    // Authenticated layout with full navigation
-    return (
-      <div className="app" key={renderKey}>
-        <Header isAuthenticated={true} />
-        <main className="app__main">
-          <div className="page-container">
-            {children}
-          </div>
-        </main>
-      </div>
-    )
-  }
-
-  // Public layout for guests - minimal header with navigation
+  // Unified Layout - Always render the Header component (single source of truth)
+  // Removed renderKey to prevent forced re-renders that could cause duplication
   return (
-    <div className="app" key={renderKey}>
-      <header className="app__header app__header--public">
-        <div className="app__branding">
-          <h1 className="app__title">Lexicon Master</h1>
-        </div>
-        <div className="app__nav">
-          <Button 
-            variant={currentPage === 'landing' ? 'primary' : 'ghost'}
-            onClick={() => navigate('landing')}
-          >
-            Home
-          </Button>
-          <Button 
-            variant={currentPage === 'game' ? 'primary' : 'ghost'}
-            onClick={() => navigate('game')}
-          >
-            Play
-          </Button>
-          <Button 
-            variant={currentPage === 'village' ? 'primary' : 'ghost'}
-            onClick={() => navigate('village')}
-          >
-            Village
-          </Button>
-          <Button 
-            variant="ghost"
-            onClick={() => navigate('auth')}
-          >
-            Sign In
-          </Button>
-        </div>
-        <LanguageSwitcher className="app__language-switcher" />
-      </header>
+    <div className="app">
+      <Header isAuthenticated={isAuthenticated} />
       <main className="app__main">
         <div className="page-container">
           {children}

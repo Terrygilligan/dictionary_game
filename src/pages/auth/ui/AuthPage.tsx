@@ -4,7 +4,9 @@ import { Button } from '@/shared/ui/Button'
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
 import { PasswordInput } from '@/shared/ui/PasswordInput'
 import { authService } from '@/services/auth'
-import type { User } from '@/entities/user'
+import { userStore } from '@/entities/user'
+import type { User, RegisterUser } from '@/entities/user'
+import { useGameIdentity } from '@/features/play-round/model/useFirebaseAuth'
 
 interface AuthPageProps {
   onAuthSuccess: (user?: User) => void
@@ -12,6 +14,7 @@ interface AuthPageProps {
 
 export function AuthPage({ onAuthSuccess }: AuthPageProps) {
   const { t } = useTranslate()
+  const { tenant_id, aggregate_id } = useGameIdentity()
   const [isSignUp, setIsSignUp] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
@@ -42,27 +45,59 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
     setVerificationMessage('')
 
     try {
-      const result = isSignUp
-        ? await authService.signUp(formData.email, formData.password, formData.displayName)
-        : await authService.signIn(formData.email, formData.password)
+      if (isSignUp) {
+        // Event-Sourced Registration Flow
+        console.log('🔐 [AUTH] Starting event-sourced registration...')
+        
+        // Step 1: Firebase Authentication
+        const firebaseResult = await authService.signUp(formData.email, formData.password, formData.displayName)
+        
+        if (!firebaseResult.success || !firebaseResult.user) {
+          setError(firebaseResult.error || t('errors.unknown'))
+          return
+        }
 
-      if (result.success && result.user) {
-        if (isSignUp) {
-          // Show verification message for sign up
-          // setEmailSent(true) // TODO: Implement email verification flow
-          setVerificationMessage(t('auth.verificationEmailSent'))
-        } else {
+        console.log('✅ [AUTH] Firebase auth successful:', firebaseResult.user.id)
+
+        // Step 2: Atomic Event Store Registration
+        const registerCommand: RegisterUser = {
+          type: 'user/register',
+          tenant_id: firebaseResult.user.id, // Use Firebase UID as tenant_id
+          aggregate_id: `user_${firebaseResult.user.id}`, // User-specific aggregate
+          userId: firebaseResult.user.id,
+          email: firebaseResult.user.email,
+          displayName: firebaseResult.user.displayName,
+          emailVerified: firebaseResult.user.emailVerified,
+          createdAt: firebaseResult.user.createdAt,
+        }
+
+        console.log('🎮 [AUTH] Dispatching registration command:', registerCommand)
+        
+        // Step 3: Commit to Event Store (Atomic)
+        userStore.dispatch(registerCommand)
+        
+        console.log('✅ [AUTH] Registration event committed successfully')
+        
+        // Step 4: Show verification message
+        setVerificationMessage(t('auth.verificationEmailSent'))
+        
+      } else {
+        // Sign In Flow (existing logic)
+        const result = await authService.signIn(formData.email, formData.password)
+
+        if (result.success && result.user) {
           // Check if email is verified for sign in
           if (!result.user.emailVerified) {
             setError(t('auth.emailNotVerified'))
             return
           }
           onAuthSuccess(result.user)
+        } else {
+          setError(result.error || t('errors.unknown'))
         }
-      } else {
-        setError(result.error || t('errors.unknown'))
       }
     } catch (err) {
+      console.error('❌ [AUTH] Registration failed:', err)
       setError(t('errors.unknown'))
     } finally {
       setIsLoading(false)

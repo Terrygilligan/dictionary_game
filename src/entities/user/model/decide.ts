@@ -20,6 +20,8 @@ export function decideUser(
       
       return [{
         type: 'user/created',
+        tenant_id: command.tenant_id,
+        aggregate_id: command.aggregate_id,
         userId: 'user_' + Date.now(), // Will be replaced by proper ID generation
         email: command.email,
         displayName: command.displayName,
@@ -27,11 +29,13 @@ export function decideUser(
       }]
 
     case 'user/register':
-      // Only register if user exists and is authenticated
-      if (!state.user || state.authStatus !== 'authenticated') return []
+      // Only register if user doesn't already exist (prevent duplicate registration)
+      if (state.user) return []
       
       return [{
         type: 'user/registered',
+        tenant_id: command.tenant_id,
+        aggregate_id: command.aggregate_id,
         userId: command.userId,
         email: command.email,
         displayName: command.displayName,
@@ -45,6 +49,8 @@ export function decideUser(
       
       return [{
         type: 'user/authenticated',
+        tenant_id: command.tenant_id,
+        aggregate_id: command.aggregate_id,
         userId: state.user.id,
         token: command.token, // Token handled by auth service, not exposed to UI
         timestamp: Date.now(), // Will be replaced by injectable clock
@@ -58,6 +64,8 @@ export function decideUser(
       
       return [{
         type: 'user/updated',
+        tenant_id: command.tenant_id,
+        aggregate_id: command.aggregate_id,
         userId: state.user.id,
         displayName: command.displayName,
         timestamp: Date.now(), // Will be replaced by injectable clock
@@ -69,6 +77,8 @@ export function decideUser(
       
       return [{
         type: 'user/email-verified',
+        tenant_id: command.tenant_id,
+        aggregate_id: command.aggregate_id,
         userId: command.userId,
         email: command.email,
         verifiedAt: Date.now(), // Will be replaced by injectable clock
@@ -85,6 +95,8 @@ export function decideUser(
           command.shareLocationForLeaderboard !== undefined) {
         events.push({
           type: 'profile/updated',
+          tenant_id: command.tenant_id,
+          aggregate_id: command.aggregate_id,
           userId: state.user.id,
           totalScore: command.totalScore,
           matchesPlayed: command.matchesPlayed,
@@ -114,6 +126,8 @@ export function decideUser(
       if (hasUpdates) {
         statsEvents.push({
           type: 'stats/updated',
+          tenant_id: command.tenant_id,
+          aggregate_id: command.aggregate_id,
           userId: state.user.id,
           gamesPlayed: command.gamesPlayed,
           correctAnswers: command.correctAnswers,
@@ -135,6 +149,8 @@ export function decideUser(
       
       return [{
         type: 'friend/added',
+        tenant_id: command.tenant_id,
+        aggregate_id: command.aggregate_id,
         userId: state.user.id,
         friendId: command.friendId,
         timestamp: Date.now(), // Will be replaced by injectable clock
@@ -149,6 +165,8 @@ export function decideUser(
       
       return [{
         type: 'friend/removed',
+        tenant_id: command.tenant_id,
+        aggregate_id: command.aggregate_id,
         userId: state.user.id,
         friendId: command.friendId,
         timestamp: Date.now(), // Will be replaced by injectable clock

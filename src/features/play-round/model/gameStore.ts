@@ -14,8 +14,8 @@ export interface GameStore extends EventStore<GameState, GameEvent> {
 }
 
 /**
- * Wires the pure domain (decider + evolver) to an event store, yielding a
- * command-driven store: `dispatch(command) -> decide -> commit -> re-derive`.
+ * Wires the pure domain (decider + evolver) to an event store.
+ * ENFORCES strict command identity compliance - no fallbacks allowed.
  */
 export function createGameStore(options: EventStoreOptions = {}): GameStore {
   const store = createEventStore<GameState, GameEvent>(evolveGame, initialGameState, options)
@@ -23,25 +23,31 @@ export function createGameStore(options: EventStoreOptions = {}): GameStore {
   return {
     ...store,
     dispatch(command) {
-      // Use default tenant/aggregate for single-player games
-      const tenant_id = command.tenant_id || 'game-tenant'
-      const aggregate_id = command.aggregate_id || 'game-session'
-      
-      // Enhance command with tenant/aggregate if not provided
-      const enhancedCommand = {
-        ...command,
-        tenant_id,
-        aggregate_id,
+      // STRICT ENFORCEMENT: No fallbacks, no enhancement
+      if (!command.tenant_id || !command.tenant_id.trim()) {
+        throw new Error('COMMAND_IDENTITY_VIOLATION: Missing mandatory tenant_id')
       }
+
+      if (!command.aggregate_id || !command.aggregate_id.trim()) {
+        throw new Error('COMMAND_IDENTITY_VIOLATION: Missing mandatory aggregate_id')
+      }
+
+      console.log(`🎮 [STORE] Dispatching command:`, command.type, { 
+        tenant_id: command.tenant_id, 
+        aggregate_id: command.aggregate_id,
+        command: command
+      })
       
-      console.log(`🎮 [STORE] Dispatching command:`, command.type, { tenant_id, aggregate_id })
+      // Pure domain processing - command used exactly as received
+      const currentState = store.getState(command.tenant_id, command.aggregate_id)
+      console.log(`🎮 [STORE] Current state before decision:`, currentState.status)
       
-      const events = decideGame(store.getState(tenant_id, aggregate_id), enhancedCommand)
+      const events = decideGame(currentState, command)
       console.log(`🎮 [STORE] Generated events:`, events.length, events)
       
-      store.commit(events, tenant_id, aggregate_id)
+      store.commit(events, command.tenant_id, command.aggregate_id)
       
-      const newState = store.getState(tenant_id, aggregate_id)
+      const newState = store.getState(command.tenant_id, command.aggregate_id)
       console.log(`🎮 [STORE] New state:`, newState.status)
     },
   }

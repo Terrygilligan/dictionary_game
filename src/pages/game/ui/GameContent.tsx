@@ -1,0 +1,82 @@
+import { useState, useEffect } from 'react'
+import { GameScreen } from '@/features/play-round'
+import { DictionarySelection } from '@/features/main-game'
+import { GameStatsTracker } from '@/features/play-round/model/GameStatsTracker'
+import { Button } from '@/shared/ui/Button'
+import { useTranslate } from '@/shared/lib/i18n/useTranslate'
+import { useNavigation } from '@/shared/lib/navigation'
+import { i18nService } from '@/shared/lib/i18n/i18nService'
+
+type GameMode = 'quiz' | 'dictionary'
+
+interface GameContentProps {
+  isGuest?: boolean
+}
+
+export function GameContent({ isGuest = false }: GameContentProps) {
+  const [gameMode, setGameMode] = useState<GameMode>('quiz')
+  const { t } = useTranslate()
+  const { currentPage } = useNavigation()
+  const currentLanguage = i18nService.getCurrentLanguage()
+
+  // Reset game state when navigating away from game page
+  useEffect(() => {
+    console.log('🎮 [GAMECONTENT] Current page:', currentPage)
+    
+    return () => {
+      console.log('🔄 [GAMECONTENT] Unmounting, game state will be reset by GameScreen')
+    }
+  }, [currentPage])
+
+  // Guest notice
+  if (isGuest) {
+    return (
+      <main className="page">
+        <header className="page__masthead">
+          <h1 className="page__title">{t('gamePage.title')}</h1>
+          <p className="page__tagline">{t('landing.guestPrivacyNotice')}</p>
+          <div style={{ marginTop: '1rem' }}>
+            <Button variant="ghost" onClick={() => setGameMode('quiz')}>
+              {t('gamePage.switchToDictionary')}
+            </Button>
+          </div>
+        </header>
+        <GameStatsTracker />
+        <GameScreen language={currentLanguage} resetOnUnmount={true} />
+      </main>
+    )
+  }
+
+  if (gameMode === 'quiz') {
+    return (
+      <main className="page">
+        <header className="page__masthead">
+          <h1 className="page__title">{t('gamePage.title')}</h1>
+          <p className="page__tagline">{t('gamePage.tagline')}</p>
+          <div style={{ marginTop: '1rem' }}>
+            <Button variant="ghost" onClick={() => setGameMode('dictionary')}>
+              {t('gamePage.switchToDictionary')}
+            </Button>
+          </div>
+        </header>
+        <GameStatsTracker />
+        <GameScreen language={currentLanguage} resetOnUnmount={true} />
+      </main>
+    )
+  }
+
+  return (
+    <main className="page">
+      <header className="page__masthead">
+        <h1 className="page__title">{t('gamePage.dictionaryTitle')}</h1>
+        <p className="page__tagline">{t('gamePage.dictionaryTagline')}</p>
+        <div style={{ marginTop: '1rem' }}>
+          <Button variant="ghost" onClick={() => setGameMode('quiz')}>
+            {t('gamePage.switchToQuiz')}
+          </Button>
+        </div>
+      </header>
+      <DictionarySelection />
+    </main>
+  )
+}

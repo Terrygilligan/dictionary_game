@@ -6,7 +6,6 @@ export interface DeckOptions {
   roundCount?: number
   choicesPerRound?: number
   rng?: Rng
-  seed?: number
   language?: string
 }
 
@@ -16,10 +15,10 @@ export interface DeckOptions {
  * so the event log remains a deterministic record.
  */
 export function buildDeck(options: DeckOptions = {}): RoundSpec[] {
-  const { roundCount = 8, choicesPerRound = 4, rng = Math.random, seed, language = 'en' } = options
+  const { roundCount = 8, choicesPerRound = 4, rng = Math.random, language = 'en' } = options
 
   // Get random words for the specified language
-  const words = getRandomWordsForLanguage(roundCount + (choicesPerRound - 1) * roundCount, language, seed)
+  const words = getRandomWordsForLanguage(roundCount + (choicesPerRound - 1) * roundCount, language)
 
   // Select prompt words
   const prompts = sample(words, roundCount, rng)

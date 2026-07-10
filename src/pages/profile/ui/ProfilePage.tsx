@@ -8,6 +8,7 @@ import { useUserStats } from '@/entities/user/model/UserStatsContext'
 import { useNavigation } from '@/shared/lib/navigation'
 import { userService } from '@/services/userService'
 import type { User, UpdateProfile } from '@/entities/user'
+import { useGameIdentity } from '@/features/play-round/model/useFirebaseAuth'
 
 interface ProfilePageProps {
   user: User
@@ -15,8 +16,52 @@ interface ProfilePageProps {
 }
 
 export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
+  // ALL HOOKS MUST BE DECLARED UNCONDITIONALLY AT THE TOP
   const { t, currentLanguage, setLanguage, availableLanguages, getLanguageDisplayName } = useTranslate()
   const { currentPage } = useNavigation()
+  const { tenant_id, aggregate_id, isLoading, error } = useGameIdentity()
+  const { userStats, statsLoading } = useUserStats()
+  const [isSaving, setIsSaving] = useState(false)
+  const [locationForm, setLocationForm] = useState({
+    village: user.village || '',
+    postcode: user.postcode || '',
+    shareLocationForLeaderboard: user.shareLocationForLeaderboard || false,
+  })
+
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="page">
+        <div className="panel panel--center">
+          <p>Loading identity...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Handle error state
+  if (error) {
+    return (
+      <div className="page">
+        <div className="panel panel--center">
+          <p>Authentication required: {error}</p>
+          <Button onClick={() => window.location.href = '/auth'}>Sign In</Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Handle missing identity
+  if (!tenant_id || !aggregate_id) {
+    return (
+      <div className="page">
+        <div className="panel panel--center">
+          <p>Identity not available</p>
+          <Button onClick={() => window.location.reload()}>Refresh</Button>
+        </div>
+      </div>
+    )
+  }
 
   // Ghost render detection
   if (currentPage !== 'profile') {
@@ -27,16 +72,7 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
   // Debug: Log when ProfilePage renders
   console.log('👤 [PROFILE] ProfilePage rendering for user:', user.displayName)
   console.log('👤 [PROFILE] User email:', user.email)
-  
-  // Consume centralized user stats from provider
-  const { userStats, statsLoading, statsError, refetchStats } = useUserStats()
-  
-  const [isSaving, setIsSaving] = useState(false)
-  const [locationForm, setLocationForm] = useState({
-    village: user.village || '',
-    postcode: user.postcode || '',
-    shareLocationForLeaderboard: user.shareLocationForLeaderboard || false,
-  })
+  console.log('🔐 [PROFILE] Identity context:', { tenant_id, aggregate_id })
 
   // Calculate accuracy percentage
   const accuracy = userService.calculateAccuracy(userStats || {
@@ -73,13 +109,17 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
     try {
       setIsSaving(true)
       
+      // Strict compliance: Include identity metadata from useGameIdentity
       const updateCommand: UpdateProfile = {
         type: 'profile/update',
+        tenant_id,
+        aggregate_id,
         village: locationForm.village || undefined,
         postcode: locationForm.postcode || undefined,
         shareLocationForLeaderboard: locationForm.shareLocationForLeaderboard,
       }
       
+      console.log('🔐 [PROFILE] Dispatching profile update:', updateCommand)
       userStore.dispatch(updateCommand)
       
       console.log('✅ Location settings saved successfully')
@@ -97,6 +137,7 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
     }))
   }
 
+  // Handle stats loading state (must be after all hooks)
   if (statsLoading) {
     return (
       <div className="page">

@@ -1,82 +1,19 @@
-import { useState, useEffect } from 'react'
-import { GameScreen } from '@/features/play-round'
-import { DictionarySelection } from '@/features/main-game'
-import { GameStatsTracker } from '@/features/play-round/model/GameStatsTracker'
-import { Button } from '@/shared/ui/Button'
-import { useTranslate } from '@/shared/lib/i18n/useTranslate'
-import { useNavigation } from '@/shared/lib/navigation'
-import { i18nService } from '@/shared/lib/i18n/i18nService'
-
-type GameMode = 'quiz' | 'dictionary'
+import { GameStatsLoadingSkeleton } from '@/features/play-round/ui/GameStatsLoadingSkeleton'
+import { useIdentityReady } from '@/features/play-round/model/useIdentityReady'
+import { GameContent } from './GameContent'
 
 interface GamePageProps {
   isGuest?: boolean
 }
 
 export function GamePage({ isGuest = false }: GamePageProps) {
-  const [gameMode, setGameMode] = useState<GameMode>('quiz')
-  const { t } = useTranslate()
-  const { currentPage } = useNavigation()
-  const currentLanguage = i18nService.getCurrentLanguage()
+  const { isReady } = useIdentityReady()
 
-  // Reset game state when navigating away from game page
-  useEffect(() => {
-    console.log('🎮 [GAMEPAGE] Current page:', currentPage)
-    
-    return () => {
-      console.log('🔄 [GAMEPAGE] Unmounting, game state will be reset by GameScreen')
-    }
-  }, [currentPage])
-
-  // Guest notice
-  if (isGuest) {
-    return (
-      <main className="page">
-        <header className="page__masthead">
-          <h1 className="page__title">{t('gamePage.title')}</h1>
-          <p className="page__tagline">{t('landing.guestPrivacyNotice')}</p>
-          <div style={{ marginTop: '1rem' }}>
-            <Button variant="ghost" onClick={() => setGameMode('quiz')}>
-              {t('gamePage.switchToDictionary')}
-            </Button>
-          </div>
-        </header>
-        <GameStatsTracker />
-        <GameScreen language={currentLanguage} resetOnUnmount={true} />
-      </main>
-    )
+  // Top-Level Guard: GameContent only enters the render tree when isReady is true
+  if (!isReady) {
+    return <GameStatsLoadingSkeleton />
   }
 
-  if (gameMode === 'quiz') {
-    return (
-      <main className="page">
-        <header className="page__masthead">
-          <h1 className="page__title">{t('gamePage.title')}</h1>
-          <p className="page__tagline">{t('gamePage.tagline')}</p>
-          <div style={{ marginTop: '1rem' }}>
-            <Button variant="ghost" onClick={() => setGameMode('dictionary')}>
-              {t('gamePage.switchToDictionary')}
-            </Button>
-          </div>
-        </header>
-        <GameStatsTracker />
-        <GameScreen language={currentLanguage} resetOnUnmount={true} />
-      </main>
-    )
-  }
-
-  return (
-    <main className="page">
-      <header className="page__masthead">
-        <h1 className="page__title">{t('gamePage.dictionaryTitle')}</h1>
-        <p className="page__tagline">{t('gamePage.dictionaryTagline')}</p>
-        <div style={{ marginTop: '1rem' }}>
-          <Button variant="ghost" onClick={() => setGameMode('quiz')}>
-            {t('gamePage.switchToQuiz')}
-          </Button>
-        </div>
-      </header>
-      <DictionarySelection />
-    </main>
-  )
+  // GameContent only mounts once identity is already true
+  return <GameContent isGuest={isGuest} />
 }

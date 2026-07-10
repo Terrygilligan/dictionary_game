@@ -7,6 +7,7 @@ import { GamePage } from '@/pages/game'
 import { VillagePage } from '@/pages/village'
 import { AdminPage } from '@/pages/admin/AdminPage'
 import { BaseLayout } from '@/app/ui/BaseLayout'
+import { AuthGuard } from '@/shared/auth/AuthGuard'
 import { initializeI18n } from '@/shared/lib/i18n/i18nService'
 import { useNavigation } from '@/shared/lib/navigation'
 import type { User } from '@/entities/user'
@@ -16,6 +17,11 @@ export function AppRouter() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isVoidTransition, setIsVoidTransition] = useState(false)
+  
+  // Debug: Track AppRouter renders to identify duplication
+  useEffect(() => {
+    console.log(`🔄 [ROUTER] AppRouter render: currentPage=${currentPage}, isLoading=${isLoading}`)
+  }, [currentPage, isLoading])
   
   
   // Initialize i18n and check auth state on mount
@@ -38,24 +44,24 @@ export function AppRouter() {
     initialize()
   }, [])
 
-  // NAV_START event listener for Void transition
-  useEffect(() => {
-    const handleNavStart = () => {
-      console.log('🕳️ [ROUTER] NAV_START received - initiating Void transition')
-      setIsVoidTransition(true)
+  // TEMPORARY BYPASS: Disable Void transition system causing navigation button disappearance
+  // useEffect(() => {
+  //   const handleNavStart = () => {
+  //     console.log('🕳️ [ROUTER] NAV_START received - initiating Void transition')
+  //     setIsVoidTransition(true)
       
-      // Force component tree destruction for 50ms
-      const timeout = setTimeout(() => {
-        console.log('🕳️ [ROUTER] Void transition complete - resuming render')
-        setIsVoidTransition(false)
-      }, 50)
+  //     // Force component tree destruction for 50ms
+  //     const timeout = setTimeout(() => {
+  //       console.log('🕳️ [ROUTER] Void transition complete - resuming render')
+  //       setIsVoidTransition(false)
+  //     }, 50)
       
-      return () => clearTimeout(timeout)
-    }
+  //     return () => clearTimeout(timeout)
+  //   }
 
-    window.addEventListener('NAV_START', handleNavStart)
-    return () => window.removeEventListener('NAV_START', handleNavStart)
-  }, [])
+  //   window.addEventListener('NAV_START', handleNavStart)
+  //   return () => window.removeEventListener('NAV_START', handleNavStart)
+  // }, [])
 
   // Listen to auth state changes
   // TODO: Re-enable when Firebase is configured
@@ -123,12 +129,22 @@ export function AppRouter() {
             switch (currentPage) {
               case 'games':
                 return <GamesPage />
+              case 'game':
+                return <GamePage />
               case 'profile':
-                return user ? <ProfilePage user={user} onSignOut={handleSignOut} /> : null
+                return (
+                  <AuthGuard isAuthenticated={!!user} isLoading={isLoading}>
+                    {user && <ProfilePage user={user} onSignOut={handleSignOut} />}
+                  </AuthGuard>
+                )
               case 'landing':
                 return <LandingPage />
               case 'village':
-                return <VillagePage />
+                return (
+                  <AuthGuard isAuthenticated={!!user} isLoading={isLoading}>
+                    <VillagePage />
+                  </AuthGuard>
+                )
               case 'auth':
                 return <AuthPage onAuthSuccess={handleAuthSuccess} />
               default:
@@ -141,15 +157,3 @@ export function AppRouter() {
   )
 }
 
-/**
- * AuthGuard component for protecting routes
- * This is a simple implementation - in a real app this would be more sophisticated
- */
-export function AuthGuard({ children, user }: { children: React.ReactNode; user: User | null }) {
-  if (!user) {
-    // Redirect to auth page
-    return <AuthPage onAuthSuccess={() => {}} />
-  }
-
-  return <>{children}</>
-}

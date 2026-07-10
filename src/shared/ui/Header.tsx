@@ -1,51 +1,28 @@
-import { useState, useEffect, useLayoutEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { getAuth } from 'firebase/auth'
-import { useNavigation } from '@/shared/lib/navigation'
+import { useNavigation, type Page } from '@/shared/lib/navigation'
 import { Button } from '@/shared/ui/Button'
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 
 interface HeaderProps {
-  isAuthenticated?: boolean
+  isAuthenticated: boolean
 }
 
-// Navigation map for cleaner header management
-const NAV_MAP = {
-  landing: { key: 'landing', translationKey: 'ui.home', isPrimary: false, isAdminOnly: false },
-  games: { key: 'games', translationKey: 'ui.gamesRoom', isPrimary: false, isAdminOnly: false },
-  village: { key: 'village', translationKey: 'ui.village', isPrimary: true, isAdminOnly: false },
-  profile: { key: 'profile', translationKey: 'ui.profile', isPrimary: false, isAdminOnly: false },
-  admin: { key: 'admin', translationKey: 'ui.admin', isPrimary: false, isAdminOnly: true }
-} as const
 
-export function Header({ isAuthenticated = false }: HeaderProps) {
+export function Header({ isAuthenticated }: HeaderProps) {
   const { navigate, currentPage } = useNavigation()
   const { t } = useTranslate()
   const [isAdmin, setIsAdmin] = useState(false)
 
-  // Debug: Track Header's currentPage state
+  // Debug: Track Header renders and state to identify duplication
   useEffect(() => {
-    console.log(`🎯 [HEADER] currentPage updated: ${currentPage}`)
-  }, [currentPage])
+    console.log(`🎯 [HEADER] RENDER DETECTED: currentPage=${currentPage}, isAuthenticated=${isAuthenticated}`)
+  }, [currentPage, isAuthenticated])
+  
+  console.log(`🎯 [HEADER] Component rendering: currentPage=${currentPage}`)
 
-  // DOM Override: Force active class management to bypass React batching issues
-  useLayoutEffect(() => {
-    console.log(`🔧 [HEADER] DOM Override - updating active classes for: ${currentPage}`)
-    
-    // Clear all active classes first
-    const allNavLinks = document.querySelectorAll('.header__nav-link')
-    allNavLinks.forEach(link => {
-      link.classList.remove('header__nav-link--active')
-    })
-    
-    // Apply active class to current page
-    const activeLink = document.querySelector(`[data-nav-page="${currentPage}"]`)
-    if (activeLink) {
-      activeLink.classList.add('header__nav-link--active')
-      console.log(`🔧 [HEADER] Applied active class to: ${currentPage}`)
-    }
-  }, [currentPage])
-
+  // Check admin status for authenticated users
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
@@ -68,8 +45,22 @@ export function Header({ isAuthenticated = false }: HeaderProps) {
     }
   }, [isAuthenticated])
 
+  // Navigation configuration with authentication-based filtering
+  const getNavigationItems = () => {
+    const allItems = [
+      { key: 'landing' as Page, translationKey: 'ui.home', show: true, authRequired: false },
+      { key: 'game' as Page, translationKey: 'ui.gamesRoom', show: true, authRequired: false },
+      { key: 'village' as Page, translationKey: 'ui.village', show: isAuthenticated, authRequired: true },
+      { key: 'profile' as Page, translationKey: 'ui.profile', show: isAuthenticated, authRequired: true },
+      { key: 'auth' as Page, translationKey: 'ui.signIn', show: !isAuthenticated, authRequired: false },
+      { key: 'admin' as Page, translationKey: 'ui.admin', show: isAuthenticated && isAdmin, authRequired: true, isAdminOnly: true },
+    ]
+
+    return allItems.filter(item => item.show)
+  }
+
   return (
-    <header className="header">
+    <header className="header" data-active-page={currentPage}>
       <div className="header__container">
         <div className="header__content">
           <div className="header__brand">
@@ -77,33 +68,28 @@ export function Header({ isAuthenticated = false }: HeaderProps) {
             <span className="header__tagline">{t('ui.tagline')}</span>
           </div>
           
-          {isAuthenticated && (
-            <nav className="header__nav">
-              {Object.values(NAV_MAP).map((navItem) => {
-                // Skip admin-only items if user is not admin
-                if (navItem.isAdminOnly && !isAdmin) return null
-                
-                const isActive = currentPage === navItem.key
-                const baseClasses = 'header__nav-link'
-                const primaryClass = navItem.isPrimary ? 'header__nav-link--primary' : ''
-                const adminClass = navItem.isAdminOnly ? 'header__nav-link--admin' : ''
-                const activeClass = isActive ? 'header__nav-link--active' : ''
-                const className = `${baseClasses} ${primaryClass} ${adminClass} ${activeClass}`.trim()
-                
-                return (
-                  <Button
-                    key={navItem.key}
-                    variant="ghost"
-                    onClick={() => navigate(navItem.key)}
-                    className={className}
-                    data-nav-page={navItem.key}
-                  >
-                    {t(navItem.translationKey)}
-                  </Button>
-                )
-              })}
-            </nav>
-          )}
+          {/* Unified Navigation - Single Source of Truth */}
+          <nav className="header__nav">
+            {getNavigationItems().map((item) => {
+              const baseClasses = 'header__nav-link'
+              const primaryClass = item.key === 'village' ? 'header__nav-link--primary' : ''
+              const adminClass = item.isAdminOnly ? 'header__nav-link--admin' : ''
+              const activeClass = currentPage === item.key ? 'header__nav-link--active' : ''
+              const className = `${baseClasses} ${primaryClass} ${adminClass} ${activeClass}`.trim()
+              
+              return (
+                <Button
+                  key={item.key}
+                  variant="ghost"
+                  onClick={() => navigate(item.key)}
+                  className={className}
+                  data-nav-page={item.key}
+                >
+                  {t(item.translationKey)}
+                </Button>
+              )
+            })}
+          </nav>
           
           <div className="header__actions">
             <LanguageSwitcher className="header__language-switcher" />

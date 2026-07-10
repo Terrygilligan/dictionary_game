@@ -8,12 +8,17 @@ interface NavigationContextType {
   isNavigating: boolean
 }
 
-const NavigationContext = createContext<NavigationContextType | undefined>(undefined)
+const NavigationContext = createContext<NavigationContextType>({
+  currentPage: 'landing',
+  navigate: () => console.warn('Navigation not initialized'),
+  isNavigating: false,
+})
 
 export function NavigationProvider({ children }: { children: ReactNode }) {
   const [currentPage, setCurrentPage] = useState<Page>(() => {
-    // Initialize from URL
+    // Initialize from URL with fallback
     const path = window.location.pathname
+    
     if (path === '/' || path === '/landing') return 'landing'
     if (path === '/auth') return 'auth'
     if (path === '/games') return 'games'
@@ -21,16 +26,18 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     if (path === '/game') return 'game'
     if (path === '/village') return 'village'
     if (path === '/admin') return 'admin'
+    
     return 'landing'
   })
 
   const [isNavigating, setIsNavigating] = useState(false)
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Debug: Log page changes
+  // Debug: Track NavigationProvider mounts and state changes
   useEffect(() => {
-    console.log(`📄 [NAV] Page changed to: ${currentPage}`)
-  }, [currentPage])
+    console.log('🧭 [NAVIGATION] Provider mounted/updated:', { currentPage, isNavigating })
+  }, [currentPage, isNavigating])
+
 
   const navigate = (page: Page) => {
     // Clear existing timer
@@ -40,7 +47,6 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
 
     // Emit NAV_START event immediately
     if (page !== currentPage) {
-      console.log(`🚀 [NAV] NAV_START emitted: ${currentPage} → ${page}`)
       setIsNavigating(true)
       
       // Dispatch custom event for global listeners
@@ -51,17 +57,14 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
 
     // Debounce navigation to prevent rapid successive changes
     debounceTimerRef.current = setTimeout(() => {
-      console.log(`🧭 [NAV] Navigate called: ${currentPage} → ${page}`)
       setCurrentPage(page)
       // Update URL without page reload
       window.history.pushState(null, '', `/${page === 'landing' ? '' : page}`)
-      console.log(`🧭 [NAV] Navigation complete: ${page}`)
       
       // Emit NAV_COMPLETE after page change and URL update
       window.dispatchEvent(new CustomEvent('NAV_COMPLETE', { 
         detail: { from: currentPage, to: page } 
       }))
-      console.log(`🎯 [NAV] NAV_COMPLETE emitted: ${currentPage} → ${page}`)
       
       // Reset navigation state after transition
       setTimeout(() => {
@@ -93,8 +96,10 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const contextValue = { currentPage, navigate, isNavigating }
+  
   return (
-    <NavigationContext.Provider value={{ currentPage, navigate, isNavigating }}>
+    <NavigationContext.Provider value={contextValue}>
       {children}
     </NavigationContext.Provider>
   )
@@ -102,8 +107,11 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
 
 export function useNavigation() {
   const context = useContext(NavigationContext)
+  
+  // Removed diagnostic logs for cleaner console
   if (!context) {
-    throw new Error('useNavigation must be used within NavigationProvider')
+    console.error('Navigation context is null - check provider hierarchy')
   }
-  return context
+  
+  return context // Default context ensures this never returns undefined
 }

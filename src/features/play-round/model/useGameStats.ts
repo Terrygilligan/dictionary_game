@@ -3,16 +3,20 @@ import { useGameState } from './useGame.ts'
 import { useUserDispatch, useCurrentUser } from '@/entities/user/model/useUser.ts'
 import { userService } from '@/services/userService'
 import { useNavigationCleanup } from '@/shared/lib/navigation/useAtomicReset'
+import { useIdentityReady } from './useIdentityReady'
 import type { UserCommand } from '@/entities/user/model'
 
 /**
  * Hook to automatically update user stats when a game finishes
- * Only works for authenticated users
+ * Only works for authenticated users with resolved identity
  */
 export function useGameStats() {
-  const gameState = useGameState()
+  const { isReady, tenant_id, aggregate_id } = useIdentityReady()
   const userDispatch = useUserDispatch()
   const currentUser = useCurrentUser()
+
+  // useGameState now handles null identity parameters safely
+  const gameState = useGameState(tenant_id, aggregate_id)
 
   // Register cleanup function for navigation changes
   useNavigationCleanup(() => {
@@ -20,8 +24,18 @@ export function useGameStats() {
   })
 
   useEffect(() => {
+    // Only update stats when identity is ready, user is authenticated, and game finishes
+    if (!isReady || !tenant_id || !aggregate_id || !gameState || !userDispatch || !currentUser) {
+      return
+    }
+
+    console.log(`[GAME_STATS] Subscription attempt starting. tenant_id: ${tenant_id}, aggregate_id: ${aggregate_id}`)
+    console.log('[GAME_STATS] Executing useGameState subscription')
+
     // Only update stats for authenticated users when game finishes
-    if (gameState.status === 'finished' && userDispatch && currentUser) {
+    if (gameState.status === 'finished') {
+      console.log('📊 [GAME_STATS] Game finished, updating stats for user:', currentUser.id)
+      
       // Calculate stats from the game state
       const correctAnswers = gameState.answers.filter(answer => answer.correct).length
       const totalQuestions = gameState.answers.length
@@ -54,9 +68,11 @@ export function useGameStats() {
         const newTotalQuestions = currentStats.totalQuestions + totalQuestions
         const newHighestStreak = Math.max(currentStats.highestStreak, highestStreak)
 
-        // Dispatch stats update command
+        // Dispatch stats update command with proper identity metadata
         const statsCommand: UserCommand = {
           type: 'stats/update',
+          tenant_id,      // ✅ Identity compliance
+          aggregate_id,  // ✅ Identity compliance
           gamesPlayed: newGamesPlayed,
           correctAnswers: newCorrectAnswers,
           totalQuestions: newTotalQuestions,
@@ -64,6 +80,7 @@ export function useGameStats() {
           highestStreak: newHighestStreak,
         }
 
+        console.log('📊 [GAME_STATS] Dispatching stats update:', statsCommand)
         userDispatch(statsCommand)
 
         // Save to Firestore
@@ -81,5 +98,5 @@ export function useGameStats() {
         console.error('Failed to load/save user stats:', error)
       })
     }
-  }, [gameState.status, gameState.answers, gameState.streak, userDispatch, currentUser])
+  }, [isReady, tenant_id, aggregate_id, gameState, userDispatch, currentUser])
 }

@@ -32,6 +32,17 @@ export const decideGame: Decider<GameState, GameCommand, GameEvent> = (state, co
       const choice = round.choices.find((c) => c.id === command.choiceId)
       if (!choice) return []
       const nextStreak = choice.correct ? state.streak + 1 : 0
+      
+      // DEBUG: Log answer submission for test debugging
+      console.log('🔍 [DECIDE] Answer submitted:', {
+        choiceId: command.choiceId,
+        choiceCorrect: choice.correct,
+        roundIndex: state.currentRound,
+        nextStreak,
+        tenant_id,
+        aggregate_id
+      })
+      
       // Record the cause (the answer) before its effect (the streak change).
       return [
         {

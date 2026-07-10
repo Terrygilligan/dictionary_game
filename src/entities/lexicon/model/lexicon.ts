@@ -22,7 +22,7 @@ export function getWordByCoord(coord: WordCoordinate): LexiconWord | null {
  * Get random words for the Quiz game
  */
 export function getRandomWords(count: number, seed?: number): LexiconWord[] {
-  const rng = seededRng(seed || Date.now())
+  const rng = seededRng(seed !== undefined ? seed : Date.now())
   
   // Create a copy of the array to avoid modifying the original
   const shuffled = [...lexiconWords]
@@ -89,22 +89,10 @@ export function getWordsForLanguage(language: string): { word: string; definitio
 /**
  * Get random words for a specific language
  */
-export function getRandomWordsForLanguage(count: number, language: string, seed?: number): { word: string; definition: string; conceptId: string }[] {
+export function getRandomWordsForLanguage(count: number, language: string): { word: string; definition: string; conceptId: string }[] {
   const languageWords = getWordsForLanguage(language)
-  const rng = seededRng(seed || Date.now())
   
-  // Create a copy of the array to avoid modifying the original
-  const shuffled = [...languageWords]
-  
-  // Fisher-Yates shuffle using the seeded RNG
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1))
-    if (j >= 0 && j < shuffled.length) {
-      const temp = shuffled[i]!
-      shuffled[i] = shuffled[j]!
-      shuffled[j] = temp
-    }
-  }
-  
-  return shuffled.slice(0, Math.min(count, shuffled.length))
+  // Return words in original order - let the caller handle randomization
+  // This ensures deterministic behavior when combined with seeded RNG
+  return languageWords.slice(0, Math.min(count, languageWords.length))
 }

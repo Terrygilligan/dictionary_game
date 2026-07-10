@@ -3,20 +3,33 @@ import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 import { Button } from '@/shared/ui/Button'
 import { useNavigation } from '@/shared/lib/navigation'
 import { useGameDispatch } from '@/features/play-round'
+import { useGameIdentity } from '@/features/play-round/model/useFirebaseAuth'
 
 export function LandingPage() {
   const { t } = useTranslate()
   const { navigate, currentPage } = useNavigation()
   const dispatch = useGameDispatch()
+  const { tenant_id, aggregate_id, isLoading, error } = useGameIdentity()
 
-  // Debug info
-  console.log('🏠 [LANDING] LandingPage rendering, currentPage:', currentPage)
-
-  // Reset game state when landing page loads
+  // Debug: Verify navigation hook is working
   useEffect(() => {
-    console.log('🔄 [LANDING] Resetting game state on landing page load')
-    dispatch({ type: 'resetGame', reason: 'navigation-change' })
-  }, [dispatch])
+    console.log('🏠 [LANDING] LandingPage mounted/updated')
+    console.log('🏠 [LANDING] Navigation hook state:', { currentPage, navigate: typeof navigate })
+  }, [currentPage, navigate])
+
+  
+  // Reset game state when landing page loads - only if identity is available
+  useEffect(() => {
+    // Only dispatch if identity is resolved to prevent COMMAND_IDENTITY_VIOLATION
+    if (!isLoading && !error && tenant_id && aggregate_id) {
+      dispatch({ 
+        type: 'resetGame', 
+        reason: 'navigation-change',
+        tenant_id,      // ✅ Identity compliance
+        aggregate_id    // ✅ Identity compliance
+      })
+    }
+  }, [dispatch, tenant_id, aggregate_id, isLoading, error])
 
   // Helper function to safely get translations with fallbacks
   const safeT = (key: string, fallback?: string) => {
@@ -29,27 +42,13 @@ export function LandingPage() {
   }
 
   const handlePlayAsGuest = () => {
-    console.log('🎮 [LANDING] Play as Guest button clicked!')
-    console.log('📍 [LANDING] Current page:', currentPage)
-    console.log('📍 [LANDING] Navigate function type:', typeof navigate)
-    try {
-      navigate('game')
-      console.log('✅ [LANDING] Navigation to game succeeded')
-    } catch (error) {
-      console.error('❌ [LANDING] Navigation to game failed:', error)
-    }
+    console.log('🎮 [LANDING] Play as Guest button clicked - navigating to game page')
+    navigate('game')
   }
 
   const handleRegister = () => {
-    console.log('📝 [LANDING] Register button clicked!')
-    console.log('📍 [LANDING] Current page:', currentPage)
-    console.log('📍 [LANDING] Navigate function type:', typeof navigate)
-    try {
-      navigate('auth')
-      console.log('✅ [LANDING] Navigation to auth succeeded')
-    } catch (error) {
-      console.error('❌ [LANDING] Navigation to auth failed:', error)
-    }
+    console.log('📝 [LANDING] Register button clicked - navigating to auth page')
+    navigate('auth')
   }
 
   return (
@@ -93,28 +92,7 @@ export function LandingPage() {
         </div>
       </div>
 
-      {/* Debug Section */}
-      <div className="panel panel--center">
-        <h2 className="panel__title">🔧 Debug Tools</h2>
-        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Button onClick={() => console.log('🧪 [DEBUG] Test button clicked!')}>
-            Test Button
-          </Button>
-          <Button onClick={() => (window as any).runButtonDiagnostics()}>
-            Run Diagnostics
-          </Button>
-          <Button onClick={() => (window as any).testDOMStructure()}>
-            Test DOM
-          </Button>
-          <Button onClick={() => (window as any).testNavigation()}>
-            Test Navigation
-          </Button>
-        </div>
-        <div style={{ marginTop: '1rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          Current page: {currentPage} | Open console for detailed logs
-        </div>
-      </div>
-
+      
       {/* Features Section */}
       <div className="panel panel--center">
         <h2 className="panel__title">{safeT('landing.features.title', 'Features')}</h2>

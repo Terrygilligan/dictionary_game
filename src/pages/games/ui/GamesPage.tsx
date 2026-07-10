@@ -3,6 +3,13 @@ import { Button } from '@/shared/ui/Button'
 
 export function GamesPage() {
   const { t } = useTranslate()
+  
+  // State Audit: Log button state and DOM node
+  console.log('[DEBUG_STATE]', { 
+    isReady: true, 
+    status: 'ready', 
+    DOM_node: document.querySelector('.game-card__button') 
+  })
 
   return (
     <div className="page">

@@ -13,6 +13,7 @@ export interface UserProviderProps {
 }
 
 export function UserProvider({ children, store }: UserProviderProps) {
+  console.log('[USER_PROVIDER] Initializing identity (on component mount)')
   const [userStore] = useState<UserStore>(() => store ?? createUserStore())
   const [isInitialized, setIsInitialized] = useState(false)
   const [userStats, setUserStats] = useState<UserStats | null>(null)
@@ -41,6 +42,8 @@ export function UserProvider({ children, store }: UserProviderProps) {
     const unsubscribe = userStore.subscribe(() => {
       const state = userStore.getState()
       const userId = state.user?.id
+      
+      console.log(`[USER_PROVIDER] tenant_id updated to: ${userId}`)
       
       // Fetch user stats when user changes
       if (userId && userId !== currentUserId) {

@@ -1605,10 +1605,6 @@ button, .button, input[type="button"], input[type="submit"], [role="button"] {
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
   transition: all 0.2s ease;
-  /* Reset-First: Clear all active styles by default */
-  background: transparent;
-  box-shadow: none;
-  font-weight: normal;
 }
 
 .header__nav-link--primary {
@@ -1622,25 +1618,15 @@ button, .button, input[type="button"], input[type="submit"], [role="button"] {
   border-color: var(--accent);
 }
 
-/* CSS-Attribute Truth: Active state based on parent data attribute */
-/* Higher specificity overrides the reset rule above */
-.header[data-active-page="landing"] .header__nav-link[data-nav-page="landing"],
-.header[data-active-page="games"] .header__nav-link[data-nav-page="games"],
-.header[data-active-page="village"] .header__nav-link[data-nav-page="village"],
-.header[data-active-page="profile"] .header__nav-link[data-nav-page="profile"],
-.header[data-active-page="admin"] .header__nav-link[data-nav-page="admin"] {
-  background: var(--accent) !important;
+.header__nav-link--active {
+  background: var(--accent);
   color: white;
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.3);
   font-weight: 600;
 }
 
-.header[data-active-page="landing"] .header__nav-link[data-nav-page="landing"]:hover,
-.header[data-active-page="games"] .header__nav-link[data-nav-page="games"]:hover,
-.header[data-active-page="village"] .header__nav-link[data-nav-page="village"]:hover,
-.header[data-active-page="profile"] .header__nav-link[data-nav-page="profile"]:hover,
-.header[data-active-page="admin"] .header__nav-link[data-nav-page="admin"]:hover {
+.header__nav-link--active:hover {
   background: var(--accent-strong);
   border-color: var(--accent-strong);
 }

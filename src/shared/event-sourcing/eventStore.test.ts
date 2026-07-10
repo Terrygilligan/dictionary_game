@@ -15,11 +15,11 @@ afterEach(() => {
 describe('createEventStore', () => {
   it('derives state purely from the committed log', () => {
     const store = createEventStore(evolve, 0)
-    store.commit([{ type: 'incremented', by: 2 }, { type: 'incremented', by: 3 }])
-    expect(store.getState()).toBe(5)
-    store.commit([{ type: 'reset' }])
-    expect(store.getState()).toBe(0)
-    expect(store.getLog()).toHaveLength(3)
+    store.commit([{ type: 'incremented', by: 2 }, { type: 'incremented', by: 3 }], 'tenant-123', 'aggregate-456')
+    expect(store.getState('tenant-123', 'aggregate-456')).toBe(5)
+    store.commit([{ type: 'reset' }], 'tenant-123', 'aggregate-456')
+    expect(store.getState('tenant-123', 'aggregate-456')).toBe(0)
+    expect(store.getLog('tenant-123', 'aggregate-456')).toHaveLength(3)
   })
 
   it('assigns monotonic sequence numbers and metadata', () => {
@@ -27,9 +27,9 @@ describe('createEventStore', () => {
     setIdFactory(() => `ev-${(n += 1)}`)
     const clock = { now: () => 1000 }
     const store = createEventStore(evolve, 0, { clock })
-    store.commit([{ type: 'incremented', by: 1 }])
-    store.commit([{ type: 'incremented', by: 1 }])
-    const log = store.getLog()
+    store.commit([{ type: 'incremented', by: 1 }], 'tenant-123', 'aggregate-456')
+    store.commit([{ type: 'incremented', by: 1 }], 'tenant-123', 'aggregate-456')
+    const log = store.getLog('tenant-123', 'aggregate-456')
     expect(log.map((e) => e.seq)).toEqual([0, 1])
     expect(log.map((e) => e.id)).toEqual(['ev-1', 'ev-2'])
     expect(log.every((e) => e.timestamp === 1000)).toBe(true)
@@ -38,20 +38,20 @@ describe('createEventStore', () => {
   it('notifies change subscribers once per commit', () => {
     const store = createEventStore(evolve, 0)
     const listener = vi.fn()
-    const unsubscribe = store.subscribe(listener)
-    store.commit([{ type: 'incremented', by: 1 }])
-    store.commit([{ type: 'incremented', by: 1 }])
+    const unsubscribe = store.subscribe('tenant-123', 'aggregate-456', listener)
+    store.commit([{ type: 'incremented', by: 1 }], 'tenant-123', 'aggregate-456')
+    store.commit([{ type: 'incremented', by: 1 }], 'tenant-123', 'aggregate-456')
     expect(listener).toHaveBeenCalledTimes(2)
     unsubscribe()
-    store.commit([{ type: 'incremented', by: 1 }])
+    store.commit([{ type: 'incremented', by: 1 }], 'tenant-123', 'aggregate-456')
     expect(listener).toHaveBeenCalledTimes(2)
   })
 
   it('does nothing when committing an empty batch', () => {
     const store = createEventStore(evolve, 0)
     const listener = vi.fn()
-    store.subscribe(listener)
-    expect(store.commit([])).toEqual([])
+    store.subscribe('tenant-123', 'aggregate-456', listener)
+    expect(store.commit([], 'tenant-123', 'aggregate-456')).toEqual([])
     expect(listener).not.toHaveBeenCalled()
   })
 
@@ -59,7 +59,7 @@ describe('createEventStore', () => {
     const store = createEventStore(evolve, 0)
     const seen: CounterEvent[] = []
     store.bus.subscribeAll((event) => seen.push(event))
-    store.commit([{ type: 'incremented', by: 4 }, { type: 'reset' }])
+    store.commit([{ type: 'incremented', by: 4 }, { type: 'reset' }], 'tenant-123', 'aggregate-456')
     expect(seen).toEqual([{ type: 'incremented', by: 4 }, { type: 'reset' }])
   })
 })
