@@ -5,7 +5,7 @@
  * 
  * Following Event-Driven Architecture Blueprint compliance with explicit multi-tenant isolation.
  */
-export interface EventEnvelope<TEvent> {
+export interface EventEnvelope<TEvent extends { type: string }> {
   readonly id: string
   readonly seq: number
   readonly timestamp: number
@@ -13,6 +13,8 @@ export interface EventEnvelope<TEvent> {
   readonly tenant_id: string
   /** Unique identifier for the aggregate (game session, entity instance) */
   readonly aggregate_id: string
+  /** Duplicated from event.type for the EventBus channel routing. */
+  readonly type: TEvent['type']
   readonly event: TEvent
 }
 

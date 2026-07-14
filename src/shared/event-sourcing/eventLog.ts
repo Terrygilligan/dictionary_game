@@ -69,6 +69,7 @@ const isEnvelope = (value: unknown): value is EventEnvelope<{ type: string }> =>
   typeof value.id === 'string' &&
   typeof value.seq === 'number' &&
   typeof value.timestamp === 'number' &&
+  typeof value.type === 'string' &&
   isRecord(value.event) &&
   typeof (value.event as { type?: unknown }).type === 'string'
 
@@ -113,6 +114,7 @@ export function createEventLogService<TState, TEvent extends { type: string }>(
         timestamp: clock.now(),
         tenant_id: 'default-tenant',
         aggregate_id: 'default-aggregate',
+        type: event.type,
         event,
       }))
       log = { ...log, events: [...log.events, ...committed] }

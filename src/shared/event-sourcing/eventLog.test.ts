@@ -70,7 +70,7 @@ describe('EventLogService', () => {
     const existing: EventLog<CounterEvent> = {
       matchId: 'm',
       createdAt: 1,
-      events: [{ id: 'a', seq: 0, timestamp: 1, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate', event: { type: 'incremented', by: 1 } }],
+      events: [{ id: 'a', seq: 0, timestamp: 1, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate', type: 'incremented', event: { type: 'incremented', by: 1 } }],
     }
     const service = createEventLogService<number, CounterEvent>('m', { initialLog: existing })
     service.append([{ type: 'incremented', by: 1 }])

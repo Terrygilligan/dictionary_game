@@ -22,3 +22,5 @@ export type {
   AuditQuery,
   AuditProjectionState,
 } from './types.ts'
+
+export { AuditProjection, createAuditProjection } from '../auditProjectionCore.ts'

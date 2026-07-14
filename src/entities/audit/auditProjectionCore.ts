@@ -153,32 +153,42 @@ export class AuditProjection {
   }
 
   /**
+   * Process an already-enveloped event directly.
+   * Used by AuditProjectionService so real EventStore metadata is preserved.
+   */
+  public processEvent(envelope: EventEnvelope<GameEvent | UserEvent | VillageEvent>): void {
+    try {
+      const auditEntry: AuditLogEntry = {
+        id: envelope.id,
+        envelope,
+        eventType: envelope.event.type,
+        tenantId: envelope.tenant_id,
+        aggregateId: envelope.aggregate_id,
+        timestamp: envelope.timestamp,
+        payload: envelope.event as unknown as Record<string, unknown>,
+      }
+
+      this.addAuditEntry(auditEntry)
+
+      this.log('Processed event from envelope:', envelope.event.type, 'for tenant:', envelope.tenant_id)
+    } catch (error) {
+      this.log('Error processing event:', error)
+    }
+  }
+
+  /**
    * Handle incoming events from the EventBus
    * This is the core event processing logic
    */
-  private handleEvent(event: GameEvent | UserEvent | VillageEvent, _envelope?: EventEnvelope<GameEvent | UserEvent | VillageEvent>): void {
+  private handleEvent(event: GameEvent | UserEvent | VillageEvent): void {
     if (!this.isStarted) {
       return
     }
 
     try {
-      // Create audit entry
-      const auditEntry: AuditLogEntry = {
-        id: this.generateAuditId(),
-        envelope: this.createEventEnvelope(event),
-        eventType: event.type,
-        tenantId: this.extractTenantId(event),
-        aggregateId: this.extractAggregateId(event),
-        timestamp: Date.now(),
-        payload: event as unknown as Record<string, unknown>,
-      }
-
-      // Add to audit log
-      this.addAuditEntry(auditEntry)
-
-      this.log('Processed event:', event.type, 'for tenant:', auditEntry.tenantId)
+      this.processEvent(this.createEventEnvelope(event))
     } catch (error) {
-      this.log('Error processing event:', error)
+      this.log('Error handling event:', error)
     }
   }
 
@@ -290,6 +300,7 @@ export class AuditProjection {
       timestamp: Date.now(),
       tenant_id: this.extractTenantId(event),
       aggregate_id: this.extractAggregateId(event),
+      type: event.type,
       event,
     }
   }
@@ -326,13 +337,6 @@ export class AuditProjection {
     }
     
     return 'system'
-  }
-
-  /**
-   * Generate unique audit entry ID
-   */
-  private generateAuditId(): string {
-    return `audit-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   }
 
   /**

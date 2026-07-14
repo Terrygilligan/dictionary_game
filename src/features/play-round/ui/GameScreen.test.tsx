@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { GameScreen } from './GameScreen.tsx'
 import { GameProvider } from '../model/GameProvider.tsx'
+import { createGameStore } from '../model/gameStore.ts'
 import { seededRng } from '@/shared/lib'
 
 // Mock useTranslate to provide actual English translations
@@ -37,7 +38,7 @@ afterEach(cleanup)
 
 function renderGame(roundCount: number) {
   return render(
-    <GameProvider>
+    <GameProvider store={createGameStore()}>
       <GameScreen deckOptions={{ roundCount, choicesPerRound: 4, rng: seededRng(3) }} />
     </GameProvider>,
   )

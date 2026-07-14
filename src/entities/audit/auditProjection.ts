@@ -218,6 +218,7 @@ export class AuditProjection {
       timestamp,
       tenant_id: this.extractTenantId(event),
       aggregate_id: this.extractAggregateId(event),
+      type: event.type,
       event
     }
 

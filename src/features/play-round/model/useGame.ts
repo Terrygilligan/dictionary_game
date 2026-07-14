@@ -3,7 +3,7 @@ import type { GameCommand, GameState } from '@/entities/game'
 import { GameStoreContext } from './context.ts'
 import type { GameStore } from './gameStore.ts'
 
-function useGameStore(): GameStore {
+export function useGameStore(): GameStore {
   const store = useContext(GameStoreContext)
   if (!store) {
     throw new Error('useGame hooks must be used within a <GameProvider>')

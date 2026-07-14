@@ -52,3 +52,6 @@ export function createGameStore(options: EventStoreOptions = {}): GameStore {
     },
   }
 }
+
+/** Shared application game store. */
+export const gameStore = createGameStore()

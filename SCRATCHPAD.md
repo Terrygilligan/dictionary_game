@@ -517,3 +517,24 @@ Implement a comprehensive SuperAdmin Dashboard for real-time audit and visualiza
 
 ### Files to be created
 `src/entities/audit/model/`, `src/services/auditProjectionService.ts`, `src/features/super-admin-dashboard/`, `src/pages/admin/`, dashboard UI components and routing integration.
+
+---
+
+## 0009 — Live Telemetry Dashboard Wiring
+
+**Date:** 2026-07-14
+**Status:** implemented
+
+### Goal
+Bridge the SuperAdmin dashboard from a mock-fed `AuditProjection` to the real multi-tenant `EventStore` bus, so the `EventStreamDashboard` displays telemetry from real testers as events are committed.
+
+### Architectural rationale
+
+- **Envelope is the source of truth.** `EventStore.commit` now publishes the full `EventEnvelope` (id, seq, timestamp, tenant_id, aggregate_id, event) on `store.bus` instead of the bare payload. This preserves the identity metadata required by audit/projections without requiring consumers to scan the event payload.
+- **Projection is fed, not isolated.** `AuditProjectionService` is the bridge. It subscribes directly to `gameStore.bus`, `userStore.bus`, and `villageStore.bus`, and forwards every received envelope to `AuditProjectionCore.processEvent`. Existing events are loaded from `EventStore.getLog()` before live subscription.
+- **Shared store instances.** `GameProvider` and `UserProvider` now default to shared store singletons (`gameStore` and `userStore`) instead of minting fresh instances on mount. This guarantees the dashboard, `AuthCommandService`, and gameplay all observe the same event logs.
+- **No mock data.** `SuperAdminDashboardPage` no longer creates an isolated `eventBus` or `MockEventGenerator`. It receives the `AuditProjection` from a live `AuditProjectionService` wired to the real stores.
+- **No schema changes needed.** The `EventEnvelope` already carries all fields the audit projection requires (`id`, `seq`, `timestamp`, `tenant_id`, `aggregate_id`, `event`). No new domain events were introduced; this is a read-projection wiring change.
+
+### Files modified
+`src/shared/event-sourcing/eventStore.ts`, `src/shared/event-sourcing/eventStore.test.ts`, `src/entities/audit/auditProjectionCore.ts`, `src/entities/audit/model/index.ts`, `src/services/auditProjectionService.ts`, `src/pages/admin/SuperAdminDashboardPage.tsx`, `src/features/play-round/model/gameStore.ts`, `src/features/play-round/model/GameProvider.tsx`, `src/features/play-round/model/useGame.ts`, `src/features/play-round/index.ts`, `src/entities/user/model/UserProvider.tsx`.

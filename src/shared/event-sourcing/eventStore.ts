@@ -12,8 +12,8 @@ export interface EventStore<TState, TEvent extends { type: string }> {
   commit(events: readonly TEvent[], tenant_id: string, aggregate_id: string): readonly EventEnvelope<TEvent>[]
   /** Subscribe to state changes for a specific tenant (for `useSyncExternalStore`). */
   subscribe(tenant_id: string, aggregate_id: string, listener: () => void): () => void
-  /** The underlying bus, for observing individual domain events. */
-  readonly bus: EventBus<TEvent>
+  /** The underlying bus, for observing individual committed event envelopes. */
+  readonly bus: EventBus<EventEnvelope<TEvent>>
   /** Get all tenant IDs for administrative purposes (requires elevated permissions). */
   getTenantIds(): readonly string[]
 }
@@ -41,7 +41,7 @@ export function createEventStore<TState, TEvent extends { type: string }>(
   options: EventStoreOptions = {},
 ): EventStore<TState, TEvent> {
   const clock = options.clock ?? { now: () => Date.now() }
-  const bus = createEventBus<TEvent>()
+  const bus = createEventBus<EventEnvelope<TEvent>>()
   const changeListeners = new Map<string, Set<() => void>>() // tenant:aggregate -> listeners
 
   // Multi-tenant storage: tenant_id -> aggregate_id -> event log
@@ -114,6 +114,7 @@ export function createEventStore<TState, TEvent extends { type: string }>(
         timestamp: clock.now(),
         tenant_id,
         aggregate_id,
+        type: event.type,
         event,
       }))
 
@@ -123,8 +124,8 @@ export function createEventStore<TState, TEvent extends { type: string }>(
       tenantLog.set(aggregate_id, newLog)
       tenantState.set(aggregate_id, newState)
 
-      // Publish events and notify listeners
-      for (const entry of committed) bus.publish(entry.event)
+      // Publish full envelopes and notify listeners
+      for (const entry of committed) bus.publish(entry)
       
       const key = getTenantAggregateKey(tenant_id, aggregate_id)
       const listeners = changeListeners.get(key)

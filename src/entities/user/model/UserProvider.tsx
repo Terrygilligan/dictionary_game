@@ -1,9 +1,8 @@
 import { useState, useEffect, type ReactNode } from 'react'
 import { UserStoreContext } from './context.ts'
 import { UserStatsContext } from './UserStatsContext.tsx'
-import { createUserStore, type UserStore } from './userStore.ts'
+import { userStore, type UserStore } from './userStore.ts'
 import type { UserStats } from './types.ts'
-import type { UserCommand } from './commands.ts'
 
 export interface UserProviderProps {
   children: ReactNode
@@ -18,24 +17,9 @@ export function UserProvider({ children, store }: UserProviderProps) {
   const [statsLoading, setStatsLoading] = useState(false)
   const [statsError, setStatsError] = useState<string | null>(null)
   
-  const [userStore] = useState<UserStore>(() => store ?? createUserStore())
+  const [providedUserStore] = useState<UserStore>(() => store ?? userStore)
 
-  // Simple reset function instead of global assignment
-  const resetUserStore = () => {
-    setCurrentUserId(null)
-    setUserStats(null)
-    setStatsLoading(false)
-    setStatsError(null)
-    // Reset the store to initial state
-    const logoutCommand: UserCommand = {
-      type: 'user/authenticate',
-      tenant_id: 'default',
-      aggregate_id: 'default',
-      token: '' // Empty token for logout
-    }
-    userStore.dispatch(logoutCommand)
-  }
-
+  
   // Fetch user stats function
   const fetchUserStats = async (userId: string): Promise<void> => {
     if (!userId) return
@@ -46,7 +30,7 @@ export function UserProvider({ children, store }: UserProviderProps) {
     try {
       // This would typically call an API service
       // For now, we'll simulate with existing user data
-      const currentState = userStore.getState('default', 'default')
+      const currentState = providedUserStore.getState('default', 'default')
       if (currentState.user?.id === userId && currentState.user.stats) {
         setUserStats(currentState.user.stats)
       } else {
@@ -72,14 +56,14 @@ export function UserProvider({ children, store }: UserProviderProps) {
     console.log('👤 [USER_PROVIDER] UserProvider mounted')
     
     // Context Mapping: Initialize currentUserId from store state
-    const initialState = userStore.getState('default', 'default')
+    const initialState = providedUserStore.getState('default', 'default')
     if (initialState.user?.id) {
       setCurrentUserId(initialState.user.id)
     }
     
     // Subscribe to store changes using the event bus
-    const unsubscribe = userStore.bus.subscribeAll(() => {
-      const state = userStore.getState('default', 'default')
+    const unsubscribe = providedUserStore.bus.subscribeAll(() => {
+      const state = providedUserStore.getState('default', 'default')
       console.log('👤 [USER_PROVIDER] Store state updated:', state)
       
       // Update currentUserId when user changes
@@ -96,7 +80,7 @@ export function UserProvider({ children, store }: UserProviderProps) {
       console.log('👤 [USER_PROVIDER] UserProvider unmounting')
       unsubscribe()
     }
-  }, [userStore, currentUserId])
+  }, [providedUserStore, currentUserId])
 
   // Data Fetching: Trigger fetchUserStats when userId changes
   useEffect(() => {
@@ -121,7 +105,7 @@ export function UserProvider({ children, store }: UserProviderProps) {
 
   // Export Reset: Provide both UserStoreContext and UserStatsContext
   return (
-    <UserStoreContext.Provider value={userStore}>
+    <UserStoreContext.Provider value={providedUserStore}>
       <UserStatsContext.Provider value={statsValue}>
         {children}
       </UserStatsContext.Provider>

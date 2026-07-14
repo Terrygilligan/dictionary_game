@@ -1,16 +1,19 @@
+import type { EventEnvelope } from '../shared/event-sourcing/types.ts'
 import type { EventStore } from '../shared/event-sourcing/eventStore.ts'
 import type { GameEvent } from '../entities/game/model/events.ts'
 import type { UserEvent } from '../entities/user/model/events.ts'
 import type { VillageEvent } from '../entities/village/model/events.ts'
-import { createSubscribeWrapper } from '../shared/event-bus/eventBus.ts'
-import type {
-  AuditEvent,
-  TenantMetrics,
-  EventTypeMetrics,
-  SystemMetrics,
-  AuditFilter,
-  AuditQuery,
-  AuditProjectionState,
+import { createEventBus } from '../shared/event-bus/index.ts'
+import {
+  AuditProjection,
+  createAuditProjection,
+  type AuditEvent,
+  type TenantMetrics,
+  type EventTypeMetrics,
+  type SystemMetrics,
+  type AuditFilter,
+  type AuditQuery,
+  type AuditProjectionState,
 } from '../entities/audit/model/index.ts'
 
 export type SystemEvent = GameEvent | UserEvent | VillageEvent
@@ -36,7 +39,10 @@ export interface AuditProjectionService {
   
   /** Export events to specified format */
   exportEvents(filter: AuditFilter, format: 'json' | 'csv'): Promise<string>
-  
+
+  /** Get the underlying AuditProjection for the dashboard */
+  getAuditProjection(): AuditProjection
+
   /** Subscribe to audit projection updates */
   subscribe(listener: (state: AuditProjectionState) => void): () => void
 }
@@ -55,11 +61,10 @@ export interface AuditProjectionOptions {
 export function createAuditProjectionService(
   gameStore: EventStore<unknown, GameEvent>,
   userStore: EventStore<unknown, UserEvent>,
-  villageStore: EventStore<unknown, VillageEvent>,
+  villageStore?: EventStore<unknown, VillageEvent>,
   options: AuditProjectionOptions = {}
 ): AuditProjectionService {
   const {
-    batch_size = 100,
     metrics_interval = 5000,
     max_events = 10000,
     debug = false,
@@ -88,6 +93,10 @@ export function createAuditProjectionService(
   const tenant_metrics = new Map<string, TenantMetrics>()
   const event_type_metrics = new Map<string, EventTypeMetrics>()
 
+  const auditProjection = createAuditProjection(createEventBus<SystemEvent>())
+  let store_unsubscribers: Array<() => void> = []
+  let metrics_timer: NodeJS.Timeout | null = null
+
   const log = (message: string, ...args: unknown[]) => {
     if (debug) {
       console.log(`[AuditProjection] ${message}`, ...args)
@@ -104,28 +113,25 @@ export function createAuditProjectionService(
     return 'village'
   }
 
-  const processEvent = (
-    event: SystemEvent,
-    tenant_id: string,
-    aggregate_id: string,
-    sequence: number,
-    timestamp: number
-  ): AuditEvent => {
+  const processEvent = (envelope: EventEnvelope<SystemEvent>): AuditEvent => {
+    // Forward the real EventStore envelope to the audit projection
+    auditProjection.processEvent(envelope as EventEnvelope<GameEvent | UserEvent | VillageEvent>)
+
     const audit_event: AuditEvent = {
-      id: `${tenant_id}:${aggregate_id}:${sequence}`,
-      tenant_id,
-      aggregate_id,
-      aggregate_type: extractAggregateType(event.type),
-      event_type: event.type,
-      timestamp,
-      sequence,
-      metadata: event as unknown as Record<string, unknown>,
+      id: envelope.id,
+      tenant_id: envelope.tenant_id,
+      aggregate_id: envelope.aggregate_id,
+      aggregate_type: extractAggregateType(envelope.event.type),
+      event_type: envelope.event.type,
+      timestamp: envelope.timestamp,
+      sequence: envelope.seq,
+      metadata: envelope.event as unknown as Record<string, unknown>,
       processed_at: Date.now(),
     }
 
     // Update cache
     event_cache.set(audit_event.id, audit_event)
-    
+
     // Maintain cache size
     if (event_cache.size > max_events) {
       const oldest_key = Array.from(event_cache.keys())[0] ?? ''
@@ -134,7 +140,7 @@ export function createAuditProjectionService(
 
     // Update tenant metrics
     updateTenantMetrics(audit_event)
-    
+
     // Update event type metrics
     updateEventTypeMetrics(audit_event)
 
@@ -252,49 +258,37 @@ export function createAuditProjectionService(
 
   const processAllEvents = async () => {
     log('Processing all events from stores')
-    
+
     // Process game events
-    const game_tenants = gameStore.getTenantIds()
-    for (const tenant_id of game_tenants) {
-      const game_events = gameStore.getLog(tenant_id)
-      for (const envelope of game_events) {
-        processEvent(
-          envelope.event,
-          envelope.tenant_id,
-          envelope.aggregate_id,
-          envelope.seq,
-          envelope.timestamp
-        )
+    if (gameStore && typeof gameStore.getTenantIds === 'function') {
+      const game_tenants = gameStore.getTenantIds()
+      for (const tenant_id of game_tenants) {
+        const game_events = gameStore.getLog(tenant_id)
+        for (const envelope of game_events) {
+          processEvent(envelope as EventEnvelope<SystemEvent>)
+        }
       }
     }
 
     // Process user events
-    const user_tenants = userStore.getTenantIds()
-    for (const tenant_id of user_tenants) {
-      const user_events = userStore.getLog(tenant_id)
-      for (const envelope of user_events) {
-        processEvent(
-          envelope.event,
-          envelope.tenant_id,
-          envelope.aggregate_id,
-          envelope.seq,
-          envelope.timestamp
-        )
+    if (userStore && typeof userStore.getTenantIds === 'function') {
+      const user_tenants = userStore.getTenantIds()
+      for (const tenant_id of user_tenants) {
+        const user_events = userStore.getLog(tenant_id)
+        for (const envelope of user_events) {
+          processEvent(envelope as EventEnvelope<SystemEvent>)
+        }
       }
     }
 
     // Process village events
-    const village_tenants = villageStore.getTenantIds()
-    for (const tenant_id of village_tenants) {
-      const village_events = villageStore.getLog(tenant_id)
-      for (const envelope of village_events) {
-        processEvent(
-          envelope.event,
-          envelope.tenant_id,
-          envelope.aggregate_id,
-          envelope.seq,
-          envelope.timestamp
-        )
+    if (villageStore && typeof villageStore.getTenantIds === 'function') {
+      const village_tenants = villageStore.getTenantIds()
+      for (const tenant_id of village_tenants) {
+        const village_events = villageStore.getLog(tenant_id)
+        for (const envelope of village_events) {
+          processEvent(envelope as EventEnvelope<SystemEvent>)
+        }
       }
     }
 
@@ -302,30 +296,41 @@ export function createAuditProjectionService(
     log(`Processed ${event_cache.size} total events`)
   }
 
-  const subscribeToStores = () => {
-    // Create subscribe wrappers for each store
-    const gameSubscribe = createSubscribeWrapper(gameStore.bus)
-    const userSubscribe = createSubscribeWrapper(userStore.bus)
-    const villageSubscribe = createSubscribeWrapper(villageStore.bus)
+  const subscribeToStores = (): Array<() => void> => {
+    const unsubscribers: Array<() => void> = []
 
     // Subscribe to game store events
-    gameSubscribe((event: GameEvent) => {
-      // This is a simplified approach - in practice, we'd need to know tenant/aggregate info
-      log('Game event received:', event.type)
-    })
+    if (gameStore?.bus?.subscribeAll) {
+      unsubscribers.push(
+        gameStore.bus.subscribeAll((envelope) => {
+          processEvent(envelope as EventEnvelope<SystemEvent>)
+          updateProjectionState()
+        })
+      )
+    }
 
     // Subscribe to user store events
-    userSubscribe((event: UserEvent) => {
-      log('User event received:', event.type)
-    })
+    if (userStore?.bus?.subscribeAll) {
+      unsubscribers.push(
+        userStore.bus.subscribeAll((envelope) => {
+          processEvent(envelope as EventEnvelope<SystemEvent>)
+          updateProjectionState()
+        })
+      )
+    }
 
     // Subscribe to village store events
-    villageSubscribe((event: VillageEvent) => {
-      log('Village event received:', event.type)
-    })
-  }
+    if (villageStore?.bus?.subscribeAll) {
+      unsubscribers.push(
+        villageStore.bus.subscribeAll((envelope) => {
+          processEvent(envelope as EventEnvelope<SystemEvent>)
+          updateProjectionState()
+        })
+      )
+    }
 
-  let metrics_timer: NodeJS.Timeout | null = null
+    return unsubscribers
+  }
 
   return {
     async start(): Promise<void> {
@@ -343,9 +348,9 @@ export function createAuditProjectionService(
 
       // Process existing events
       await processAllEvents()
-      
+
       // Subscribe to new events
-      subscribeToStores()
+      store_unsubscribers = subscribeToStores()
 
       // Start metrics calculation interval
       metrics_timer = setInterval(updateProjectionState, metrics_interval)
@@ -376,6 +381,12 @@ export function createAuditProjectionService(
         clearInterval(metrics_timer)
         metrics_timer = null
       }
+
+      // Unsubscribe from store buses
+      for (const unsubscribe of store_unsubscribers) {
+        unsubscribe()
+      }
+      store_unsubscribers = []
 
       // Clear subscriptions
       listeners.clear()
@@ -437,6 +448,10 @@ export function createAuditProjectionService(
 
     getTenantMetrics(tenant_id: string): TenantMetrics | null {
       return tenant_metrics.get(tenant_id) || null
+    },
+
+    getAuditProjection(): AuditProjection {
+      return auditProjection
     },
 
     async exportEvents(filter: AuditFilter, format: 'json' | 'csv'): Promise<string> {

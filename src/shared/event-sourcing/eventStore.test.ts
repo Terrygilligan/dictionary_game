@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createEventStore } from './eventStore.ts'
 import { resetIdFactory, setIdFactory } from '../lib/id.ts'
+import type { EventEnvelope } from './types.ts'
 
 type CounterEvent = { type: 'incremented'; by: number } | { type: 'reset' }
 
@@ -55,11 +56,14 @@ describe('createEventStore', () => {
     expect(listener).not.toHaveBeenCalled()
   })
 
-  it('publishes each event on the bus', () => {
+  it('publishes each full EventEnvelope on the bus', () => {
     const store = createEventStore(evolve, 0)
-    const seen: CounterEvent[] = []
+    const seen: EventEnvelope<CounterEvent>[] = []
     store.bus.subscribeAll((event) => seen.push(event))
     store.commit([{ type: 'incremented', by: 4 }, { type: 'reset' }], 'tenant-123', 'aggregate-456')
-    expect(seen).toEqual([{ type: 'incremented', by: 4 }, { type: 'reset' }])
+    expect(seen.map((e) => e.event)).toEqual([{ type: 'incremented', by: 4 }, { type: 'reset' }])
+    expect(seen.map((e) => e.type)).toEqual(['incremented', 'reset'])
+    expect(seen.map((e) => e.tenant_id)).toEqual(['tenant-123', 'tenant-123'])
+    expect(seen.map((e) => e.aggregate_id)).toEqual(['aggregate-456', 'aggregate-456'])
   })
 })
