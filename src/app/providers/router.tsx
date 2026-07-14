@@ -5,7 +5,7 @@ import { ProfilePage } from '@/pages/profile'
 import { GamesPage } from '@/pages/games'
 import { GamePage } from '@/pages/game'
 import { VillagePage } from '@/pages/village'
-import { AdminPage } from '@/pages/admin/AdminPage'
+import { SuperAdminDashboardPage } from '@/pages/admin/SuperAdminDashboardPage'
 import { BaseLayout } from '@/app/ui/BaseLayout'
 import { AuthGuard } from '@/shared/auth/AuthGuard'
 import { initializeI18n } from '@/shared/lib/i18n/i18nService'
@@ -13,11 +13,10 @@ import { useNavigation } from '@/shared/lib/navigation'
 import type { User } from '@/entities/user'
 
 export function AppRouter() {
-  const { currentPage, navigate, isNavigating } = useNavigation()
+  const { currentPage, navigate } = useNavigation()
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isVoidTransition, setIsVoidTransition] = useState(false)
-  
+    
   // Debug: Track AppRouter renders to identify duplication
   useEffect(() => {
     console.log(`🔄 [ROUTER] AppRouter render: currentPage=${currentPage}, isLoading=${isLoading}`)
@@ -115,14 +114,6 @@ export function AppRouter() {
             <p>Loading...</p>
           </div>
         </div>
-      ) : isVoidTransition ? (
-        <BaseLayout isAuthenticated={!!user}>
-          <div className="page">
-            <div className="panel panel--center">
-              <p>Transitioning...</p>
-            </div>
-          </div>
-        </BaseLayout>
       ) : (
         <BaseLayout isAuthenticated={!!user}>
           {(() => {
@@ -147,6 +138,8 @@ export function AppRouter() {
                 )
               case 'auth':
                 return <AuthPage onAuthSuccess={handleAuthSuccess} />
+              case 'admin':
+                return <SuperAdminDashboardPage />
               default:
                 return <LandingPage />
             }
