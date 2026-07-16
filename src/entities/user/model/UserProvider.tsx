@@ -5,6 +5,9 @@ import { UserClaimsProvider } from './UserClaimsContext.tsx'
 import { userStore, type UserStore } from './userStore.ts'
 import type { UserStats, UserClaims } from './types.ts'
 import { useFirebaseAuth } from '@/features/play-round/model/useFirebaseAuth'
+import { createLogger } from '@/shared/lib/logger'
+
+const logger = createLogger('USER_PROVIDER')
 
 export interface UserProviderProps {
   children: ReactNode
@@ -67,43 +70,43 @@ export function UserProvider({ children, store }: UserProviderProps) {
 
   // Identity resolution: Map Firebase user to tenant/aggregate IDs
   useEffect(() => {
-    console.log('🔄 [USER_PROVIDER_INIT] Auth state check:', { authLoading, userExists: !!user?.id })
+    logger.log('Auth state check:', { authLoading, userExists: !!user?.id })
     
     if (!authLoading) {
-      console.log('✅ [USER_PROVIDER_INIT] Firebase auth settled, determining user state')
+      logger.log('Firebase auth settled, determining user state')
       
       if (user?.id) {
-        console.log('🔐 [USER_PROVIDER_INIT] Identity resolved:', { userId: user.id, claims: user.claims })
-        console.log('🔐 [USER_PROVIDER_INIT] Full user object:', JSON.stringify(user, null, 2))
+        logger.log('Identity resolved:', { userId: user.id, claims: user.claims })
+        logger.log('Full user object (sanitized):', { id: user.id, email: user.email, claims: user.claims })
         setTenantId(user.id)
         setAggregateId(user.id) // Map both to uid for per-user isolation
         setCurrentUserId(user.id)
         setUserClaims(user.claims || null)
-        console.log('🔐 [USER_PROVIDER_INIT] setUserClaims called with:', user.claims)
+        logger.log('setUserClaims called with:', user.claims)
       } else {
-        console.log('🚪 [USER_PROVIDER_INIT] No authenticated user, clearing all identity state')
+        logger.log('No authenticated user, clearing all identity state')
         setTenantId(null)
         setAggregateId(null)
         setCurrentUserId(null)
         setUserClaims(null)
         setUserStats(null) // Clear stats on sign-out
-        console.log('✅ [USER_PROVIDER_INIT] Identity state cleared')
+        logger.log('Identity state cleared')
       }
       
       // Auth initialization complete
-      console.log('✅ [USER_PROVIDER_INIT] Auth initialization complete, isInitializing = false')
+      logger.log('Auth initialization complete, isInitializing = false')
       setIsInitializing(false)
     } else {
-      console.log('⏳ [USER_PROVIDER_INIT] Firebase auth still loading, isInitializing = true')
+      logger.log('Firebase auth still loading, isInitializing = true')
     }
   }, [user, authLoading])
 
   useEffect(() => {
-    console.log('👤 [USER_PROVIDER] UserProvider mounted')
+    logger.log('UserProvider mounted')
     
     // Only initialize store state if identity is resolved
     if (!tenantId || !aggregateId) {
-      console.log('👤 [USER_PROVIDER] Waiting for identity resolution')
+      logger.log('Waiting for identity resolution')
       return
     }
     
@@ -116,7 +119,7 @@ export function UserProvider({ children, store }: UserProviderProps) {
     // Subscribe to store changes using the event bus
     const unsubscribe = providedUserStore.bus.subscribeAll(() => {
       const state = providedUserStore.getState(tenantId, aggregateId)
-      console.log('👤 [USER_PROVIDER] Store state updated:', state)
+      logger.log('Store state updated:', state)
       
       // Update currentUserId when user changes
       if (state.user?.id !== currentUserId) {
@@ -129,7 +132,7 @@ export function UserProvider({ children, store }: UserProviderProps) {
     })
 
     return () => {
-      console.log('👤 [USER_PROVIDER] UserProvider unmounting')
+      logger.log('UserProvider unmounting')
       unsubscribe()
     }
   }, [providedUserStore, currentUserId, tenantId, aggregateId])

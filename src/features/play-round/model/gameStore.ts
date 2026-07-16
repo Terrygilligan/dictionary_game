@@ -8,6 +8,9 @@ import {
 } from '@/entities/game'
 import { createEventStore, type EventStore, type EventStoreOptions } from '@/shared/event-sourcing'
 import { gameEventBus, createGameEventEnvelope } from '@/entities/game/model/GameEventBus'
+import { createLogger } from '@/shared/lib/logger'
+
+const logger = createLogger('STORE')
 
 export interface GameStore extends EventStore<GameState, GameEvent> {
   /** Runs a command through the decider and commits any resulting events. */
@@ -33,21 +36,21 @@ export function createGameStore(options: EventStoreOptions = {}): GameStore {
         throw new Error('COMMAND_IDENTITY_VIOLATION: Missing mandatory aggregate_id')
       }
 
-      console.log(`🎮 [STORE] Dispatching command:`, command.type, { 
-        tenant_id: command.tenant_id, 
+      logger.log(`Dispatching command:`, command.type, {
+        tenant_id: command.tenant_id,
         aggregate_id: command.aggregate_id,
         command: command
       })
-      
+
       // Pure domain processing - command used exactly as received
       const currentState = store.getState(command.tenant_id, command.aggregate_id)
-      console.log(`🎮 [STORE] Current state before decision:`, currentState.status)
-      
+      logger.log(`Current state before decision:`, currentState.status)
+
       const events = decideGame(currentState, command)
-      console.log(`🎮 [STORE] Generated events:`, events.length, events)
-      
+      logger.log(`Generated events:`, events.length, events)
+
       store.commit(events, command.tenant_id, command.aggregate_id)
-      
+
       // Publish events to GameEventBus for audit trail and projections
       events.forEach(event => {
         const correlationId = crypto.randomUUID()
@@ -58,11 +61,11 @@ export function createGameStore(options: EventStoreOptions = {}): GameStore {
           event
         )
         gameEventBus.publish(envelope)
-        console.log(`📤 [STORE] Published event to GameEventBus:`, event.type, { correlationId })
+        logger.log(`Published event to GameEventBus:`, event.type, { correlationId })
       })
-      
+
       const newState = store.getState(command.tenant_id, command.aggregate_id)
-      console.log(`🎮 [STORE] New state:`, newState.status)
+      logger.log(`New state:`, newState.status)
     },
   }
 }
