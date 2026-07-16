@@ -197,7 +197,6 @@ export function getWordsNeedingPractice(missedWords: readonly MissedWord[], thre
  * Check if learner is ready for stage progression
  */
 export function isReadyForStageProgression(state: LinguisticState): boolean {
-  const _currentThreshold = STAGE_THRESHOLDS[state.stage]
   const nextStage = getNextStage(state.stage)
   
   if (!nextStage) return false

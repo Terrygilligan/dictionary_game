@@ -15,6 +15,7 @@
 import type { AIAgent, EventContext } from '../agent.ts'
 import type { TermAssignedEvent, FeedbackGeneratedEvent, AudioReadyEvent, AudioGenerationFailedEvent } from '@/entities/game/model/audioEvents.ts'
 import type { GameEvent } from '@/entities/game'
+import type { EventEnvelope } from '@/shared/event-sourcing'
 import { DEFAULT_VOICE_MAPPINGS } from '@/entities/game/model/audioEvents.ts'
 
 /**
@@ -39,15 +40,15 @@ interface VoiceSettings {
 }
 
 /**
- * Streaming TTS Response
+ * Streaming TTS Response - Unused interface
  */
-interface StreamingTTSResponse {
-  audio: ReadableStream<Uint8Array>
-  text: string
-  voiceId: string
-  duration: number
-  model: string
-}
+// interface StreamingTTSResponse {
+//   audio: ReadableStream<Uint8Array>
+//   text: string
+//   voiceId: string
+//   duration: number
+//   model: string
+// }
 
 /**
  * Voice Configuration by Tenant
@@ -131,12 +132,13 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
   /**
    * Process text events and synthesize audio
    */
-  async process(context: EventContext): Promise<GameEvent[]> {
+  async process(context: EventContext): Promise<(TermAssignedEvent | FeedbackGeneratedEvent | AudioReadyEvent | AudioGenerationFailedEvent)[]> {
     const { tenant_id, aggregate_id, eventHistory } = context
 
-    // Find relevant text events
-    const textEvents = eventHistory.filter(e => 
-      this.subscribedEventTypes.has(e.event.type)
+    // Find relevant text events with proper typing
+    const textEvents = eventHistory.filter((e): e is EventEnvelope<TermAssignedEvent | FeedbackGeneratedEvent> => 
+      this.subscribedEventTypes.has(e.event.type) &&
+      (e.event.type === 'term/assigned' || e.event.type === 'feedback/generated')
     )
 
     if (textEvents.length === 0) {
@@ -145,7 +147,7 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
 
     console.log(`🤖 [ELEVENLABS] Processing ${textEvents.length} text events for tenant: ${tenant_id}`)
 
-    const events: GameEvent[] = []
+    const events: (TermAssignedEvent | FeedbackGeneratedEvent | AudioReadyEvent | AudioGenerationFailedEvent)[] = []
 
     // Process each text event
     for (const eventEnvelope of textEvents) {
@@ -154,11 +156,11 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
       if (event.type === 'term/assigned') {
         const termEvent = event as TermAssignedEvent
         const audioEvent = await this.synthesizeTextToAudio(termEvent, tenant_id, aggregate_id)
-        events.push(audioEvent)
+        events.push(audioEvent as AudioReadyEvent | AudioGenerationFailedEvent)
       } else if (event.type === 'feedback/generated') {
         const feedbackEvent = event as FeedbackGeneratedEvent
         const audioEvent = await this.synthesizeTextToAudio(feedbackEvent, tenant_id, aggregate_id)
-        events.push(audioEvent)
+        events.push(audioEvent as AudioReadyEvent | AudioGenerationFailedEvent)
       }
     }
 
@@ -218,7 +220,7 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
       const processingTime = Date.now() - startTime
 
       console.log(`🤖 [ELEVENLABS] TTS completed in ${processingTime}ms`)
-      console.log(`  Text: "${event.text || event.term}"`)
+      console.log(`  Text: "${event.type === 'term/assigned' ? event.term : event.feedback}"`)
       console.log(`  Voice: ${voiceConfig.voiceId}`)
       console.log(`  Duration: ${audioBlob.size} bytes`)
 
@@ -228,7 +230,7 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
         tenant_id,
         aggregate_id,
         audioBlob,
-        text: event.text || event.term,
+        text: event.type === 'term/assigned' ? event.term : event.feedback,
         voiceId: voiceConfig.voiceId,
         duration: 0, // Will be calculated from audio blob
         format: 'mp3',
@@ -241,6 +243,7 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
       console.error('🤖 [ELEVENLABS] TTS failed:', error)
       
       const processingTime = Date.now() - startTime
+    console.debug(`[ElevenLabs] TTS processing completed in ${processingTime}ms`)
       
       // Emit failure event
       const failureEvent: AudioGenerationFailedEvent = {
@@ -250,7 +253,7 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
         errorType: 'elevenlabs',
         errorMessage: error instanceof Error ? error.message : 'Unknown error',
         originalEvent: event.type,
-        fallbackText: event.text || event.term
+        fallbackText: event.type === 'term/assigned' ? event.term : event.feedback
       }
 
       return failureEvent
@@ -264,8 +267,9 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
     event: TermAssignedEvent | FeedbackGeneratedEvent,
     voiceConfig: TenantVoiceConfig
   ): FormData {
-    const text = event.text || event.term
-    const language = event.language || 'en'
+    const text = event.type === 'term/assigned' ? event.term : event.feedback
+    const language = event.type === 'term/assigned' ? event.language : 'en'
+    console.debug(`[ElevenLabs] Processing TTS for language: ${language}`)
     
     const formData = new FormData()
     formData.append('text', text)
@@ -342,13 +346,13 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
       tenant_id,
       voiceId: 'bella', // Default English voice
       language: 'en',
-      provider: 'elevenlabs',
       settings: {
         stability: 0.5,
         similarity_boost: 0.5,
         style: 'moderate',
         use_speaker_boost: false,
-        optimize_streaming_latency: 2
+        optimize_streaming_latency: 2,
+        output_format: 'mp3_22050_32'
       },
       preferences: {
         speed: 1.0,
@@ -373,14 +377,18 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
     console.log(`🤖 [EVENLABS] Updated voice config for tenant: ${tenant_id}`)
   }
 
-  /**
-   * Get streaming TTS response for low latency
-   */
+  // Unused streaming TTS method - functionality not currently needed
+  /*
   private async getStreamingTTS(
     text: string,
     voiceConfig: TenantVoiceConfig,
     language: string
   ): Promise<StreamingTTSResponse> {
+    if (!text) {
+      throw new Error("TTS text missing - cannot generate audio")
+    }
+    console.debug(`[ElevenLabs] Streaming TTS requested for language: ${language}`)
+    
     const formData = new FormData()
     formData.append('text', text)
     formData.append('model', voiceConfig.settings.optimize_streaming_latency === 4 ? 'eleven_turbo_v2' : 'eleven_monolingual_v1')
@@ -394,16 +402,18 @@ export class ElevenLabsAgent implements AIAgent<TermAssignedEvent | FeedbackGene
     }
     
     const audioStream = response.body
-    const reader = audioStream.getReader()
+    const reader = audioStream?.getReader()
+    console.debug(`[ElevenLabs] Audio stream reader created successfully`)
     
     return {
-      audio: audioStream,
-      text,
+      audio: audioStream!,
+      text: text,
       voiceId: voiceConfig.voiceId,
       duration: 0,
       model: voiceConfig.settings.optimize_streaming_latency === 4 ? 'eleven_turbo_v2' : 'eleven_monolingual_v1'
     }
   }
+  */
 
   /**
    * Get ElevenLabs API status

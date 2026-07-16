@@ -7,7 +7,7 @@ import { useEmailVerification } from '@/hooks/useEmailVerification'
  */
 export function EmailVerificationTracker() {
   const userState = useUserStore()
-  const currentUser = userState.getState().user
+  const currentUser = userState.getState('default', 'default').user
 
   // Use the email verification hook to detect changes and dispatch events
   useEmailVerification(currentUser)

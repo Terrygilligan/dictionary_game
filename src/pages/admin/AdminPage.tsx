@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getAuth } from 'firebase/auth'
+import { authService } from '@/services/auth'
 import { EventStreamDashboard, createAuditStore } from '../../features/super-admin-dashboard/index.ts'
 import { createAuditProjectionService } from '../../services/auditProjectionService.ts'
 
@@ -11,8 +11,7 @@ export function AdminPage() {
   useEffect(() => {
     const initializeAdmin = async () => {
       try {
-        const auth = getAuth()
-        const user = auth.currentUser
+        const user = authService.getCurrentUser()
         
         if (!user) {
           setLoading(false)
@@ -20,8 +19,8 @@ export function AdminPage() {
         }
 
         // Check if user has admin claims
-        const idTokenResult = await user.getIdTokenResult()
-        const adminClaim = idTokenResult.claims.admin
+        const idTokenResult = await authService.getIdTokenResult()
+        const adminClaim = idTokenResult.claims.admin || idTokenResult.claims.superAdmin
         
         if (!adminClaim) {
           console.warn('User does not have admin privileges')

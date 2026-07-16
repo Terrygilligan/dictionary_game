@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react'
 
-export type Page = 'landing' | 'auth' | 'games' | 'profile' | 'game' | 'village' | 'admin'
+export type Page = 'landing' | 'auth' | 'games' | 'profile' | 'village' | 'admin'
 
 interface NavigationContextType {
   currentPage: Page
@@ -18,15 +18,35 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   const [currentPage, setCurrentPage] = useState<Page>(() => {
     // Initialize from URL with fallback
     const path = window.location.pathname
-    
-    if (path === '/' || path === '/landing') return 'landing'
-    if (path === '/auth') return 'auth'
-    if (path === '/games') return 'games'
-    if (path === '/profile') return 'profile'
-    if (path === '/game') return 'game'
-    if (path === '/village') return 'village'
-    if (path === '/admin') return 'admin'
-    
+
+    console.log('[NavigationContext] Initializing from URL:', path)
+
+    if (path === '/' || path === '/landing') {
+      console.log('[NavigationContext] Mapped to: landing')
+      return 'landing'
+    }
+    if (path === '/auth') {
+      console.log('[NavigationContext] Mapped to: auth')
+      return 'auth'
+    }
+    if (path === '/games' || path === '/game') {
+      console.log('[NavigationContext] Mapped to: games')
+      return 'games'
+    }
+    if (path === '/profile') {
+      console.log('[NavigationContext] Mapped to: profile')
+      return 'profile'
+    }
+    if (path === '/village') {
+      console.log('[NavigationContext] Mapped to: village')
+      return 'village'
+    }
+    if (path === '/admin') {
+      console.log('[NavigationContext] Mapped to: admin')
+      return 'admin'
+    }
+
+    console.log('[NavigationContext] Unknown path, defaulting to: landing')
     return 'landing'
   })
 
@@ -57,9 +77,12 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
 
     // Debounce navigation to prevent rapid successive changes
     debounceTimerRef.current = setTimeout(() => {
+      console.log('🧭 [NAVIGATION] Executing navigation to:', page)
       setCurrentPage(page)
       // Update URL without page reload
-      window.history.pushState(null, '', `/${page === 'landing' ? '' : page}`)
+      const urlPath = page === 'landing' ? '' : page
+      window.history.pushState(null, '', `/${urlPath}`)
+      console.log('🧭 [NAVIGATION] URL updated to:', `/${urlPath}`)
       
       // Emit NAV_COMPLETE after page change and URL update
       window.dispatchEvent(new CustomEvent('NAV_COMPLETE', { 
@@ -77,13 +100,34 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handlePopState = () => {
       const path = window.location.pathname
-      if (path === '/' || path === '/landing') setCurrentPage('landing')
-      else if (path === '/auth') setCurrentPage('auth')
-      else if (path === '/games') setCurrentPage('games')
-      else if (path === '/profile') setCurrentPage('profile')
-      else if (path === '/game') setCurrentPage('game')
-      else if (path === '/village') setCurrentPage('village')
-      else if (path === '/admin') setCurrentPage('admin')
+      console.log('🧭 [NAVIGATION] PopState event, path:', path)
+      if (path === '/' || path === '/landing') {
+        console.log('[NavigationContext] PopState mapping to: landing')
+        setCurrentPage('landing')
+      }
+      else if (path === '/auth') {
+        console.log('[NavigationContext] PopState mapping to: auth')
+        setCurrentPage('auth')
+      }
+      else if (path === '/games' || path === '/game') {
+        console.log('[NavigationContext] PopState mapping to: games')
+        setCurrentPage('games')
+      }
+      else if (path === '/profile') {
+        console.log('[NavigationContext] PopState mapping to: profile')
+        setCurrentPage('profile')
+      }
+      else if (path === '/village') {
+        console.log('[NavigationContext] PopState mapping to: village')
+        setCurrentPage('village')
+      }
+      else if (path === '/admin') {
+        console.log('[NavigationContext] PopState mapping to: admin')
+        setCurrentPage('admin')
+      } else {
+        console.log('[NavigationContext] PopState unknown path, defaulting to: landing')
+        setCurrentPage('landing')
+      }
     }
 
     window.addEventListener('popstate', handlePopState)
@@ -112,6 +156,6 @@ export function useNavigation() {
   if (!context) {
     console.error('Navigation context is null - check provider hierarchy')
   }
-  
+
   return context // Default context ensures this never returns undefined
 }

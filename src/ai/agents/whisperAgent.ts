@@ -104,8 +104,8 @@ export class WhisperAgent implements AIAgent<AudioRecordedEvent | AudioTranscrib
   /**
    * Process audio events and transcribe them
    */
-  process(context: EventContext): GameEvent[] {
-    const { tenant_id, aggregate_id, eventHistory } = context
+  async process(context: EventContext): Promise<(AudioRecordedEvent | AudioTranscribedEvent | AudioGenerationFailedEvent)[]> {
+    const { tenant_id, eventHistory } = context
 
     // Find the most recent audio recorded event
     const audioEvent = [...eventHistory]
@@ -147,7 +147,7 @@ export class WhisperAgent implements AIAgent<AudioRecordedEvent | AudioTranscrib
   /**
    * Transcribe audio using Whisper API
    */
-  private async transcribeAudio(audioEvent: AudioRecordedEvent): Promise<GameEvent[]> {
+  private async transcribeAudio(audioEvent: AudioRecordedEvent): Promise<(AudioRecordedEvent | AudioTranscribedEvent | AudioGenerationFailedEvent)[]> {
     const startTime = Date.now()
 
     try {
@@ -191,15 +191,14 @@ export class WhisperAgent implements AIAgent<AudioRecordedEvent | AudioTranscrib
         originalAudioBlob: audioEvent.audioBlob
       }
 
-      // Convert transcription to answer/submitted event
-      const answerEvent = this.convertToAnswerEvent(transcriptionEvent)
-
-      return [transcriptionEvent, answerEvent]
+      // Return only the transcription event
+      return [transcriptionEvent]
 
     } catch (error) {
       console.error('🤖 [WHISPER] Transcription failed:', error)
       
       const processingTime = Date.now() - startTime
+    console.debug(`[Whisper] Transcription completed in ${processingTime}ms`)
       
       // Emit failure event
       const failureEvent: AudioGenerationFailedEvent = {
@@ -259,35 +258,10 @@ export class WhisperAgent implements AIAgent<AudioRecordedEvent | AudioTranscrib
     return totalConfidence / transcription.words.length
   }
 
-  /**
-   * Convert transcription event to answer/submitted event
-   */
-  private convertToAnswerEvent(transcriptionEvent: AudioTranscribedEvent): GameEvent {
-    // Extract the answer from transcription
-    // This is a simplified approach - in a real implementation,
-    // you might want to parse the transcription more intelligently
-    const text = transcriptionEvent.transcription.toLowerCase().trim()
-    
-    // Try to extract a choice from the transcription
-    const choiceId = this.extractChoiceFromText(text)
-    const roundIndex = 0 // Default round index, could be extracted from context
-    
-    // Determine if the answer is correct (placeholder logic)
-    const correct = this.determineCorrectness(choiceId, text)
+  // Unused method removed - convertToAnswerEvent functionality not currently needed
 
-    return {
-      type: 'answer/submitted',
-      tenant_id: transcriptionEvent.tenant_id,
-      aggregate_id: transcriptionEvent.aggregate_id,
-      roundIndex,
-      choiceId,
-      correct
-    }
-  }
-
-  /**
-   * Extract choice ID from transcribed text
-   */
+  // Unused method - extractChoiceFromText functionality not currently needed
+  /*
   private extractChoiceFromText(text: string): string {
     // Simple extraction logic - looks for common patterns
     const patterns = [
@@ -309,12 +283,9 @@ export class WhisperAgent implements AIAgent<AudioRecordedEvent | AudioTranscrib
     return words[0] || 'unknown'
   }
 
-  /**
-   * Determine correctness of the answer
-   * This is a placeholder - in a real implementation,
-    * you would compare against the actual correct answer
-   */
-  private determineCorrectness(choiceId: string, text: string): boolean {
+  // Unused method - determineCorrectness functionality not currently needed
+  /*
+  private _determineCorrectness(choiceId: string, _text: string): boolean {
     // Simple heuristic: positive words are "correct"
     const positiveWords = ['yes', 'correct', 'right', 'true', 'good']
     const negativeWords = ['no', 'wrong', 'false', 'bad', 'incorrect']
@@ -330,6 +301,7 @@ export class WhisperAgent implements AIAgent<AudioRecordedEvent | AudioTranscrib
     // Default to false for unknown choices
     return false
   }
+  */
 
   /**
    * Get Whisper API status

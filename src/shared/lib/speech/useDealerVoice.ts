@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback, useMemo } from 'react'
 
 // Types for the speech hook
 interface SpeechEvent {
@@ -27,7 +27,7 @@ export function useDealerVoice(gameState: any, eventLog: any[] = []) {
   const speechSynthesis = window.speechSynthesis
 
   // Phase-to-speech mapping
-  const phaseAnnouncements: Record<string, string> = {
+  const phaseAnnouncements: Record<string, string> = useMemo(() => ({
     idle: "Welcome to the Dictionary Game. Press Start to begin.",
     scroll: "Flicking through dictionary sections...",
     page: "Section locked. Select your page side.",
@@ -36,16 +36,10 @@ export function useDealerVoice(gameState: any, eventLog: any[] = []) {
     ready: "Coordinates locked. Ready to seal the word.",
     sealed: "Word sealed. The Dealer is ready.",
     revealed: "Word revealed!"
-  }
-
-  // Add speech event to queue
-  const enqueueSpeech = (text: string, priority: number = 1) => {
-    queueRef.current.events.push({ text, priority })
-    processQueue()
-  }
+  }), [])
 
   // Process the speech queue
-  const processQueue = () => {
+  const processQueue = useCallback(() => {
     if (queueRef.current.isSpeaking || queueRef.current.events.length === 0) {
       return
     }
@@ -75,10 +69,16 @@ export function useDealerVoice(gameState: any, eventLog: any[] = []) {
     }
 
     speechSynthesis.speak(utterance)
-  }
+  }, [speechSynthesis])
+
+  // Add speech event to queue
+  const enqueueSpeech = useCallback((text: string, priority: number = 1) => {
+    queueRef.current.events.push({ text, priority })
+    processQueue()
+  }, [processQueue])
 
   // Speak immediately (high priority)
-  const speakNow = (text: string) => {
+  const speakNow = useCallback((text: string) => {
     // Cancel current speech and clear queue for immediate announcements
     speechSynthesis.cancel()
     queueRef.current.events = []
@@ -90,7 +90,7 @@ export function useDealerVoice(gameState: any, eventLog: any[] = []) {
     utterance.volume = 0.8
     
     speechSynthesis.speak(utterance)
-  }
+  }, [speechSynthesis])
 
   // Monitor game state changes
   useEffect(() => {
@@ -102,7 +102,7 @@ export function useDealerVoice(gameState: any, eventLog: any[] = []) {
     if (announcement) {
       enqueueSpeech(announcement, 1)
     }
-  }, [gameState?.phase])
+  }, [gameState, phaseAnnouncements, enqueueSpeech])
 
   // Monitor event log for specific events
   useEffect(() => {
@@ -134,14 +134,14 @@ export function useDealerVoice(gameState: any, eventLog: any[] = []) {
         }
         break
     }
-  }, [eventLog])
+  }, [eventLog, enqueueSpeech, speakNow])
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
       speechSynthesis.cancel()
     }
-  }, [])
+  }, [speechSynthesis])
 
   return {
     speakNow,

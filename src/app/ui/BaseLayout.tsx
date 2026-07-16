@@ -8,7 +8,7 @@ interface BaseLayoutProps {
 }
 
 export function BaseLayout({ children, isAuthenticated }: BaseLayoutProps) {
-  const { currentPage, navigate } = useNavigation()
+  const { currentPage } = useNavigation()
   
   // Debug: Track BaseLayout renders to identify duplication
   useEffect(() => {

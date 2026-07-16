@@ -7,6 +7,7 @@ import {
   type GameState,
 } from '@/entities/game'
 import { createEventStore, type EventStore, type EventStoreOptions } from '@/shared/event-sourcing'
+import { gameEventBus, createGameEventEnvelope } from '@/entities/game/model/GameEventBus'
 
 export interface GameStore extends EventStore<GameState, GameEvent> {
   /** Runs a command through the decider and commits any resulting events. */
@@ -46,6 +47,19 @@ export function createGameStore(options: EventStoreOptions = {}): GameStore {
       console.log(`🎮 [STORE] Generated events:`, events.length, events)
       
       store.commit(events, command.tenant_id, command.aggregate_id)
+      
+      // Publish events to GameEventBus for audit trail and projections
+      events.forEach(event => {
+        const correlationId = crypto.randomUUID()
+        const envelope = createGameEventEnvelope(
+          command.tenant_id,
+          command.aggregate_id,
+          correlationId,
+          event
+        )
+        gameEventBus.publish(envelope)
+        console.log(`📤 [STORE] Published event to GameEventBus:`, event.type, { correlationId })
+      })
       
       const newState = store.getState(command.tenant_id, command.aggregate_id)
       console.log(`🎮 [STORE] New state:`, newState.status)

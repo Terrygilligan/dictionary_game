@@ -9,3 +9,13 @@ export interface VillageState {
   readonly error: string | null
   readonly lastUpdated: number | null
 }
+
+export const initialVillageState: VillageState = {
+  currentVillage: null,
+  villages: [],
+  stats: null,
+  battles: [],
+  isLoading: false,
+  error: null,
+  lastUpdated: null,
+}

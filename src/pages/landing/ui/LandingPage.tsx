@@ -42,8 +42,8 @@ export function LandingPage() {
   }
 
   const handlePlayAsGuest = () => {
-    console.log('🎮 [LANDING] Play as Guest button clicked - navigating to game page')
-    navigate('game')
+    console.log('🎮 [LANDING] Play as Guest button clicked - navigating to games page')
+    navigate('games')
   }
 
   const handleRegister = () => {

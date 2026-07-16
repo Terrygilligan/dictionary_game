@@ -8,10 +8,15 @@ import type { VillageEvent } from './events'
  * 
  * Commands represent user intentions that need to be validated
  * before being converted to events.
+ * 
+ * ARCHITECTURAL ENFORCEMENT: All commands MUST include tenant_id and aggregate_id
+ * for multi-tenant isolation and audit trail continuity.
  */
 
 export interface CreateVillageCommand {
   type: 'village/create'
+  tenant_id: string
+  aggregate_id: string
   name: string
   description: string
   userId: string
@@ -19,6 +24,8 @@ export interface CreateVillageCommand {
 
 export interface AddContributionCommand {
   type: 'contribution/add'
+  tenant_id: string
+  aggregate_id: string
   villageId: string
   userId: string
   userName: string
@@ -29,6 +36,8 @@ export interface AddContributionCommand {
 
 export interface VoteContributionCommand {
   type: 'contribution/vote'
+  tenant_id: string
+  aggregate_id: string
   villageId: string
   contributionId: string
   userId: string
@@ -37,6 +46,8 @@ export interface VoteContributionCommand {
 
 export interface CreateBattleCommand {
   type: 'battle/create'
+  tenant_id: string
+  aggregate_id: string
   villageId: string
   name: string
   description: string
@@ -45,7 +56,9 @@ export interface CreateBattleCommand {
   userId: string
 }
 
-export function decideVillage(command: CreateVillageCommand | AddContributionCommand | VoteContributionCommand | CreateBattleCommand): VillageEvent[] {
+export type VillageCommand = CreateVillageCommand | AddContributionCommand | VoteContributionCommand | CreateBattleCommand
+
+export function decideVillage(_state: any, command: VillageCommand): VillageEvent[] {
   switch (command.type) {
     case 'village/create':
       if (!command.name.trim()) {

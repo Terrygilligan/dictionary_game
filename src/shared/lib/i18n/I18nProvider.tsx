@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useState, useRef, type ReactNode } from 'react'
 import { initializeI18n, i18nService } from './i18nService'
 import type { SupportedLanguage } from './types'
 
@@ -15,13 +15,15 @@ const I18nContext = createContext<I18nContextValue | undefined>(undefined)
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [currentLanguage, setCurrentLanguage] = useState<SupportedLanguage>('en')
   const [isInitialized, setIsInitialized] = useState(false)
+  const isInitializingRef = useRef(false)
 
   useEffect(() => {
     const initialize = async () => {
       try {
         // Prevent race conditions by ensuring single initialization
-        if (isInitialized) return
+        if (isInitializingRef.current) return
         
+        isInitializingRef.current = true
         console.log('🌐 [I18N] Initializing with single source of truth')
         await initializeI18n()
         const language = i18nService.getCurrentLanguage()
@@ -39,7 +41,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     if (!isInitialized) {
       initialize()
     }
-  }, []) // Remove isInitialized dependency to prevent re-initialization
+  }, [isInitialized])
 
   const setLanguage = async (language: SupportedLanguage) => {
     try {

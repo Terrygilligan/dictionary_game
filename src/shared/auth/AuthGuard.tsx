@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { useNavigation } from '@/shared/lib/navigation'
 
 interface AuthGuardProps {
@@ -13,6 +13,15 @@ interface AuthGuardProps {
  */
 export function AuthGuard({ isAuthenticated, isLoading = false, children }: AuthGuardProps) {
   const { navigate } = useNavigation()
+  const [shouldRedirect, setShouldRedirect] = useState(false)
+
+  // Handle navigation in useEffect to prevent React warning
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate('auth')
+      setShouldRedirect(true)
+    }
+  }, [isLoading, isAuthenticated, navigate])
 
   // Wait for authentication to resolve before making decisions
   if (isLoading) {
@@ -25,9 +34,8 @@ export function AuthGuard({ isAuthenticated, isLoading = false, children }: Auth
     )
   }
 
-  // Redirect unauthenticated users to auth page
-  if (!isAuthenticated) {
-    navigate('auth')
+  // Show redirect state while navigation happens
+  if (!isAuthenticated || shouldRedirect) {
     return (
       <div className="page">
         <div className="panel panel--center">

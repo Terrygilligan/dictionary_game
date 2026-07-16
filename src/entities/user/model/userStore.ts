@@ -9,8 +9,9 @@ import {
 import { createEventStore, type EventStore, type EventStoreOptions } from '@/shared/event-sourcing'
 
 export interface UserStore extends EventStore<UserState, UserEvent> {
-  /** Runs a command through the decider and commits any resulting events. */
-  dispatch(command: UserCommand): void
+  /** Runs a command through the decider and commits any resulting events.
+   * Requires explicit tenant_id and aggregate_id for multi-tenant isolation. */
+  dispatch(command: UserCommand, tenant_id: string, aggregate_id: string): void
 }
 
 /**
@@ -22,9 +23,10 @@ export function createUserStore(options: EventStoreOptions = {}): UserStore {
 
   return {
     ...store,
-    dispatch(command) {
-      const currentState = store.getState('default', 'default')
-      store.commit(decideUser(currentState, command), 'default', 'default')
+    dispatch(command, tenant_id, aggregate_id) {
+      const currentState = store.getState(tenant_id, aggregate_id)
+      const events = decideUser(currentState, command)
+      store.commit(events, tenant_id, aggregate_id)
     },
   }
 }

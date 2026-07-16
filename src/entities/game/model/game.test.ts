@@ -124,7 +124,7 @@ describe('game domain', () => {
       const started = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
       const events = decideGame(started, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
       expect(events.map((e) => e.type)).toEqual(['answer/submitted', 'streak/updated'])
-      expect(events[1]).toEqual({ type: 'streak/updated', streak: 1 })
+      expect(events[1]).toEqual({ type: 'streak/updated', streak: 1, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
     })
 
     it('resetStreak clears a non-zero streak', () => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 interface JumpToMenuProps {
   safeT: (key: string, fallback?: string) => string
@@ -7,12 +7,12 @@ interface JumpToMenuProps {
 export function JumpToMenu({ safeT }: JumpToMenuProps) {
   const [activeSection, setActiveSection] = useState('play-your-way')
 
-  const menuItems = [
+  const menuItems = useMemo(() => [
     { id: 'features', label: safeT('landing.menu.features', 'Features') },
     { id: 'privacy', label: safeT('landing.menu.dataControl', 'Data Control') },
     { id: 'how-it-works', label: safeT('landing.menu.howItWorks', 'How It Works') },
     { id: 'play-your-way', label: safeT('landing.menu.playYourWay', 'Play Your Way') }
-  ]
+  ], [safeT])
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
@@ -44,7 +44,7 @@ export function JumpToMenu({ safeT }: JumpToMenuProps) {
     window.addEventListener('scroll', handleScroll)
     handleScroll() // Check initial position
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [menuItems])
 
   return (
     <div className="landing__jump-menu">

@@ -1,8 +1,10 @@
 import { createEventBus, type EventBus } from '../event-bus/index.ts'
 import { nextId } from '../lib/id.ts'
 import type { EventEnvelope, Evolve } from './types.ts'
+import type { ITeardownService } from '../services/ITeardownService.ts'
+import { SecurityContextError } from '../services/ITeardownService.ts'
 
-export interface EventStore<TState, TEvent extends { type: string }> {
+export interface EventStore<TState, TEvent extends { type: string }> extends ITeardownService {
   /** The current state, derived entirely by folding the event log for a specific tenant. */
   getState(tenant_id: string, aggregate_id: string): TState
   /** An immutable view of the committed event log for a specific tenant. */
@@ -16,6 +18,10 @@ export interface EventStore<TState, TEvent extends { type: string }> {
   readonly bus: EventBus<EventEnvelope<TEvent>>
   /** Get all tenant IDs for administrative purposes (requires elevated permissions). */
   getTenantIds(): readonly string[]
+  /** Perform absolute teardown of tenant-specific data to prevent cross-tenant leakage. */
+  teardown(tenant_id?: string): void
+  /** Check if the store is currently active (not torn down). */
+  isActive(): boolean
 }
 
 interface Clock {
@@ -47,6 +53,9 @@ export function createEventStore<TState, TEvent extends { type: string }>(
   // Multi-tenant storage: tenant_id -> aggregate_id -> event log
   const tenantLogs = new Map<string, Map<string, readonly EventEnvelope<TEvent>[]>>()
   const tenantStates = new Map<string, Map<string, TState>>()
+  
+  // Active state for teardown tracking
+  let active = true
 
   const derive = (entries: readonly EventEnvelope<TEvent>[]): TState =>
     entries.reduce<TState>((acc, entry) => evolve(acc, entry.event), seed)
@@ -55,6 +64,12 @@ export function createEventStore<TState, TEvent extends { type: string }>(
 
   return {
     getState(tenant_id: string, aggregate_id: string): TState {
+      // Read operation guard: Log warning and return safe default if inactive
+      if (!active) {
+        console.warn('⚠️ [EVENT_STORE] Store is inactive, returning seed state for getState')
+        return seed
+      }
+
       const tenant = tenantStates.get(tenant_id)
       if (!tenant) return seed
       
@@ -62,6 +77,12 @@ export function createEventStore<TState, TEvent extends { type: string }>(
     },
 
     getLog(tenant_id: string, aggregate_id?: string): readonly EventEnvelope<TEvent>[] {
+      // Read operation guard: Log warning and return safe default if inactive
+      if (!active) {
+        console.warn('⚠️ [EVENT_STORE] Store is inactive, returning empty log for getLog')
+        return []
+      }
+
       const tenant = tenantLogs.get(tenant_id)
       if (!tenant) return []
       
@@ -78,6 +99,16 @@ export function createEventStore<TState, TEvent extends { type: string }>(
     },
 
     subscribe(tenant_id: string, aggregate_id: string, listener: () => void): () => void {
+      // Mutation operation guard: Throw SecurityContextError if inactive
+      if (!active) {
+        throw new SecurityContextError(
+          'Cannot subscribe to inactive store',
+          undefined,
+          undefined,
+          'EventStore.subscribe'
+        )
+      }
+
       const key = getTenantAggregateKey(tenant_id, aggregate_id)
       const listeners = changeListeners.get(key) ?? new Set()
       changeListeners.set(key, listeners)
@@ -95,6 +126,16 @@ export function createEventStore<TState, TEvent extends { type: string }>(
     },
 
     commit(events: readonly TEvent[], tenant_id: string, aggregate_id: string): readonly EventEnvelope<TEvent>[] {
+      // Pre-operation guard: Throw SecurityContextError if inactive
+      if (!active) {
+        throw new SecurityContextError(
+          'Cannot commit to inactive store',
+          tenant_id,
+          undefined,
+          'EventStore.commit'
+        )
+      }
+
       if (events.length === 0) return []
       
       // Initialize tenant storage if needed
@@ -124,6 +165,26 @@ export function createEventStore<TState, TEvent extends { type: string }>(
       tenantLog.set(aggregate_id, newLog)
       tenantState.set(aggregate_id, newState)
 
+      // Post-operation safety check (simulates post-await check for async operations)
+      // This prevents race conditions if teardown occurs during the operation window
+      if (!active) {
+        throw new SecurityContextError(
+          'Store became inactive during commit operation',
+          tenant_id,
+          undefined,
+          'EventStore.commit'
+        )
+      }
+
+      if (!tenantLogs.has(tenant_id)) {
+        throw new SecurityContextError(
+          'Tenant was torn down during commit operation',
+          tenant_id,
+          undefined,
+          'EventStore.commit'
+        )
+      }
+
       // Publish full envelopes and notify listeners
       for (const entry of committed) bus.publish(entry)
       
@@ -140,6 +201,60 @@ export function createEventStore<TState, TEvent extends { type: string }>(
 
     getTenantIds(): readonly string[] {
       return Array.from(tenantLogs.keys())
+    },
+
+    teardown(tenant_id?: string): void {
+      console.log(`🧹 [EVENT_STORE] Starting teardown for tenant: ${tenant_id || 'all tenants'}`)
+      
+      if (!active) {
+        console.warn('⚠️ [EVENT_STORE] Store is already inactive, skipping teardown')
+        return
+      }
+
+      if (tenant_id) {
+        // Idempotent tenant-specific teardown: If tenant already cleared, exit gracefully
+        if (!tenantLogs.has(tenant_id)) {
+          console.log(`ℹ️ [EVENT_STORE] Tenant ${tenant_id} cleanup already performed, skipping`)
+          return
+        }
+
+        console.log(`🧹 [EVENT_STORE] Clearing tenant data: ${tenant_id}`)
+        
+        // Clear tenant's event logs
+        tenantLogs.delete(tenant_id)
+        // Clear tenant's derived states
+        tenantStates.delete(tenant_id)
+        
+        // Clear all listeners for this tenant
+        const listenersToClear: string[] = []
+        for (const key of changeListeners.keys()) {
+          if (key.startsWith(`${tenant_id}:`)) {
+            listenersToClear.push(key)
+          }
+        }
+        for (const key of listenersToClear) {
+          changeListeners.delete(key)
+        }
+        
+        console.log(`✅ [EVENT_STORE] Tenant ${tenant_id} torn down successfully`)
+      } else {
+        // Global teardown: Clear all tenant data
+        console.log(`🧹 [EVENT_STORE] Clearing all tenant data (global teardown)`)
+        
+        const tenantCount = tenantLogs.size
+        tenantLogs.clear()
+        tenantStates.clear()
+        changeListeners.clear()
+        
+        console.log(`✅ [EVENT_STORE] Global teardown complete: ${tenantCount} tenants cleared`)
+        
+        // Mark store as inactive after global teardown
+        active = false
+      }
+    },
+
+    isActive(): boolean {
+      return active
     },
   }
 }

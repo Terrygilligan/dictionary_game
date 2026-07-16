@@ -31,7 +31,7 @@ export function Header({ isAuthenticated }: HeaderProps) {
         
         if (user) {
           const idTokenResult = await user.getIdTokenResult()
-          const adminClaim = idTokenResult.claims.admin
+          const adminClaim = idTokenResult.claims.admin || idTokenResult.claims.superadmin
           setIsAdmin(!!adminClaim)
         }
       } catch (error) {
@@ -49,7 +49,7 @@ export function Header({ isAuthenticated }: HeaderProps) {
   const getNavigationItems = () => {
     const allItems = [
       { key: 'landing' as Page, translationKey: 'ui.home', show: true, authRequired: false },
-      { key: 'game' as Page, translationKey: 'ui.gamesRoom', show: true, authRequired: false },
+      { key: 'games' as Page, translationKey: 'ui.gamesRoom', show: true, authRequired: false },
       { key: 'village' as Page, translationKey: 'ui.village', show: isAuthenticated, authRequired: true },
       { key: 'profile' as Page, translationKey: 'ui.profile', show: isAuthenticated, authRequired: true },
       { key: 'auth' as Page, translationKey: 'ui.signIn', show: !isAuthenticated, authRequired: false },

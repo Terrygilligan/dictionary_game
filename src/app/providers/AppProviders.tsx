@@ -3,7 +3,11 @@ import { GameProvider } from '@/features/play-round'
 import { I18nProvider } from '@/shared/lib/i18n/I18nProvider'
 import { NavigationProvider } from '@/shared/lib/navigation'
 import { UserProvider } from '@/entities/user'
+import { VillageProvider } from '@/entities/village'
 import { EmailVerificationTracker } from '@/components/EmailVerificationTracker'
+import { OutboxProvider } from './OutboxProvider'
+import { GameAuditProvider } from './GameAuditProvider'
+import { VillageAuditProvider } from './VillageAuditProvider'
 
 /** Composition root for cross-cutting providers. */
 export function AppProviders({ children }: { children: ReactNode }) {
@@ -14,9 +18,14 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <I18nProvider>
         <UserProvider>
           <EmailVerificationTracker />
-          <GameProvider>
-            {children}
-          </GameProvider>
+          <OutboxProvider />
+          <GameAuditProvider />
+          <VillageAuditProvider />
+          <VillageProvider>
+            <GameProvider>
+              {children}
+            </GameProvider>
+          </VillageProvider>
         </UserProvider>
       </I18nProvider>
     </NavigationProvider>

@@ -22,3 +22,10 @@ export * from './userStore.ts'
 export * from './context.ts'
 export * from './useUser.ts'
 export * from './UserProvider.tsx'
+export * from './useAuthInitialization.ts'
+
+// Stats Context
+export * from './UserStatsContext.tsx'
+
+// Claims Context
+export * from './UserClaimsContext.tsx'

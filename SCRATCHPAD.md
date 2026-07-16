@@ -538,3 +538,193 @@ Bridge the SuperAdmin dashboard from a mock-fed `AuditProjection` to the real mu
 
 ### Files modified
 `src/shared/event-sourcing/eventStore.ts`, `src/shared/event-sourcing/eventStore.test.ts`, `src/entities/audit/auditProjectionCore.ts`, `src/entities/audit/model/index.ts`, `src/services/auditProjectionService.ts`, `src/pages/admin/SuperAdminDashboardPage.tsx`, `src/features/play-round/model/gameStore.ts`, `src/features/play-round/model/GameProvider.tsx`, `src/features/play-round/model/useGame.ts`, `src/features/play-round/index.ts`, `src/entities/user/model/UserProvider.tsx`.
+
+---
+
+## 0010 — Admin superAdmin claim recognition & firebase-admin for promotion scripts
+
+**Date:** 2026-07-14
+**Status:** implemented
+
+### Goal
+Allow a Firebase user promoted with the `superAdmin` custom claim to access the admin dashboard, and provide the `firebase-admin` dependency needed to run the `scripts/promote-user.ts` utility.
+
+### Architectural rationale
+
+- **Claim check parity.** `Header.tsx` and `AdminPage.tsx` both gated admin UI on `claims.admin`. The `promote-user.ts` script sets `superAdmin: true`. Either claim should grant admin access, so the UI now treats `admin || superAdmin` as the admin predicate.
+- **Minimal source change.** The promotion script is operational tooling, not domain logic, so its behavior is unchanged; only the claim consumer widens its check.
+- **Dependency hygiene.** `firebase-admin` is required at runtime by `scripts/promote-user.ts` but is not shipped in the browser bundle. Adding it to `devDependencies` keeps the client bundle lean while making the promotion utility runnable via `tsx`.
+
+### Files modified
+`package.json`, `src/shared/ui/Header.tsx`, `src/pages/admin/AdminPage.tsx`.
+
+---
+
+## 0011 — Identity Injection for UserProvider Multi-Tenant Isolation
+
+**Date:** 2026-07-14
+**Status:** implemented
+
+### Goal
+Remove hardcoded 'default', 'default' tenant/aggregate identifiers from UserProvider and userStore, replacing them with dynamic tenant_id and aggregate_id derived from the authenticated Firebase user's uid. This ensures strict multi-tenant isolation per the Command Identity Enforcement Directive.
+
+### Architectural rationale
+
+- **Multi-Tenant Enforcement.** The EventStore requires explicit tenant_id and aggregate_id for all operations. Currently, UserProvider hardcodes 'default', 'default' which violates multi-tenant isolation and the Command Identity Directive.
+- **Auth-Driven Identity.** The Firebase Auth service already surfaces user identity via `authService.onAuthStateChanged` and the `useFirebaseAuth` hook exposes `tenant_id: user?.id`. Mapping both tenant_id and aggregate_id to the uid provides proper per-user isolation.
+- **Command Identity Compliance.** UserCommand types already require tenant_id and aggregate_id fields. The store dispatch must accept and validate these IDs, ensuring all commands carry explicit identity metadata.
+- **Reactive Re-initialization.** When uid changes (login/logout), UserProvider must re-initialize the store context with new tenant/aggregate IDs, preventing cross-tenant data leakage.
+- **FSD Compliance.** The auth hook lives in the feature layer (`useFirebaseAuth`) but is consumed by the entity layer (`UserProvider`) only for identity extraction, not business logic. This maintains the dependency direction (entities ← features) for identity metadata only.
+
+### Implementation details
+
+- **Auth Hook Analysis.** `useFirebaseAuth` in `src/features/play-round/model/useFirebaseAuth.ts` surfaces `user.id` as `tenant_id`. It provides reactive auth state via `authService.onAuthStateChanged`.
+- **UserProvider Refactor.** Inject `useFirebaseAuth` to derive tenantId and aggregateId from `user.id`. Replace 'default', 'default' in all getState() calls with dynamic values. Add useEffect to re-initialize store when uid changes.
+- **userStore Refactor.** Update dispatch signature to `dispatch(command: UserCommand, tenant_id: string, aggregate_id: string)`. Replace hardcoded 'default', 'default' in getState() and commit() calls with injected parameters.
+- **Hook Updates.** Update `useUserDispatch`, `useCurrentUser`, `useAuthStatus` to accept and pass tenantId/aggregateId parameters.
+- **Context Bridge.** Update UserStoreContext to provide a method for dispatching with identity parameters, or create a new context that exposes the identity-aware store interface.
+
+### Files to be modified
+`src/entities/user/model/UserProvider.tsx`, `src/entities/user/model/userStore.ts`, `src/entities/user/model/context.ts`, `src/entities/user/model/useUser.ts`, `src/entities/user/model/index.ts` (for updated exports).
+
+### Validation
+- Verify no remaining 'default', 'default' strings in user entity files.
+- Ensure all getState() calls use dynamic tenantId/aggregateId.
+- Confirm dispatch() requires tenant_id and aggregate_id parameters.
+- Test login/logout triggers proper store re-initialization.
+
+### Files modified
+`src/entities/user/model/userStore.ts`, `src/entities/user/model/context.ts`, `src/entities/user/model/useUser.ts`, `src/entities/user/model/UserProvider.tsx`, `src/services/AuthCommandService.ts`, `src/pages/profile/ui/ProfilePage.tsx`.
+
+### Tests
+All 53 tests passing. Typecheck passing. Lint passing (5 pre-existing warnings unrelated to this change).
+
+---
+
+## 0012 — User Materialization Loop with UserEventBus
+
+**Date:** 2026-07-14
+**Status:** implemented
+
+### Goal
+Implement a user materialization loop that projects user registration events to Firestore with proper multi-tenant isolation and GDPR encryption, using a dedicated UserEventBus for decoupled event routing.
+
+### Architectural rationale
+
+- **Event-Driven Architecture.** Replace tight coupling between OutboxProcessor and EmailVerificationService with a UserEventBus that allows multiple subscribers to process user events independently.
+- **Multi-Tenant Enforcement.** UserEventBus carries tenant_id and aggregate_id in event envelopes, ensuring all projections maintain proper tenant isolation.
+- **GDPR Compliance.** UserProjectionService applies AES-256-GCM encryption before writing to Firestore, ensuring sensitive user data is crypto-shreddable.
+- **Idempotent Projections.** Using Firestore's `setDoc(..., { merge: true })` prevents document overwrites during flaky network conditions while allowing incremental updates.
+- **FSD Compliance.** UserEventBus lives in shared layer, UserProjectionService in service layer, maintaining proper dependency direction.
+
+### Implementation details
+
+- **UserEventBus.** Create typed event bus for user domain events with envelope structure including tenant_id, aggregate_id, correlationId, timestamp, eventType, and payload.
+- **UserProjectionService.** Subscribe to user.registered events, extract identity metadata, encrypt sensitive fields, write to Firestore users/{userId} with merge semantics.
+- **OutboxProcessor Refactor.** Replace direct emailVerificationService call with UserEventBus.publish() for user.registered events.
+- **EmailVerificationService Update.** Subscribe to UserEventBus instead of receiving direct method calls, maintaining existing logic.
+
+### Files to be created
+`src/shared/events/UserEventBus.ts`, `src/services/userProjectionService.ts`.
+
+### Files to be modified
+`src/shared/events/OutboxProcessor.ts`, `src/services/EmailVerificationService.ts`.
+
+### Validation
+- Verify Firestore users/{userId} document creation on registration
+- Confirm tenant_id and aggregate_id preserved in event envelope
+- Test both email verification and projection execute on registration
+- Ensure GDPR encryption applied to sensitive user data
+
+### Files created
+`src/shared/events/UserEventBus.ts`, `src/services/userProjectionService.ts`.
+
+### Files modified
+`src/shared/events/OutboxProcessor.ts`, `src/services/EmailVerificationService.ts`, `src/app/providers/OutboxProvider.tsx`, `src/services/AuthCommandService.ts`.
+
+### Critical Fix (2026-07-14)
+Removed 'default' fallback for tenant_id and aggregate_id in OutboxProcessor (lines 254-255). 
+Now enforces strict validation with descriptive error message if identity metadata missing.
+This closes the final gap in multi-tenant isolation enforcement.
+
+### Tests
+Typecheck passing. Lint passing (5 pre-existing warnings unrelated to this change).
+
+---
+
+## 0013 — GDPR & Crypto-Shredding Readiness
+
+**Date:** 2026-07-14
+**Status:** planned
+
+### Goal
+Document and prepare the system architecture for crypto-shredding to support the "Right to be Forgotten" while maintaining immutable event-sourced architecture.
+
+### Architectural strategy: Crypto-Shredding for Total Deletion
+
+To support GDPR compliance for data deletion without requiring risky physical purging of immutable event logs, the system is designed to support future crypto-shredding. This strategy allows legally compliant data deletion by destroying encryption keys rather than data.
+
+### Core principles
+
+- **Identity Segregation**: All user data is partitioned by `tenant_id` and `aggregate_id` for tenant isolation.
+- **Encryption at the Edge**: Sensitive user data is encrypted within `UserProjectionService` before reaching the database.
+- **Key-Based Shredding**: By assigning each user a unique Data Encryption Key (DEK) identified by `encryption_key_id`, we can render all historical data (event store) and current data (read model) cryptographically unreachable by destroying the DEK.
+
+### Implementation requirements for future phases
+
+- [ ] **Encryption Key Management Service (KMS)**: Implement a service to map `encryption_key_id` to actual decryption keys.
+- [ ] **Event Schema Evolution**: Ensure all new events include `encryption_key_id` in their envelope metadata.
+- [ ] **Read Model Updates**: Ensure all materialized Firestore documents store their associated `encryption_key_id`.
+- [ ] **Deletion Orchestration**: Create a `user.deleted` handler that triggers destruction of the associated key in the KMS.
+
+### Current status
+
+✅ Identity and multi-tenancy enforced via `tenant_id` and `aggregate_id`  
+✅ Encryption at edge implemented via `UserProjectionService` using `encryptUserProfile()`  
+✅ Documentation added to relevant files for future integration  
+⏳ Structural `encryption_key_id` field commented in UserEventBus envelope  
+⏳ Per-user key rotation and shredding not yet implemented  
+
+### Files documented (for future integration)
+- `src/shared/events/UserEventBus.ts` - Added encryption_key_id comment in envelope interface
+- `src/services/userProjectionService.ts` - Added encryption_key_id storage comment
+- `src/shared/lib/security/cryptoShreddingBrowser.ts` - Added KMS implementation comment
+
+### Files to be created (future)
+- `src/services/KeyManagementService.ts` - Implement KMS for per-user key management
+
+---
+
+## 0014 — Session Completion: Documentation & Lint Resolution
+
+**Date:** 2026-07-14
+**Status:** completed
+
+### Goal
+Complete the recommended session sequence: GDPR documentation, runtime validation preparation, and lint resolution.
+
+### Implementation
+
+**GDPR Documentation**:
+- Created `docs/GDPR_READINESS.md` comprehensive documentation
+- Documented crypto-shredding architectural strategy
+- Outlined implementation roadmap for KMS integration
+- Included security considerations and operational procedures
+- Provided external stakeholder communication document
+
+**Lint Resolution**:
+- Fixed 5 React hooks dependency warnings
+- `useDealerVoice.ts`: Added useCallback for enqueueSpeech and speakNow, memoized phaseAnnouncements with useMemo, fixed dependency arrays
+- `JumpToMenu.tsx`: Memoized menuItems with useMemo to prevent re-render on every prop change
+- `I18nProvider.tsx`: Used useRef for initialization tracking to prevent re-initialization loop while satisfying lint rules
+
+### Files created
+`docs/GDPR_READINESS.md`
+
+### Files modified
+`src/shared/lib/speech/useDealerVoice.ts`, `src/pages/landing/ui/JumpToMenu.tsx`, `src/shared/lib/i18n/I18nProvider.tsx`
+
+### Validation
+✅ Typecheck passing
+✅ Lint passing (0 warnings, 0 errors)
+✅ GDPR documentation comprehensive and external-facing

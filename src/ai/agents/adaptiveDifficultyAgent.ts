@@ -114,7 +114,7 @@ export class AdaptiveDifficultyAgent implements AIAgent {
   /**
    * Core decision-making loop - analyzes performance and emits difficulty adjustments
    */
-  process(context: EventContext): GameEvent[] {
+  async process(context: EventContext): Promise<GameEvent[]> {
     const { tenant_id, aggregate_id, eventHistory } = context
     
     console.log(`🤖 [AI] Processing events for tenant: ${tenant_id}, aggregate: ${aggregate_id}`)
@@ -198,6 +198,8 @@ export class AdaptiveDifficultyAgent implements AIAgent {
     const recentAccuracy = recentAnswers.length > 0 
       ? (recentAnswers.filter(e => e.correct).length / recentAnswers.length) * 100 
       : 0
+    
+    console.debug(`[AdaptiveDifficulty] Recent accuracy: ${recentAccuracy.toFixed(2)}% for ${recentAnswers.length} answers`)
     
     let recentTrend: 'improving' | 'declining' | 'stable' = 'stable'
     if (recentAnswers.length >= 5) {

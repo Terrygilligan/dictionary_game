@@ -47,9 +47,12 @@ vi.mock('@/features/play-round/model/useFirebaseAuth.ts', () => ({
 }))
 
 // Mock crypto.randomUUID for deterministic session IDs
-const mockSessionId = 'test-session-456'
+let mockUuidCounter = 0
 Object.defineProperty(global, 'crypto', {
   value: {
-    randomUUID: () => mockSessionId,
+    randomUUID: () => {
+      mockUuidCounter += 1
+      return `test-session-${mockUuidCounter}`
+    },
   },
 })

@@ -4,6 +4,11 @@
  * This utility provides encryption/decryption functions for sensitive data
  * in event logs, enabling secure data storage and the ability to "shred"
  * data by destroying encryption keys.
+ * 
+ * Future Implementation: Key Management Service (KMS)
+ * TODO: Enhance KeyManager to support per-user encryption keys with key_id mapping
+ * TODO: Implement key rotation and destruction for GDPR "Right to be Forgotten"
+ * See SCRATCHPAD.md entry 0013 for GDPR & Crypto-Shredding Readiness
  */
 
 // Web Crypto API for browser compatibility

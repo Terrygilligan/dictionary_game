@@ -8,15 +8,15 @@
 import { useEffect, useState } from 'react'
 import { useGameStore } from '../../features/play-round/index.ts'
 import { useUserStore } from '../../entities/user/index.ts'
-import { AuditProjection } from '../../entities/audit/auditProjectionCore.ts'
+import { AuditProjection } from '../../entities/audit'
 import { createAuditProjectionService, type AuditProjectionService } from '../../services/auditProjectionService.ts'
 import { EventStreamDashboard } from '../../components/admin/EventStreamDashboard.tsx'
-import { AdminGuard, MockAuthProvider } from '../../components/admin/AdminGuard.tsx'
 
 /**
  * SuperAdmin Dashboard Page Component
  */
 export function SuperAdminDashboardPage() {
+  console.log('[SuperAdminDashboardPage] Component mounting')
   const gameStore = useGameStore()
   const userStore = useUserStore()
   const [auditProjection, setAuditProjection] = useState<AuditProjection | null>(null)
@@ -51,6 +51,7 @@ export function SuperAdminDashboardPage() {
   }, [gameStore, userStore])
 
   if (!isInitialized || !auditProjection) {
+    console.log('[SuperAdminDashboardPage] Showing loading skeleton - isInitialized:', isInitialized, 'auditProjection:', auditProjection)
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -61,12 +62,10 @@ export function SuperAdminDashboardPage() {
     )
   }
 
+  console.log('[SuperAdminDashboardPage] Rendering AdminGuard with auditProjection')
+
   return (
-    <MockAuthProvider>
-      <AdminGuard requiredRole="admin">
-        <EventStreamDashboard auditProjection={auditProjection} />
-      </AdminGuard>
-    </MockAuthProvider>
+    <EventStreamDashboard auditProjection={auditProjection} />
   )
 }
 

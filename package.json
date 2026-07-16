@@ -9,10 +9,12 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "lint": "oxlint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {
     "firebase": "^12.15.0",
+    "firebase-admin": "^12.7.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -23,6 +25,7 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.3.4",
+    "gh-pages": "^6.3.0",
     "jsdom": "^25.0.1",
     "oxlint": "^1.6.0",
     "tsx": "^4.23.0",

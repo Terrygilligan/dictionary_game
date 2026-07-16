@@ -1,16 +1,20 @@
 import { useCallback } from 'react'
-import { useUserStore } from './context.ts'
+import { useUserStore, useUserIdentity } from './context.ts'
 import type { UserCommand } from './commands.ts'
 
 /**
- * Hook for dispatching user commands
+ * Hook for dispatching user commands with identity parameters
  */
 export function useUserDispatch() {
   const store = useUserStore()
+  const { tenant_id, aggregate_id } = useUserIdentity()
   
   return useCallback((command: UserCommand) => {
-    store.dispatch(command)
-  }, [store])
+    if (!tenant_id || !aggregate_id) {
+      throw new Error('Cannot dispatch user command: identity not resolved (tenant_id or aggregate_id is null)')
+    }
+    store.dispatch(command, tenant_id, aggregate_id)
+  }, [store, tenant_id, aggregate_id])
 }
 
 /**
@@ -18,7 +22,13 @@ export function useUserDispatch() {
  */
 export function useCurrentUser() {
   const store = useUserStore()
-  return store.getState('default', 'default').user
+  const { tenant_id, aggregate_id } = useUserIdentity()
+  
+  if (!tenant_id || !aggregate_id) {
+    return null
+  }
+  
+  return store.getState(tenant_id, aggregate_id).user
 }
 
 /**
@@ -26,5 +36,11 @@ export function useCurrentUser() {
  */
 export function useAuthStatus() {
   const store = useUserStore()
-  return store.getState('default', 'default').authStatus
+  const { tenant_id, aggregate_id } = useUserIdentity()
+  
+  if (!tenant_id || !aggregate_id) {
+    return 'anonymous'
+  }
+  
+  return store.getState(tenant_id, aggregate_id).authStatus
 }

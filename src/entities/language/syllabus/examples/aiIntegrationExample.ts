@@ -29,7 +29,7 @@ export class SyllabusAwareAdaptiveAgent {
    * @returns Difficulty adjustment with curriculum context
    */
   async getCurriculumAwareDifficultyAdjustment(
-    tenantId: string,
+    _tenantId: string,
     languageCode: string,
     currentStage: DevelopmentalStage,
     performanceScore: number
@@ -208,7 +208,7 @@ export class SyllabusAwareAdaptiveAgent {
    * Calculate curriculum-aware difficulty adjustment
    */
   private calculateCurriculumAwareAdjustment(
-    stageData: StageData,
+    _stageData: StageData,
     performanceScore: number,
     stageProgress: number
   ): {
@@ -249,7 +249,7 @@ export class SyllabusAwareAdaptiveAgent {
   private async getRecommendedTopics(
     languageCode: string,
     currentStage: DevelopmentalStage,
-    performanceScore: number,
+    _performanceScore: number,
     difficultyLevel: number
   ): Promise<string[]> {
     try {
@@ -289,7 +289,7 @@ export class SyllabusAwareAdaptiveAgent {
   private prioritizeConceptsForMissedWords(
     concepts: readonly ConceptMapping[],
     missedWords: readonly string[],
-    stageData: StageData
+    _stageData: StageData
   ): readonly ConceptMapping[] {
     if (missedWords.length === 0) {
       return concepts
@@ -331,7 +331,7 @@ export class SyllabusAwareAdaptiveAgent {
    * Generate learning objectives based on concepts and performance
    */
   private generateLearningObjectives(
-    concepts: readonly ConceptMapping[],
+    _concepts: readonly ConceptMapping[],
     performanceScore: number,
     missedWords: readonly string[]
   ): string[] {
@@ -402,7 +402,7 @@ export async function demonstrateAIIntegration(): Promise<void> {
   const adjustment1 = await agent.getCurriculumAwareDifficultyAdjustment(
     'tenant_123',
     'bg',
-    'TODDLER',
+    DevelopmentalStage.TODDLER,
     85 // Good performance
   )
   
@@ -420,7 +420,7 @@ export async function demonstrateAIIntegration(): Promise<void> {
   
   const learningPath = await agent.getPersonalizedLearningPath(
     'bg',
-    'TODDLER',
+    DevelopmentalStage.TODDLER,
     85,
     ['mother', 'eat'] // Missed words
   )
@@ -458,7 +458,7 @@ export async function demonstrateAIIntegration(): Promise<void> {
   const adjustment2 = await agent.getCurriculumAwareDifficultyAdjustment(
     'tenant_456',
     'fr',
-    'SCHOOLER',
+    DevelopmentalStage.SCHOOLER,
     65 // Moderate performance
   )
   

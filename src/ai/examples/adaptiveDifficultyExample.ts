@@ -113,7 +113,7 @@ async function simulateGameSession(
     
     // Check current state
     const state = gameStore.getState(tenant_id, aggregate_id)
-    console.log(`🎮 [EXAMPLE] Round ${i + 1}: Difficulty = ${state.currentDifficulty}, Score = ${state.answers.filter(a => a.correct).length}/${state.answers.length}`)
+    console.log(`🎮 [EXAMPLE] Round ${i + 1}: Difficulty = ${state.currentDifficulty}, Score = ${state.answers.filter((a: any) => a.correct).length}/${state.answers.length}`)
   }
   
   // Simulate struggling performance (should decrease difficulty)
@@ -142,7 +142,7 @@ async function simulateGameSession(
     
     // Check current state
     const state = gameStore.getState(tenant_id, aggregate_id)
-    console.log(`🎮 [EXAMPLE] Round ${i + 1}: Difficulty = ${state.currentDifficulty}, Score = ${state.answers.filter(a => a.correct).length}/${state.answers.length}`)
+    console.log(`🎮 [EXAMPLE] Round ${i + 1}: Difficulty = ${state.currentDifficulty}, Score = ${state.answers.filter((a: any) => a.correct).length}/${state.answers.length}`)
   }
   
   // Finish game
@@ -160,8 +160,8 @@ async function simulateGameSession(
   const finalState = gameStore.getState(tenant_id, aggregate_id)
   console.log('🎮 [EXAMPLE] Game finished:', {
     finalDifficulty: finalState.currentDifficulty,
-    finalScore: `${finalState.answers.filter(a => a.correct).length}/${finalState.answers.length}`,
-    accuracy: `${Math.round((finalState.answers.filter(a => a.correct).length / finalState.answers.length) * 100)}%`
+    finalScore: `${finalState.answers.filter((a: any) => a.correct).length}/${finalState.answers.length}`,
+    accuracy: `${Math.round((finalState.answers.filter((a: any) => a.correct).length / finalState.answers.length) * 100)}%`
   })
 }
 
@@ -211,7 +211,7 @@ export function monitorAIDecisions(): void {
  */
 async function simulateAndMonitor(
   gameStore: EventStore<any, GameEvent>,
-  agent: any,
+  _agent: any,
   tenant_id: string,
   aggregate_id: string
 ): Promise<void> {
@@ -265,7 +265,7 @@ async function simulateAndMonitor(
   
   console.log('🤖 [EXAMPLE] Final state:', {
     difficulty: finalState.currentDifficulty,
-    score: `${finalState.answers.filter(a => a.correct).length}/${finalState.answers.length}`,
+    score: `${finalState.answers.filter((a: any) => a.correct).length}/${finalState.answers.length}`,
     totalEvents: eventLog.length,
     difficultyAdjustments: eventLog.filter(e => e.event.type === 'difficulty/adjusted').length
   })

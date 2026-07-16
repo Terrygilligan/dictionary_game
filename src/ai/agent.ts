@@ -52,7 +52,7 @@ export interface AIAgent<TEvent extends GameEvent = GameEvent> {
    * @param context - Event context including history and metadata
    * @returns Array of events to emit (may be empty)
    */
-  process(context: EventContext): TEvent[]
+  process(context: EventContext): Promise<TEvent[]>
   
   /**
    * Emit events to the event stream
@@ -95,6 +95,11 @@ export class RAGContextBuilder {
       includeMetadata = true,
       format = 'detailed'
     } = options
+    
+    // Add debug metadata for observability
+    if (includeMetadata) {
+      console.debug(`[EventContext] Building context with format: ${format}, timestamps: ${includeTimestamps}`)
+    }
     
     // Sort events by sequence number for proper chronological order
     const sortedEvents = eventHistory
@@ -168,7 +173,7 @@ export class RAGContextBuilder {
    */
   private static buildSummaryContext(
     events: readonly EventEnvelope<GameEvent>[],
-    options: RAGContextOptions
+    _options: RAGContextOptions
   ): string {
     const summary = this.extractSummary(events)
     
@@ -332,7 +337,7 @@ export abstract class BaseAIAgent implements AIAgent {
    * @param context - Event context for decision-making
    * @returns Array of events to emit
    */
-  abstract process(context: EventContext): GameEvent[]
+  abstract process(context: EventContext): Promise<GameEvent[]>
 }
 
 /**
@@ -351,7 +356,7 @@ export class AdaptiveDifficultyAgent extends BaseAIAgent {
     this.subscribe(['answer/submitted', 'streak/updated', 'game/finished'])
   }
   
-  process(context: EventContext): GameEvent[] {
+  async process(context: EventContext): Promise<GameEvent[]> {
     const events: GameEvent[] = []
     
     // Analyze recent performance

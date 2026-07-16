@@ -5,8 +5,11 @@ service cloud.firestore {
     match /users/{userId} {
       // Allow service account to write user profiles for projections
       // Users can read their own data and write their own updates
-      allow read, write: if request.auth != null && 
-        (request.auth.uid == userId || 
+      // SuperAdmins and Admins can access any user document
+      allow read, write: if request.auth != null &&
+        (request.auth.uid == userId ||
+         request.auth.token.superadmin == true ||
+         request.auth.token.admin == true ||
          request.auth.token.email == "firebase-adminsdk-fbsvc@lexicon-master-adb6b.iam.gserviceaccount.com");
       
       // Matches subcollection - user can read/write their own event logs
@@ -50,7 +53,16 @@ service cloud.firestore {
       allow read: if request.auth != null;
       allow write: if request.auth != null && request.auth.uid == resource.data.userId;
     }
-    
+
+    // Game event logs collection - multi-tenant audit trail
+    match /game_event_logs/{auditId} {
+      // Users can write their own tenant's events, SuperAdmins/Admins can access all
+      allow read, write: if request.auth != null &&
+        (request.auth.token.superadmin == true ||
+         request.auth.token.admin == true ||
+         request.auth.uid == resource.data.tenant_id);
+    }
+
     // Deny all other reads/writes
     match /{document=**} {
       allow read, write: if false;

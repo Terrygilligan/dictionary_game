@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Outbox collection rules
+    match /outbox/{correlationId} {
+      // Allow read/write for authenticated service accounts only
+      allow read, write: if request.auth != null && 
+        request.auth.token.email == 'service-account@lexicon-master.iam.gserviceaccount.com';
+      
+      // Allow creation with required fields
+      allow create: if request.auth != null &&
+        request.auth.token.email == 'service-account@lexicon-master.iam.gserviceaccount.com' &&
+        request.resource.data.keys().hasAll([
+          'topic',
+          'payload', 
+          'correlationId',
+          'status',
+          'createdAt',
+          'attempts'
+        ]) &&
+        request.resource.data.status in ['PENDING', 'PROCESSING', 'PROCESSED', 'FAILED'] &&
+        request.resource.data.attempts == 0;
+      
+      // Allow status updates and retry logic
+      allow update: if request.auth != null &&
+        request.auth.token.email == 'service-account@lexicon-master.iam.gserviceaccount.com' &&
+        request.resource.data.status == 'PENDING' &&
+        request.resource.data.attempts < 5 &&
+        (request.writeFields.hasAll(['status', 'lastAttemptAt', 'attempts']) ||
+         request.writeFields.hasAll(['status', 'processedAt']) ||
+         request.writeFields.hasAll(['status', 'lastAttemptAt', 'attempts', 'error', 'nextRetryAt']));
+      
+      // Allow retry of failed events
+      allow update: if request.auth != null &&
+        request.auth.token.email == 'service-account@lexicon-master.iam.gserviceaccount.com' &&
+        request.resource.data.status == 'FAILED' &&
+        request.writeFields.hasAll(['status', 'attempts', 'error', 'nextRetryAt']) &&
+        request.resource.data.attempts == 0;
+      
+      // Prevent deletion (for audit trail)
+      allow delete: if false;
+    }
+  }
+}

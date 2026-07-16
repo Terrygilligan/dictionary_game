@@ -152,6 +152,8 @@ export interface VoiceConfiguration {
     readonly similarity_boost: number
     readonly style: string
     readonly use_speaker_boost: boolean
+    readonly optimize_streaming_latency: number
+    readonly output_format: 'mp3_22050_32' | 'mp3_44100_32' | 'pcm_22050' | 'pcm_44100'
   }
   readonly preferences: {
     readonly speed: number
@@ -229,7 +231,9 @@ export const DEFAULT_VOICE_MAPPINGS: VoiceMapping = {
       stability: 0.4,
       similarity_boost: 0.6,
       style: 'gentle',
-      use_speaker_boost: true
+      use_speaker_boost: true,
+      optimize_streaming_latency: 2,
+      output_format: 'mp3_22050_32'
     },
     preferences: {
       speed: 1.0,
@@ -247,7 +251,9 @@ export const DEFAULT_VOICE_MAPPINGS: VoiceMapping = {
       stability: 0.5,
       similarity_boost: 0.5,
       style: 'moderate',
-      use_speaker_boost: false
+      use_speaker_boost: false,
+      optimize_streaming_latency: 2,
+      output_format: 'mp3_22050_32'
     },
     preferences: {
       speed: 1.0,
@@ -265,7 +271,9 @@ export const DEFAULT_VOICE_MAPPINGS: VoiceMapping = {
       stability: 0.5,
       similarity_boost: 0.5,
       style: 'moderate',
-      use_speaker_boost: false
+      use_speaker_boost: false,
+      optimize_streaming_latency: 2,
+      output_format: 'mp3_22050_32'
     },
     preferences: {
       speed: 1.0,

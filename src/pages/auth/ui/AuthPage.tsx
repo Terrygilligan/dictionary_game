@@ -3,10 +3,9 @@ import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 import { Button } from '@/shared/ui/Button'
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
 import { PasswordInput } from '@/shared/ui/PasswordInput'
-import { authService } from '@/services/auth'
-import { userStore } from '@/entities/user'
-import type { User, RegisterUser } from '@/entities/user'
-import { useGameIdentity } from '@/features/play-round/model/useFirebaseAuth'
+import { authCommandService, CorrelationHelper } from '@/services/AuthCommandService'
+import type { RegisterUserCommand, SignInCommand } from '@/services/AuthCommandService'
+import type { User } from '@/entities/user'
 
 interface AuthPageProps {
   onAuthSuccess: (user?: User) => void
@@ -14,7 +13,6 @@ interface AuthPageProps {
 
 export function AuthPage({ onAuthSuccess }: AuthPageProps) {
   const { t } = useTranslate()
-  const { tenant_id, aggregate_id } = useGameIdentity()
   const [isSignUp, setIsSignUp] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
@@ -46,51 +44,58 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
 
     try {
       if (isSignUp) {
-        // Event-Sourced Registration Flow
-        console.log('🔐 [AUTH] Starting event-sourced registration...')
+        // Event-Sourced Registration Flow with AuthCommandService
+        console.log('🔐 [AUTH] Starting event-sourced registration with command service...')
         
-        // Step 1: Firebase Authentication
-        const firebaseResult = await authService.signUp(formData.email, formData.password, formData.displayName)
+        // Step 1: Create registration command with correlation tracking
+        const registerCommand: RegisterUserCommand = {
+          type: 'REGISTER_USER',
+          correlationId: CorrelationHelper.generateCorrelationId(),
+          timestamp: CorrelationHelper.generateTimestamp(),
+          payload: {
+            email: formData.email,
+            password: formData.password,
+            displayName: formData.displayName,
+            acceptTerms: acceptTerms,
+          },
+        }
+
+        console.log('📋 [AUTH] Registration command created:', {
+          correlationId: registerCommand.correlationId,
+          timestamp: registerCommand.timestamp,
+        })
+
+        // Step 2: Execute through AuthCommandService (handles Firebase + Event Store)
+        const result = await authCommandService.registerUser(registerCommand)
         
-        if (!firebaseResult.success || !firebaseResult.user) {
-          setError(firebaseResult.error || t('errors.unknown'))
+        if (!result.success) {
+          setError(result.error || t('errors.unknown'))
           return
         }
 
-        console.log('✅ [AUTH] Firebase auth successful:', firebaseResult.user.id)
-
-        // Step 2: Atomic Event Store Registration
-        const registerCommand: RegisterUser = {
-          type: 'user/register',
-          tenant_id: firebaseResult.user.id, // Use Firebase UID as tenant_id
-          aggregate_id: `user_${firebaseResult.user.id}`, // User-specific aggregate
-          userId: firebaseResult.user.id,
-          email: firebaseResult.user.email,
-          displayName: firebaseResult.user.displayName,
-          emailVerified: firebaseResult.user.emailVerified,
-          createdAt: firebaseResult.user.createdAt,
-        }
-
-        console.log('🎮 [AUTH] Dispatching registration command:', registerCommand)
+        console.log('✅ [AUTH] Registration successful:', {
+          correlationId: result.correlationId,
+          userId: result.user?.id,
+        })
         
-        // Step 3: Commit to Event Store (Atomic)
-        userStore.dispatch(registerCommand)
-        
-        console.log('✅ [AUTH] Registration event committed successfully')
-        
-        // Step 4: Show verification message
+        // Step 3: Show verification message
         setVerificationMessage(t('auth.verificationEmailSent'))
         
       } else {
-        // Sign In Flow (existing logic)
-        const result = await authService.signIn(formData.email, formData.password)
+        // Sign In Flow with AuthCommandService
+        const signInCommand: SignInCommand = {
+          type: 'SIGN_IN',
+          correlationId: CorrelationHelper.generateCorrelationId(),
+          timestamp: CorrelationHelper.generateTimestamp(),
+          payload: {
+            email: formData.email,
+            password: formData.password,
+          },
+        }
+
+        const result = await authCommandService.signInUser(signInCommand)
 
         if (result.success && result.user) {
-          // Check if email is verified for sign in
-          if (!result.user.emailVerified) {
-            setError(t('auth.emailNotVerified'))
-            return
-          }
           onAuthSuccess(result.user)
         } else {
           setError(result.error || t('errors.unknown'))
@@ -114,9 +119,15 @@ export function AuthPage({ onAuthSuccess }: AuthPageProps) {
 
   const handleResendVerification = async () => {
     try {
-      await authService.sendEmailVerification()
-      setVerificationMessage(t('auth.verificationEmailResent'))
-    } catch (error) {
+      const result = await authCommandService.sendEmailVerification()
+      
+      if (result.success) {
+        setVerificationMessage(t('auth.verificationEmailResent'))
+      } else {
+        setError(result.error || t('auth.verificationEmailError'))
+      }
+    } catch (resendError) {
+      console.error('Resend verification failed:', resendError)
       setError(t('auth.verificationEmailError'))
     }
   }

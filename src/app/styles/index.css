@@ -1612,13 +1612,16 @@ button, .button, input[type="button"], input[type="submit"], [role="button"] {
 }
 
 .header__nav-link--primary {
-  background: var(--accent-strong);
-  color: white;
-  border-color: var(--accent-strong);
+  /* Only apply primary styling when actually active, not globally */
+  /* The accent color will be applied by the data-active-page selector instead */
+  background: transparent;
+  color: var(--text);
+  border-color: #ffffff2e;
 }
 
 .header__nav-link--primary:hover {
   background: var(--accent);
+  color: white;
   border-color: var(--accent);
 }
 
@@ -1634,6 +1637,12 @@ button, .button, input[type="button"], input[type="submit"], [role="button"] {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(124, 92, 255, 0.3);
   font-weight: 600;
+}
+
+/* Special case: Primary nav items (village) get stronger accent when active */
+.header[data-active-page="village"] .header__nav-link[data-nav-page="village"] {
+  background: var(--accent-strong) !important;
+  border-color: var(--accent-strong);
 }
 
 .header[data-active-page="landing"] .header__nav-link[data-nav-page="landing"]:hover,

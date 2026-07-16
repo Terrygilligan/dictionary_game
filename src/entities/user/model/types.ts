@@ -1,5 +1,13 @@
 export type AuthStatus = 'anonymous' | 'authenticated' | 'loading'
 
+/**
+ * Firebase Custom Claims for role-based access control
+ */
+export interface UserClaims {
+  readonly superadmin?: boolean
+  readonly admin?: boolean
+}
+
 export interface UserStats {
   readonly gamesPlayed: number
   readonly correctAnswers: number
@@ -20,6 +28,7 @@ export interface User {
   readonly village?: string
   readonly postcode?: string
   readonly shareLocationForLeaderboard?: boolean
+  readonly claims?: UserClaims
 }
 
 export interface UserProfile {

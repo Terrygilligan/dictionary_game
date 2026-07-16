@@ -29,25 +29,24 @@ const firebaseConfig = {
 }
 
 // Validate required configuration (development mode)
-const requiredEnvVars = [
-  'VITE_FIREBASE_PROJECT_ID',
-  'VITE_FIREBASE_API_KEY',
-  'VITE_FIREBASE_AUTH_DOMAIN',
-  'VITE_FIREBASE_APP_ID',
-] as const
+// Explicitly check each env var to prevent Vite from bundling all VITE_ prefixed variables
+const requiredEnvVars: string[] = []
 
-const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName])
+if (!import.meta.env.VITE_FIREBASE_PROJECT_ID) requiredEnvVars.push('VITE_FIREBASE_PROJECT_ID')
+if (!import.meta.env.VITE_FIREBASE_API_KEY) requiredEnvVars.push('VITE_FIREBASE_API_KEY')
+if (!import.meta.env.VITE_FIREBASE_AUTH_DOMAIN) requiredEnvVars.push('VITE_FIREBASE_AUTH_DOMAIN')
+if (!import.meta.env.VITE_FIREBASE_APP_ID) requiredEnvVars.push('VITE_FIREBASE_APP_ID')
 
-if (missingVars.length > 0 && import.meta.env.MODE === 'production') {
+if (requiredEnvVars.length > 0 && import.meta.env.MODE === 'production') {
   throw new Error(
-    `Missing required Firebase environment variables: ${missingVars.join(', ')}\n` +
+    `Missing required Firebase environment variables: ${requiredEnvVars.join(', ')}\n` +
     'Please check your .env file and ensure all required Firebase configuration is set.'
   )
 }
 
-if (missingVars.length > 0 && import.meta.env.MODE === 'development') {
+if (requiredEnvVars.length > 0 && import.meta.env.MODE === 'development') {
   console.warn('⚠️  Development mode: Using mock Firebase configuration')
-  console.warn('Missing environment variables:', missingVars.join(', '))
+  console.warn('Missing environment variables:', requiredEnvVars.join(', '))
 }
 
 /**
@@ -120,5 +119,5 @@ export const getFirebaseConfig = () => ({ ...firebaseConfig })
  * Check if Firebase is properly configured
  */
 export const isFirebaseConfigured = () => {
-  return missingVars.length === 0
+  return requiredEnvVars.length === 0
 }

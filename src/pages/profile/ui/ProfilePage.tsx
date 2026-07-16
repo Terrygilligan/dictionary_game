@@ -1,10 +1,8 @@
 import { useState, memo } from 'react'
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 import { Button } from '@/shared/ui/Button'
-import { BackendTester } from '@/components/BackendTester'
-import { authService } from '@/services/auth'
-import { userStore } from '@/entities/user'
-import { useUserStats } from '@/entities/user/model/UserStatsContext'
+import { authCommandService } from '@/services/AuthCommandService'
+import { useUserStore, useUserStats } from '@/entities/user'
 import { useNavigation } from '@/shared/lib/navigation'
 import { userService } from '@/services/userService'
 import type { User, UpdateProfile } from '@/entities/user'
@@ -12,15 +10,15 @@ import { useGameIdentity } from '@/features/play-round/model/useFirebaseAuth'
 
 interface ProfilePageProps {
   user: User
-  onSignOut: () => void
 }
 
-export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
+export function ProfilePage({ user }: ProfilePageProps) {
   // ALL HOOKS MUST BE DECLARED UNCONDITIONALLY AT THE TOP
   const { t, currentLanguage, setLanguage, availableLanguages, getLanguageDisplayName } = useTranslate()
   const { currentPage } = useNavigation()
   const { tenant_id, aggregate_id, isLoading, error } = useGameIdentity()
   const { userStats, statsLoading } = useUserStats()
+  const store = useUserStore()
   const [isSaving, setIsSaving] = useState(false)
   const [locationForm, setLocationForm] = useState({
     village: user.village || '',
@@ -95,11 +93,23 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
   }
 
   const handleSignOut = async () => {
+    console.log('🚪 [PROFILE_PAGE] Starting sign-out process')
     try {
-      await authService.signOut()
-      onSignOut()
+      const result = await authCommandService.signOutUser()
+      
+      if (result.success) {
+        console.log('✅ [PROFILE_PAGE] AuthCommandService sign-out successful')
+        // Force hard redirect to ensure complete app re-initialization
+        window.location.href = '/auth'
+      } else {
+        console.error('❌ [PROFILE_PAGE] Sign out failed:', result.error)
+        // Even if signOut fails, attempt redirect to prevent stuck state
+        window.location.href = '/auth'
+      }
     } catch (error) {
-      console.error('Failed to sign out:', error)
+      console.error('❌ [PROFILE_PAGE] Sign out error:', error)
+      // Even if signOut fails, attempt redirect to prevent stuck state
+      window.location.href = '/auth'
     }
   }
 
@@ -120,7 +130,7 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
       }
       
       console.log('🔐 [PROFILE] Dispatching profile update:', updateCommand)
-      userStore.dispatch(updateCommand)
+      store.dispatch(updateCommand, tenant_id, aggregate_id)
       
       console.log('✅ Location settings saved successfully')
     } catch (error) {
@@ -273,8 +283,7 @@ export function ProfilePage({ user, onSignOut }: ProfilePageProps) {
         </Button>
       </div>
 
-      <BackendTester />
-    </div>
+          </div>
   )
 }
 

@@ -152,8 +152,8 @@ class I18nServiceImpl implements I18nService {
       let savedLanguage: SupportedLanguage | null = null
       try {
         savedLanguage = localStorage.getItem('lexicon-master-language') as SupportedLanguage
-      } catch (error) {
-        console.warn('🌐 [I18N] localStorage not accessible, using default language')
+      } catch (storageError) {
+        console.warn('🌐 [I18N] localStorage not accessible, using default language', storageError)
       }
       
       // Use saved language if valid, otherwise use default

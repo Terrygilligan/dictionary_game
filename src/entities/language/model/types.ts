@@ -7,7 +7,6 @@
 
 import type {
   DevelopmentalStage,
-  LinguisticState,
   MissedWord,
   FocusTopic
 } from './state.ts'

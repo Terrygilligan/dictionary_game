@@ -13,10 +13,12 @@
  * - Responsive design for monitoring
  */
 
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { AuditProjection, type AuditLog, type AuditLogEntry } from '../../entities/audit/auditProjectionCore.ts'
 import { AuditQueryEngine, type EventFilter, type SortOptions } from '../../entities/audit/auditQueryEngine.ts'
-import { useAuth, type User } from './AdminGuard.tsx'
+import { useUserClaims } from '../../entities/user/index.ts'
+import { useFirebaseAuth } from '../../features/play-round/model/useFirebaseAuth'
+import { authService } from '../../services/auth.ts'
 
 /**
  * Dashboard metrics interface
@@ -34,7 +36,22 @@ interface DashboardMetrics {
  * EventStreamDashboard Component
  */
 export function EventStreamDashboard({ auditProjection }: { auditProjection: AuditProjection }) {
-  const { user, logout } = useAuth()
+  const { isSuperAdmin } = useUserClaims()
+  const { user } = useFirebaseAuth()
+  
+  const handleLogout = async () => {
+    console.log('🚪 [DASHBOARD] Starting logout process')
+    try {
+      await authService.signOut()
+      console.log('✅ [DASHBOARD] Sign-out completed, initiating hard redirect')
+      // Force hard redirect to ensure complete app re-initialization
+      window.location.href = '/auth'
+    } catch (error) {
+      console.error('❌ [DASHBOARD] Logout failed:', error)
+      // Even if signOut fails, attempt redirect to prevent stuck state
+      window.location.href = '/auth'
+    }
+  }
   
   // Dashboard state
   const [auditLog, setAuditLog] = useState<AuditLog | null>(null)
@@ -42,10 +59,10 @@ export function EventStreamDashboard({ auditProjection }: { auditProjection: Aud
   const [realTimeEnabled, setRealTimeEnabled] = useState(true)
   
   // Filter state
-  const [filter, setFilter] = useState<EventFilter>({
+  const [filter] = useState<EventFilter>({
     limit: 100,
   })
-  const [sort, setSort] = useState<SortOptions>({
+  const [sort] = useState<SortOptions>({
     field: 'timestamp',
     direction: 'desc'
   })
@@ -214,10 +231,10 @@ export function EventStreamDashboard({ auditProjection }: { auditProjection: Aud
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-500">
-                Welcome, {user?.displayName} ({user?.role})
+                Welcome, {user?.displayName} {isSuperAdmin ? '(SuperAdmin)' : ''}
               </div>
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
               >
                 Logout
