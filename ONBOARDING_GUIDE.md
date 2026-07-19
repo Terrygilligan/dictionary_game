@@ -177,16 +177,18 @@ State ← Evolver ← Fold ← Events
 **Key Components:**
 
 1. **Commands**: User intentions (startGame, submitAnswer, nextRound)
-2. **Decider**: Pure function `(state, command) → events`
+2. **Decider**: Pure function `(state, command, context) → events`
 3. **Evolver**: Pure function `(state, event) → state`
 4. **Event Log**: Append-only sequence of events
 5. **State**: Derived by folding events through evolver
+6. **Context**: External dependencies (timestamp, userId, correlationId) injected at edge
 
 **Benefits:**
 - Complete audit trail
 - Time travel debugging
 - Deterministic replay
 - No direct state mutation
+- 100% pure business logic
 
 ### Email Architecture (Backend-First)
 
@@ -278,7 +280,8 @@ src/
 - **Service Account**: Backend operations use service account
 
 ### 4. Development Patterns
-
+Context Injection**: External dependencies (timestamp, userId) passed via context object
+- **
 - **Pure Functions**: No side effects in business logic
 - **Dependency Injection**: Services injected via providers
 - **Error Boundaries**: React error boundaries for UI resilience
@@ -305,7 +308,8 @@ src/
    npm run lint
    ```
 
-4. **Run tests**
+4. **Run te              # Integration tests
+   npm run test:unit     # Pure unit tests (decider/evolver functions)sts**
    ```bash
    npm test
    ```
@@ -440,11 +444,13 @@ const q = query(usersRef,
 
 ### Event Sourcing Pitfalls
 
-#### 🚨 Gotcha: Impure Decider Functions Break Determinism
+#### 🚨 Gotcha: Impure Decider Functions Break Determinism, no `consolelog()`.
+
+**Architectural Requirement**: All deciders must use the context injection pattern for external dependencies.
 
 **Problem**: Your event replay gives different results each time, or tests fail intermittently.
 
-**Root Cause**: Decider functions must be pure - no I/O, no randomness, no `Date.now()`.
+**Root Cause**: Decider fun (OLD PATTERN)ctions must be pure - no I/O, no randomness, no `Date.now()`.
 
 **Example Issue**:
 ```typescript
@@ -458,8 +464,14 @@ function decide(state: State, command: Command): Event[] {
     }]
   }
 }
-```
+```cont injction (NEW PATTERN)
+inteface DeciderCotext {
+  redony tmestamp: number
+  readonly usrI?: string
+ ely corrlationId?: tring
+}
 
+nd, cotext: DecierContext
 **Solution**:
 ```typescript
 // ✅ CORRECT - Pure decider with externalized randomness
@@ -467,11 +479,22 @@ function decide(state: State, command: Command): Event[] {
   if (command.type === 'START_GAME') {
     // Randomness happens BEFORE dispatch, captured in command
     const { shuffledDeck, randomSeed } = command.data
-    return [{
-      type: 'game/started',
-      deck: shuffledDeck, // ✅ Deterministic - provided in command
-      randomSeed, // ✅ Deterministic - provided in command
-      timestamp: command.timestamp // ✅ Provided by caller
+    return [{text Deterministic - from context
+    }]
+  }
+}
+
+// Command handler(edge) geneates cntext
+const context = { timestamp: Date.now() }
+const eents = dec(currentState, comman,context)
+```
+
+**KeRues**:
+- ✅ Al dcides accept `(state, command, context)` signature
+- ✅ Use `context.timestamp` instead of `Date.now()`type: 'game/started',
+- ✅ No `console.log()` statements in deciders   deck: shuffledDeck, // ✅ Deterministic - provided in command
+- ✅ No external API calls or I/O     randomSeed, // ✅ Deterministic - provided in command
+- ✅ Context is future-proof (can add userId, correlationId, etc.)   timestamp: command.timestamp // ✅ Provided by caller
     }]
   }
 }
@@ -745,8 +768,11 @@ firebase functions:delete oldFunctionName --region regionName
 - Use conditional logging: `if (import.meta.env.DEV) console.log(...)`
 - Use proper logging library with levels (debug, info, warn, error)
 - Remove debug logs before production deployment
-- Consider using a logging service for production
-
+- Consider using a logging service decideo functirns
+- [ ] No Date.now() calls in  ecider fpnroducst(use iontxt.timestamp)
+ decider functions use (state, command, context) signature
+- [ ] Pure unit tests pass: `npm run test:unit`
+- [ ] No
 #### 🚨 Gotcha: Firebase Bundle Size Bloat
 
 **Problem**: Initial bundle size is very large (>500KB) causing slow load times.
@@ -761,46 +787,75 @@ import firebase from 'firebase/app'
 // ✅ CORRECT - Imports only what you need
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { getFirestore } from 'firebase/firestore'
+impoPt   UgietFireingsFramowork (NEW - Jely 2026)} from 'firebase/firestore'
 ```
+PupseFas, dterminiic#tuick Reof pure rusiness logic (decidee/evolvec functions).
 
-### Quick Reference Checklist
-
-Before deploying or committing, check:
-
-- [ ] No console.log statements in production code
-- [ ] All security rules tested with emulator
-- [ ] Decider/evolver functions are pure
-- [ ] Environment variables use VITE_ prefix
+ CConfigurlsion**:t`vit.unt.cofi.ts`- Dedcted config fopur unit tes
+-Node (no  overhead)
+-Inclde patter: `**/*.ut.pec.`
+- Exclude: ]dmin/, function /, node_modules/ll security rules tested with emulator
+- No set p fieesi(pure and relf-con/ained)volver functions are pure
+- Targe]  xecunion: < 1 secondvironment variables use VITE_ prefix
 - [ ] Path aliases work in both dev and build
-- [ ] Firebase Admin not in client dependencies
-- [ ] Cloud Functions runtime version is current
-- [ ] Email queue data structure is correct (maps, not strings)
-- [ ] Multi-tenant queries include tenant_id
-- [ ] Type checking passes: `npm run typecheck`
+**[ ]nFigrPure Unia Tists**:n not in client dependencies
+```bash
+- [ run ] Cl:unito    - Pure  ]ttnant sqonryes include tenant_id
+- [ ] Ty              #pIntegr cikn ng ss (includse UI, Fireba`e)npm run typecheck`
 - [ ] Linting passes: `npm run lint`
 
----
-
+** Pure Unit**:
 ## Testing
 
-### Current Test Setup
+### CurredtciTeVocabulasyt type DeeidetContpxt'./decide
 
+// Derminic tmestmp fo tsing
+cnsDETERINISTI_TIMESTAMP = 1721380000000
+cst tstCotex:DecideCntext = { timestap:DETERINISTI_TIMESTAMP }
 - **Framework**: Vitest
-- **Testing Library**: React Testing Library
-- **Test Environment**: jsdom
+- **TestinVocabular  Decider - Pure Urit Tys*s: React Testing Library
+- **Teshould emit event fos valid tntry', () => {
+    co st statn = initialVocabulavyState
+    conitronmmand = {
+      tenant_id: 'tenant-123',
+      aggmegate_id: 'aggenga*e-456',
+      type: 'vocabu*ar:/addWordDefinition j
+sm   entry: validEntry
+}
 
-### Running Tests
+    const vets = cideVocabula(state, cmad, tstCoext)
 
+   expect(events.toHaveLength(1)
+### Runningevent [0]!.addedAt).toBe(DETERMINISTIC_TIMESTAMP)
+  })
+})
+```
+
+**Key PrinTiples**:
+- ✅ No Fiesbast isitialization or network calls
+- ✅ No Datenow() mockin - us deerministic timestamp via context
+- ✅ No rna dependencies r side effects
+- ✅ Test execuion < 1 secnd
+- ✅ Pure and detrministic
+
+### ntegratio esting
+
+**Framwrk**: Vitest
+**Testing Library**: Reat Testing Library
+**Test Environment**: jsdom
+
+**Rnning Intgratio Tess**:
 ```bash
+npm test              # Run allintegrationtests
+npm test -- --watch   # Watch mode`bash
 # Run all tests
 npm test
 
 # Run in watch mode
-npm test -- --watch
-
-# Run specific test file
-npm test path/to/test.test.ts
+npm tPure est -- --watch (NEW - July 2026)
+, UI components
+# Run specific test fileReactts with Reac Teting Library
+npm test path/to/test.test.ts (future)
 ```
 
 ### Writing Tests
@@ -854,7 +909,53 @@ firebase deploy --only functions:processEmailQueue
 # Deploy Firestore rules
 firebase deploy --only firestore:rules
 ```
+Pure Function Architecture Refactor ✅ (July 19, 2026)
 
+**What Changed:**
+- Refactored all decider functions to use context injection pattern
+- Removed all `Date.now()` calls from decider functions (vocabulary, user, village)
+- Removed all `console.log` statements from decider functions (game)
+- Updated decider signatures: `(state, command) → events[]` to `(state, command, context: { timestamp: number }) → events[]`
+- Added optional ID fields to commands for edge generation
+- Updated command handlers (stores) to pass context parameter
+- Created dedicated pure unit test framework (`vitest.unit.config.ts`)
+- Added template unit test for vocabulary decider
+
+**Why It Matters:**
+- 100% pure business logic across all deciders
+- Deterministic event replay and testing
+- Sub-second test execution (588ms for 12 tests)
+- Future-proof context pattern for additional dependencies
+- Architectural foundation for event-sourced system
+
+**Files Modified:**
+- `src/entities/vocabulary/model/decide.ts` - Context parameter, removed Date.now()
+- `src/entities/vocabulary/model/decide.unit.spec.ts` - New pure unit test template
+- `src/entities/user/model/decide.ts` - Context parameter, removed Date.now()
+- `src/entities/user/model/commands.ts` - Optional userId field
+- `src/entities/user/model/userStore.ts` - Pass context at edge
+- `src/entities/village/model/decide.ts` - Context parameter, removed Date.now()
+- `src/entities/village/model/commands.ts` - Optional ID fields
+- `src/entities/village/model/villageStore.ts` - Pass context at edge
+- `src/entities/game/model/decide.ts` - Removed console.log statements
+- `vitest.unit.config.ts` - New pure unit test configuration
+- `package.json` - Added test:unit script
+
+**How to Use:**
+```typescript
+// Command handler (edge) generates context
+const context = { timestamp: Date.now() }
+const events = decideVocabulary(currentState, command, context)
+
+// Unit tests use deterministic timestamp
+const testContext = { timestamp: 1721380000000 }
+const events = decideVocabulary(state, command, testContext)
+
+// Run pure unit tests
+npm run test:unit
+```
+
+### 
 ### Environment Setup
 
 **Development**: Uses `.env` file  
@@ -893,22 +994,26 @@ firebase deploy --only firestore:rules
 - **vite.config.ts** - Vite build configuration
 - **firebase.json** - Firebase deployment configuration
 - **firestore.rules** - Firestore security rules
-
+context injection** - Pass timestamp and other external dependencies via context
+- **Use 
 ### External Resources
-
+, lint,test:un
 - **Firebase Console**: https://console.firebase.google.com/project/lexicon-master-adb6b/overview
 - **Firebase Documentation**: https://firebase.google.com/docs
 - **Vite Documentation**: https://vitejs.dev/
+- **Write pure unit tests** - Test decider/evolver functions deterministically
 - **React Documentation**: https://react.dev/
 - **TypeScript Documentation**: https://www.typescriptlang.org/docs/
 
 ---
 
-## Recent Changes (July 2026)
+## Recent use Date.now() in deciders** - Use context.timestamp inCtead
+- **Don't use console.log in deciders** - Keep functions pure
+- **Don't shanges (July 2026)
 
 ### Email Migration Completed ✅
 
-**What Changed:**
+**What Changed:** Runtt:unifo dcidr cha
 - Migrated email sending from client-side to Cloud Functions
 - Implemented `email_queue` collection with write-only security
 - Created `processEmailQueue` Cloud Function

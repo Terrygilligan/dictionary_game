@@ -14,7 +14,8 @@ npm run build      # type-check + production build
 npm run preview    # preview the production build
 npm run typecheck  # tsc project references, no emit
 npm run lint       # oxlint
-npm test           # vitest (run once)
+npm test           # vitest integration tests
+npm run test:unit  # pure unit tests (decider/evolver functions)
 ```
 
 Node 20.9+ (or 22.12+) is required by Vite 6.
@@ -46,14 +47,14 @@ State is **derived solely from an immutable event log**. Nothing mutates state
 directly.
 
 ```
-UI  --command-->  decide(state, command)  --events-->  log (append-only)
+UI  --command-->  decide(state, command, context)  --events-->  log (append-only)
                                                           |
                           state  <--fold-- evolve(state, event)  <--+
 ```
 
 - **Commands** are intents: `startGame`, `submitAnswer`, `nextRound`.
-- The **decider** `(state, command) → events` is pure and validates intent;
-  invalid commands yield no events.
+- The **decider** `(state, command, context) → events` is pure and validates intent;
+  invalid commands yield no events. Context provides timestamp and other external dependencies.
 - The **evolver** `(state, event) → state` is pure; the store re-derives state
   by folding the entire log on every commit, so the log is the single source of
   truth and replay is deterministic.

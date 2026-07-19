@@ -30,7 +30,9 @@ Dependency direction is one-way: `app → pages → features → entities → sh
 - State is derived **solely** from the event log. There is no state setter — the
   only way to change state is to `dispatch` a command.
 - The **decider** (`decide.ts`) and **evolver** (`state.ts`) must stay **pure**:
-  no I/O, no randomness, no `Date.now()`. Invalid commands return `[]`.
+  no I/O, no randomness, no `Date.now()`, no `console.log()`. Invalid commands return `[]`.
+- **Context Injection Pattern**: Deciders must accept `(state, command, context: { timestamp: number, userId?, correlationId? })` for external dependencies.
+- Timestamps must be generated at the edge (command handlers/stores) and passed via context, never inside deciders.
 - Confine non-determinism (randomness, clocks, ids) to the edges: `buildDeck`,
   the store's injectable clock, and `nextId`. Capture any random result in an
   event so replay stays deterministic.
@@ -39,9 +41,10 @@ Dependency direction is one-way: `app → pages → features → entities → sh
 
 ```bash
 npm run lint
+npm run test:unit  # Pure unit tests for decider/evolver functions
 npm run typecheck
 npm test
-```
+```fou
 
 All three must pass.
 
