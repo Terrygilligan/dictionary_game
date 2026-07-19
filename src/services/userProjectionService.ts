@@ -5,6 +5,9 @@ import { encryptUserProfile } from '@/shared/lib/security/cryptoShreddingBrowser
 import type { UserRegisteredEvent } from '@/shared/events/EventPublisher'
 import type { ITeardownService } from '@/shared/services/ITeardownService.ts'
 import { SecurityContextError } from '@/shared/services/ITeardownService.ts'
+import { createLogger } from '@/shared/lib/logger'
+
+const logger = createLogger('USER_PROJECTION')
 
 /**
  * User Projection Service
@@ -41,20 +44,20 @@ export class UserProjectionService implements ITeardownService {
       )
     }
 
-    console.log('🚀 [USER_PROJECTION] Starting user projection service...')
+    logger.log('Starting user projection service...')
 
     this.unsubscribe = userEventBus.subscribe('user.registered', async (envelope: UserEventEnvelope) => {
       await this.handleUserRegistered(envelope)
     })
 
-    console.log('✅ [USER_PROJECTION] Subscribed to user.registered events')
+    logger.log('Subscribed to user.registered events')
   }
 
   /**
    * Stop the projection service
    */
   stop(): void {
-    console.log('🛑 [USER_PROJECTION] Stopping user projection service...')
+    logger.log('Stopping user projection service...')
     
     if (this.unsubscribe) {
       this.unsubscribe()
@@ -67,15 +70,15 @@ export class UserProjectionService implements ITeardownService {
    * Performs absolute state reset with idempotency protection.
    */
   teardown(tenant_id?: string): void {
-    console.log(`🧹 [SERVICE_TEARDOWN] UserProjectionService teardown starting for tenant: ${tenant_id || 'all'}`)
+    logger.log(`UserProjectionService teardown starting for tenant: ${tenant_id || 'all'}`)
     
     // Constraint #1: Idempotency check
     if (this.isTornDown) {
-      console.log('ℹ️ [SERVICE_TEARDOWN] UserProjectionService already torn down, skipping')
+      logger.log('UserProjectionService already torn down, skipping')
       return
     }
 
-    console.log('🧹 [SERVICE_TEARDOWN] UserProjectionService status before: Active')
+    logger.log('UserProjectionService status before: Active')
     
     // Constraint #3: Internal Buffer Flushing - Stop normal operations
     this.stop()
@@ -83,8 +86,8 @@ export class UserProjectionService implements ITeardownService {
     // Constraint #1: Mark as torn down (idempotency)
     this.isTornDown = true
     
-    console.log('🧹 [SERVICE_TEARDOWN] UserProjectionService status after: Inactive')
-    console.log('✅ [SERVICE_TEARDOWN] UserProjectionService teardown complete')
+    logger.log('UserProjectionService status after: Inactive')
+    logger.log('UserProjectionService teardown complete')
   }
 
   /**
@@ -101,7 +104,7 @@ export class UserProjectionService implements ITeardownService {
   private async handleUserRegistered(envelope: UserEventEnvelope): Promise<void> {
     const { tenant_id, aggregate_id, correlationId, payload } = envelope
     
-    console.log(`📊 [USER_PROJECTION] Processing user registration:`, {
+    logger.log(`Processing user registration:`, {
       correlationId,
       tenant_id,
       aggregate_id,
@@ -139,7 +142,7 @@ export class UserProjectionService implements ITeardownService {
       const userRef = doc(this.db, this.usersCollection, userId)
       await setDoc(userRef, encryptedProfile, { merge: true })
 
-      console.log(`✅ [USER_PROJECTION] User document created/updated in Firestore:`, {
+      logger.log(`User document created/updated in Firestore:`, {
         userId,
         tenant_id,
         aggregate_id,
@@ -147,7 +150,7 @@ export class UserProjectionService implements ITeardownService {
       })
 
     } catch (error) {
-      console.error(`❌ [USER_PROJECTION] Failed to project user to Firestore:`, {
+      logger.error(`Failed to project user to Firestore:`, {
         correlationId,
         tenant_id,
         aggregate_id,
@@ -173,8 +176,3 @@ export class UserProjectionService implements ITeardownService {
     return snapshot.data()
   }
 }
-
-/**
- * Export singleton instance for application use
- */
-export const userProjectionService = new UserProjectionService()

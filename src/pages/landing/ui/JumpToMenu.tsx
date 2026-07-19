@@ -1,18 +1,16 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 
-interface JumpToMenuProps {
-  safeT: (key: string, fallback?: string) => string
-}
-
-export function JumpToMenu({ safeT }: JumpToMenuProps) {
+export function JumpToMenu() {
+  const { t } = useTranslate()
   const [activeSection, setActiveSection] = useState('play-your-way')
 
   const menuItems = useMemo(() => [
-    { id: 'features', label: safeT('landing.menu.features', 'Features') },
-    { id: 'privacy', label: safeT('landing.menu.dataControl', 'Data Control') },
-    { id: 'how-it-works', label: safeT('landing.menu.howItWorks', 'How It Works') },
-    { id: 'play-your-way', label: safeT('landing.menu.playYourWay', 'Play Your Way') }
-  ], [safeT])
+    { id: 'features', label: t('landing.menu.features') },
+    { id: 'privacy', label: t('landing.menu.dataControl') },
+    { id: 'how-it-works', label: t('landing.menu.howItWorks') },
+    { id: 'play-your-way', label: t('landing.menu.playYourWay') }
+  ], [t])
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)

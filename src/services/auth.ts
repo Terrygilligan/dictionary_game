@@ -1,17 +1,20 @@
-import { 
+import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   updateProfile,
-  sendPasswordResetEmail,
-  sendEmailVerification,
   reload,
   getIdTokenResult,
   type User as FirebaseUser
 } from 'firebase/auth'
 import { getFirebaseAuth } from '@/shared/api/firebase'
+import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import type { User, UserClaims } from '@/entities/user'
+import { createLogger } from '@/shared/lib/logger'
+import { guestSessionService } from './GuestSessionService'
+
+const logger = createLogger('AUTH_SERVICE')
 
 /**
  * Authentication service that handles Firebase Auth operations
@@ -34,7 +37,7 @@ export interface AuthService {
   updateProfile(displayName: string): Promise<void>
   
   /** Reset password */
-  resetPassword(email: string): Promise<void>
+  resetPassword(email: string, resetLink?: string): Promise<void>
   
   /** Send email verification */
   sendEmailVerification(): Promise<void>
@@ -69,23 +72,23 @@ export interface AuthResult {
  */
 async function extractUserClaims(firebaseUser: FirebaseUser): Promise<UserClaims> {
   try {
-    console.log('[authService] Extracting claims for user:', firebaseUser.uid)
+    logger.log('Extracting claims for user:', firebaseUser.uid)
     const idTokenResult = await getIdTokenResult(firebaseUser)
     const claims = idTokenResult.claims || {}
     
-    console.log('[authService] Raw IdTokenResult claims:', JSON.stringify(claims, null, 2))
-    console.log('[authService] superadmin claim value:', claims.superadmin)
-    console.log('[authService] admin claim value:', claims.admin)
+    logger.log('Raw IdTokenResult claims:', JSON.stringify(claims, null, 2))
+    logger.log('superadmin claim value:', claims.superadmin)
+    logger.log('admin claim value:', claims.admin)
     
     const extractedClaims = {
       superadmin: claims.superadmin === true,
       admin: claims.admin === true,
     }
     
-    console.log('[authService] Extracted claims:', extractedClaims)
+    logger.log('Extracted claims:', extractedClaims)
     return extractedClaims
   } catch (error) {
-    console.error('[authService] Failed to extract user claims:', error)
+    logger.error('Failed to extract user claims:', error)
     return {}
   }
 }
@@ -125,10 +128,42 @@ async function firebaseUserToDomainUser(firebaseUser: FirebaseUser): Promise<Use
 class FirebaseAuthService implements AuthService {
   private auth = getFirebaseAuth()
   private currentUser: User | null = null
+  private firestore = getFirestore()
+
+  /**
+   * Helper function to write email requests to email_queue collection
+   * Following the write-only security model - clients can only create, never read/update/delete
+   */
+  private async queueEmail(email: string, template: string, additionalData?: Record<string, any>): Promise<void> {
+    if (!this.auth.currentUser) {
+      throw new Error('No authenticated user')
+    }
+
+    try {
+      const emailQueueRef = collection(this.firestore, 'email_queue')
+      await addDoc(emailQueueRef, {
+        email,
+        userId: this.auth.currentUser.uid,
+        template,
+        data: additionalData || {},
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      })
+      logger.log(`Email queued successfully: ${template} for ${email}`)
+    } catch (error) {
+      logger.error('Failed to queue email:', error)
+      throw error
+    }
+  }
 
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
       const userCredential = await signInWithEmailAndPassword(this.auth, email, password)
+      
+      // Reset guest session when user signs in
+      guestSessionService.resetSession()
+      logger.log('Guest session reset on sign in')
+      
       const user = await firebaseUserToDomainUser(userCredential.user)
       this.currentUser = user
       
@@ -141,7 +176,7 @@ class FirebaseAuthService implements AuthService {
         token, // For internal auth service use only
       }
     } catch (error) {
-      console.error('Sign in error:', error)
+      logger.error('Sign in error:', error)
       return {
         success: false,
         error: this.getErrorMessage(error),
@@ -152,57 +187,54 @@ class FirebaseAuthService implements AuthService {
   async signUp(email: string, password: string, displayName: string): Promise<AuthResult> {
     try {
       const userCredential = await createUserWithEmailAndPassword(this.auth, email, password)
-      
+
+      // Reset guest session when user signs up
+      guestSessionService.resetSession()
+      logger.log('Guest session reset on sign up')
+
       // Update display name
       await updateProfile(userCredential.user, { displayName })
-      
-      // Send email verification
-      // await sendEmailVerification(userCredential.user)  // DISABLED: Use custom EmailVerificationService instead
-      
+
       const user = await firebaseUserToDomainUser(userCredential.user)
       this.currentUser = user
-      
+
       // Get token for internal use
       const token = await userCredential.user.getIdToken()
-      
+
+      // Queue welcome/verification email for new user
+      try {
+        await this.queueEmail(email, 'welcome_registration', { username: displayName })
+        logger.log('Welcome email queued for new user:', email)
+      } catch (emailError) {
+        // Don't fail signup if email queue fails, but log the error
+        logger.error('Failed to queue welcome email:', emailError)
+      }
+
       // 🔍 DEBUG LOG: User registration event
-      console.log('🔍 [AUTH] USER_REGISTERED event triggered:', {
+      logger.log('USER_REGISTERED event triggered:', {
         userId: user.id,
         email: user.email,
         displayName: user.displayName,
         createdAt: user.createdAt
       })
-      
+
       // 🎯 Emit USER_REGISTERED event to projection system
       // TODO: Re-implement projection service or use alternative approach
-      console.log('📝 [AUTH] User registered:', {
+      logger.log('User registered:', {
         userId: user.id,
         email: user.email,
         displayName: user.displayName,
         emailVerified: user.emailVerified,
         createdAt: user.createdAt,
       })
-      // await userProjectionService.processUserEvent({
-      //   type: 'user/registered',
-      //   userId: user.id,
-      //   email: user.email,
-      //   displayName: user.displayName,
-      //   emailVerified: user.emailVerified,
-      //   createdAt: user.createdAt,
-      // })
-      // console.log('✅ [AUTH] USER_REGISTERED event processed by projection service')
-      // } catch (error) {
-      //   console.error('❌ [AUTH] Failed to process USER_REGISTERED event:', error)
-      //   // Don't fail the signup if projection fails, but log the error
-      // }
-      
+
       return {
         success: true,
         user,
         token, // For internal auth service use only
       }
     } catch (error) {
-      console.error('Sign up error:', error)
+      logger.error('Sign up error:', error)
       return {
         success: false,
         error: this.getErrorMessage(error),
@@ -211,65 +243,65 @@ class FirebaseAuthService implements AuthService {
   }
 
   async signOut(): Promise<void> {
-    console.log('🚪 [AUTH_SERVICE] Starting absolute sign-out process')
+    logger.log('Starting absolute sign-out process')
     
     try {
       // Step 1: Call Firebase signOut
-      console.log('🚪 [AUTH_SERVICE] Step 1: Calling Firebase signOut')
+      logger.log('Step 1: Calling Firebase signOut')
       await signOut(this.auth)
-      console.log('✅ [AUTH_SERVICE] Firebase signOut successful')
+      logger.log('Firebase signOut successful')
       
       // Step 2: Clear local state
-      console.log('🚪 [AUTH_SERVICE] Step 2: Clearing local user state')
+      logger.log('Step 2: Clearing local user state')
       this.currentUser = null
-      console.log('✅ [AUTH_SERVICE] Local user state cleared')
+      logger.log('Local user state cleared')
       
       // Step 3: Clear localStorage
-      console.log('🚪 [AUTH_SERVICE] Step 3: Clearing localStorage')
+      logger.log('Step 3: Clearing localStorage')
       const localStorageKeysBefore = Object.keys(localStorage)
-      console.log('🗑️ [AUTH_SERVICE] localStorage keys before clear:', localStorageKeysBefore)
+      logger.log('localStorage keys before clear:', localStorageKeysBefore)
       localStorage.clear()
-      console.log('✅ [AUTH_SERVICE] localStorage cleared')
+      logger.log('localStorage cleared')
       
       // Step 4: Clear sessionStorage
-      console.log('🚪 [AUTH_SERVICE] Step 4: Clearing sessionStorage')
+      logger.log('Step 4: Clearing sessionStorage')
       const sessionStorageKeysBefore = Object.keys(sessionStorage)
-      console.log('🗑️ [AUTH_SERVICE] sessionStorage keys before clear:', sessionStorageKeysBefore)
+      logger.log('sessionStorage keys before clear:', sessionStorageKeysBefore)
       sessionStorage.clear()
-      console.log('✅ [AUTH_SERVICE] sessionStorage cleared')
+      logger.log('sessionStorage cleared')
       
       // Step 5: Attempt to clear IndexedDB (Firebase Auth persistence)
-      console.log('🚪 [AUTH_SERVICE] Step 5: Attempting to clear IndexedDB')
+      logger.log('Step 5: Attempting to clear IndexedDB')
       try {
         // Delete Firebase Auth IndexedDB databases
         const databases = await indexedDB.databases()
-        console.log('🗑️ [AUTH_SERVICE] IndexedDB databases found:', databases.map(db => db.name))
+        logger.log('IndexedDB databases found:', databases.map(db => db.name))
         
         for (const db of databases) {
           if (db.name && (db.name.includes('firebase') || db.name.includes('auth'))) {
-            console.log(`🗑️ [AUTH_SERVICE] Deleting IndexedDB database: ${db.name}`)
+            logger.log(`Deleting IndexedDB database: ${db.name}`)
             indexedDB.deleteDatabase(db.name)
           }
         }
-        console.log('✅ [AUTH_SERVICE] IndexedDB cleanup attempted')
+        logger.log('IndexedDB cleanup attempted')
       } catch (idbError) {
-        console.warn('⚠️ [AUTH_SERVICE] IndexedDB cleanup failed (non-critical):', idbError)
+        logger.warn('IndexedDB cleanup failed (non-critical):', idbError)
       }
       
       // Step 6: Clear any app-specific reset functions
-      console.log('🚪 [AUTH_SERVICE] Step 6: Triggering app-specific cleanup')
+      logger.log('Step 6: Triggering app-specific cleanup')
       if ((window as any).__resetUserStore) {
-        console.log('🗑️ [AUTH_SERVICE] Calling __resetUserStore')
+        logger.log('Calling __resetUserStore')
         ;(window as any).__resetUserStore()
       }
       
       // Step 7: Log completion and prepare for hard redirect
-      console.log('✅ [AUTH_SERVICE] Absolute sign-out process completed')
-      console.log('🔄 [AUTH_SERVICE] Preparing for hard redirect to /auth')
+      logger.log('Absolute sign-out process completed')
+      logger.log('Preparing for hard redirect to /auth')
       
       // Note: The hard redirect should be handled by the caller to ensure proper timing
     } catch (error) {
-      console.error('❌ [AUTH_SERVICE] Sign out error:', error)
+      logger.error('Sign out error:', error)
       throw error
     }
   }
@@ -293,16 +325,18 @@ class FirebaseAuthService implements AuthService {
         this.currentUser = { ...this.currentUser, displayName }
       }
     } catch (error) {
-      console.error('Profile update error:', error)
+      logger.error('Profile update error:', error)
       throw error
     }
   }
 
-  async resetPassword(email: string): Promise<void> {
+  async resetPassword(email: string, resetLink?: string): Promise<void> {
     try {
-      await sendPasswordResetEmail(this.auth, email)
+      // Queue password reset email instead of calling Firebase directly
+      await this.queueEmail(email, 'password_reset', { resetLink })
+      logger.log('Password reset email queued for:', email)
     } catch (error) {
-      console.error('Password reset error:', error)
+      logger.error('Password reset error:', error)
       throw error
     }
   }
@@ -311,11 +345,13 @@ class FirebaseAuthService implements AuthService {
     if (!this.auth.currentUser) {
       throw new Error('No authenticated user')
     }
-    
+
     try {
-      await sendEmailVerification(this.auth.currentUser)
+      // Queue email verification instead of calling Firebase directly
+      await this.queueEmail(this.auth.currentUser.email || '', 'email_verification')
+      logger.log('Email verification queued for:', this.auth.currentUser.email)
     } catch (error) {
-      console.error('Email verification error:', error)
+      logger.error('Email verification error:', error)
       throw error
     }
   }
@@ -336,7 +372,7 @@ class FirebaseAuthService implements AuthService {
         this.currentUser = await firebaseUserToDomainUser(this.auth.currentUser)
       }
     } catch (error) {
-      console.error('User refresh error:', error)
+      logger.error('User refresh error:', error)
       throw error
     }
   }
@@ -365,7 +401,7 @@ class FirebaseAuthService implements AuthService {
     }
 
     try {
-      console.log('[authService] Forcing token refresh to get latest claims')
+      logger.log('Forcing token refresh to get latest claims')
       // Force refresh by passing true to get new token from server
       await this.auth.currentUser.getIdToken(true)
       // Reload user to update claims in the auth object
@@ -373,11 +409,11 @@ class FirebaseAuthService implements AuthService {
       // Update current user data with fresh claims
       if (this.auth.currentUser) {
         this.currentUser = await firebaseUserToDomainUser(this.auth.currentUser)
-        console.log('[authService] Token refreshed successfully, claims updated')
+        logger.log('Token refreshed successfully, claims updated')
       }
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error)
-      console.error('[authService] Token refresh error:', errorMessage)
+      logger.error('Token refresh error:', errorMessage)
       throw new Error(`TOKEN_REFRESH_ERROR: Failed to refresh token - ${errorMessage}`)
     }
   }

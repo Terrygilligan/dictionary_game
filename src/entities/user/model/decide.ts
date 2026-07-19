@@ -176,6 +176,53 @@ export function decideUser(
       // Sync is handled by sync service, not domain logic
       return []
 
+    case 'guestAccess/request':
+      // Guest access can be requested by anonymous users
+      const gamesPlayed = state.guestAccess.gamesPlayed
+      const maxGames = command.maxGames
+      
+      if (gamesPlayed < maxGames) {
+        // Grant access - user can play more games
+        return [
+          {
+            type: 'guestAccess/requested',
+            tenant_id: command.tenant_id,
+            aggregate_id: command.aggregate_id,
+            userId: state.user?.id ?? 'guest',
+            timestamp: Date.now(), // Will be replaced by injectable clock
+          },
+          {
+            type: 'guestAccess/granted',
+            tenant_id: command.tenant_id,
+            aggregate_id: command.aggregate_id,
+            userId: state.user?.id ?? 'guest',
+            gamesRemaining: maxGames - gamesPlayed,
+            timestamp: Date.now(), // Will be replaced by injectable clock
+          },
+        ]
+      } else {
+        // Deny access - limit reached
+        return [
+          {
+            type: 'guestAccess/requested',
+            tenant_id: command.tenant_id,
+            aggregate_id: command.aggregate_id,
+            userId: state.user?.id ?? 'guest',
+            timestamp: Date.now(), // Will be replaced by injectable clock
+          },
+          {
+            type: 'guestAccess/denied',
+            tenant_id: command.tenant_id,
+            aggregate_id: command.aggregate_id,
+            userId: state.user?.id ?? 'guest',
+            reason: 'limit-reached',
+            gamesPlayed: gamesPlayed,
+            maxGames: maxGames,
+            timestamp: Date.now(), // Will be replaced by injectable clock
+          },
+        ]
+      }
+
     default:
       // Exhaustive checking - will cause TypeScript error if new commands added
       return []

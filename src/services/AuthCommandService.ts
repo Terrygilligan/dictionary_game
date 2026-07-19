@@ -154,11 +154,11 @@ export class AuthCommandService {
         userId: firebaseResult.user.id,
       })
 
-      // Step 2: Create event-sourced registration command
+      // Step 2: Create event-sourced registration command with proper multi-tenant identity
       const registerCommand: RegisterUser = {
         type: 'user/register',
-        tenant_id: firebaseResult.user.id,
-        aggregate_id: `user_${firebaseResult.user.id}`,
+        tenant_id: 'lexicon_community_main', // Community scope (multi-tenant architecture)
+        aggregate_id: `user_${firebaseResult.user.id}`, // User instance
         userId: firebaseResult.user.id,
         email: firebaseResult.user.email,
         displayName: firebaseResult.user.displayName,
@@ -177,27 +177,25 @@ export class AuthCommandService {
       console.log('✅ [AUTH_COMMAND] Registration event committed successfully:', {
         correlationId,
         userId: firebaseResult.user.id,
+        tenant_id: registerCommand.tenant_id,
+        aggregate_id: registerCommand.aggregate_id,
       })
 
       // Step 4: Atomically publish to outbox (transactional)
+      // Flattened payload structure: tenant_id and aggregate_id at payload root level
       await outboxManager.publishSingleAtomically(
         'user.registered',
         {
-          correlationId,
-          timestamp: new Date().toISOString(),
-          eventType: 'user.registered',
-          payload: {
-            userId: firebaseResult.user.id,
-            email: firebaseResult.user.email,
-            displayName: firebaseResult.user.displayName,
-            emailVerified: firebaseResult.user.emailVerified,
-            createdAt: firebaseResult.user.createdAt,
-            tenant_id: firebaseResult.user.id, // Include for UserEventBus
-            aggregate_id: `user_${firebaseResult.user.id}`, // Include for UserEventBus
-          },
+          userId: firebaseResult.user.id,
+          email: firebaseResult.user.email,
+          displayName: firebaseResult.user.displayName,
+          emailVerified: firebaseResult.user.emailVerified,
+          createdAt: firebaseResult.user.createdAt,
+          tenant_id: 'lexicon_community_main', // Community scope (multi-tenant architecture)
+          aggregate_id: `user_${firebaseResult.user.id}`, // User instance
         },
         correlationId,
-        firebaseResult.user.id, // Use user ID as tenant_id
+        'lexicon_community_main', // Use community tenant_id for multi-tenant isolation
         `user_${firebaseResult.user.id}` // Use user-specific aggregate
       )
 

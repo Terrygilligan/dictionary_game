@@ -120,6 +120,33 @@ export function evolveUser(state: UserState, event: UserEvent): UserState {
         lastSyncAt: event.timestamp,
       }
 
+    case 'guestAccess/requested':
+      return {
+        ...state,
+        guestAccess: {
+          ...state.guestAccess,
+          lastRequestAt: event.timestamp,
+        },
+      }
+
+    case 'guestAccess/granted':
+      return {
+        ...state,
+        guestAccess: {
+          ...state.guestAccess,
+          isAccessGranted: true,
+        },
+      }
+
+    case 'guestAccess/denied':
+      return {
+        ...state,
+        guestAccess: {
+          ...state.guestAccess,
+          isAccessGranted: false,
+        },
+      }
+
     default:
       // Exhaustive checking - will cause TypeScript error if new events added
       return state

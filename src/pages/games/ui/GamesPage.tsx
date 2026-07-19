@@ -1,8 +1,14 @@
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 import { Button } from '@/shared/ui/Button'
+import { useNavigation } from '@/shared/lib/navigation'
+import { createLogger } from '@/shared/lib/logger'
+import { guestSessionService } from '@/services/GuestSessionService'
+
+const logger = createLogger('GAMES_PAGE')
 
 export function GamesPage() {
   const { t } = useTranslate()
+  const { navigate } = useNavigation()
   
   // State Audit: Log button state and DOM node
   console.log('[DEBUG_STATE]', { 
@@ -10,6 +16,44 @@ export function GamesPage() {
     status: 'ready', 
     DOM_node: document.querySelector('.game-card__button') 
   })
+
+  const handleSoloGameClick = () => {
+    logger.log('Solo game button clicked, checking guest limit', { path: 'game', mode: 'solo' })
+    
+    // Check if guest can start a new game
+    if (!guestSessionService.canStartGame()) {
+      const gamesPlayed = guestSessionService.getGamesPlayed()
+      const maxGames = guestSessionService.getMaxGames()
+      const remaining = guestSessionService.getRemainingGames()
+      alert(`Guest play is limited to ${maxGames} games. You have played ${gamesPlayed} games (${remaining} remaining). Please sign in to continue playing unlimited games.`)
+      logger.log('Guest limit reached, blocking navigation', { gamesPlayed, maxGames, remaining })
+      return
+    }
+    
+    // Record the game and navigate
+    guestSessionService.recordGamePlayed()
+    logger.log('Guest game recorded, navigating to game page', { path: 'game', mode: 'solo' })
+    navigate('game')
+  }
+
+  const handleVersusGameClick = () => {
+    logger.log('Versus game button clicked, checking guest limit', { path: 'game', mode: 'versus' })
+    
+    // Check if guest can start a new game
+    if (!guestSessionService.canStartGame()) {
+      const gamesPlayed = guestSessionService.getGamesPlayed()
+      const maxGames = guestSessionService.getMaxGames()
+      const remaining = guestSessionService.getRemainingGames()
+      alert(`Guest play is limited to ${maxGames} games. You have played ${gamesPlayed} games (${remaining} remaining). Please sign in to continue playing unlimited games.`)
+      logger.log('Guest limit reached, blocking navigation', { gamesPlayed, maxGames, remaining })
+      return
+    }
+    
+    // Record the game and navigate
+    guestSessionService.recordGamePlayed()
+    logger.log('Guest game recorded, navigating to game page', { path: 'game', mode: 'versus' })
+    navigate('game')
+  }
 
   return (
     <div className="page">
@@ -32,7 +76,7 @@ export function GamesPage() {
                   <span className="game-card__stat">{t('games.modes.solo.duration')}</span>
                   <span className="game-card__stat">{t('games.modes.solo.difficulty')}</span>
                 </div>
-                <Button className="game-card__button">
+                <Button className="game-card__button" onClick={handleSoloGameClick} type="button">
                   {t('games.playNow')}
                 </Button>
               </div>
@@ -47,7 +91,7 @@ export function GamesPage() {
                   <span className="game-card__stat">{t('games.modes.versus.players')}</span>
                   <span className="game-card__stat">{t('games.modes.versus.duration')}</span>
                 </div>
-                <Button className="game-card__button">
+                <Button className="game-card__button" onClick={handleVersusGameClick} type="button">
                   {t('games.playNow')}
                 </Button>
               </div>

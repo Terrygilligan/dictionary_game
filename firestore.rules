@@ -63,6 +63,88 @@ service cloud.firestore {
          request.auth.uid == resource.data.tenant_id);
     }
 
+    // Outbox collection - tenant-aware event pipeline for transactional outbox pattern
+    match /outbox/{correlationId} {
+      // Helper function to check if tenant_id is valid for the request
+      function isValidTenant(tenantId) {
+        // Allow community-scoped tenant for registration and general game events
+        return tenantId == 'lexicon_community_main' ||
+               // Allow user-specific tenant for legacy/private events
+               tenantId == request.auth.uid ||
+               // Allow service account for backend processing
+               request.auth.token.email == 'firebase-adminsdk-fbsvc@lexicon-master-adb6b.iam.gserviceaccount.com';
+      }
+
+      // Helper function to check if payload has valid tenant_id
+      function hasValidTenantPayload() {
+        return request.resource.data.payload.tenant_id != null && isValidTenant(request.resource.data.payload.tenant_id) ||
+               request.resource.data.payload.payload.tenant_id != null && isValidTenant(request.resource.data.payload.payload.tenant_id);
+      }
+
+      // Allow read for authenticated users (can read their own tenant's events)
+      // Allow service account and admins to read all events
+      allow read: if request.auth != null &&
+        (isValidTenant(request.resource.data.payload.tenant_id) ||
+         request.auth.token.superadmin == true ||
+         request.auth.token.admin == true);
+
+      // Allow creation for authenticated users with valid tenant_id
+      allow create: if request.auth != null &&
+        hasValidTenantPayload() &&
+        request.resource.data.keys().hasAll([
+          'topic',
+          'payload',
+          'correlationId',
+          'status',
+          'createdAt',
+          'attempts'
+        ]) &&
+        request.resource.data.status in ['PENDING', 'PROCESSING', 'PROCESSED', 'FAILED'] &&
+        request.resource.data.attempts == 0;
+
+      // Allow updates for service account (OutboxProcessor) and admins
+      // This handles status transitions and retry logic
+      allow update: if request.auth != null &&
+        (request.auth.token.email == 'firebase-adminsdk-fbsvc@lexicon-master-adb6b.iam.gserviceaccount.com' ||
+         request.auth.token.superadmin == true ||
+         request.auth.token.admin == true) &&
+        // Status update validation
+        ((request.resource.data.status == 'PENDING' &&
+          request.resource.data.attempts < 5 &&
+          (request.writeFields.hasAll(['status', 'lastAttemptAt', 'attempts']) ||
+           request.writeFields.hasAll(['status', 'processedAt']) ||
+           request.writeFields.hasAll(['status', 'lastAttemptAt', 'attempts', 'error', 'nextRetryAt']))) ||
+         // Retry of failed events
+         (request.resource.data.status == 'FAILED' &&
+          request.writeFields.hasAll(['status', 'attempts', 'error', 'nextRetryAt']) &&
+          request.resource.data.attempts == 0));
+
+      // Prevent deletion (for audit trail integrity)
+      allow delete: if false;
+    }
+
+    // Email queue collection - backend-triggered email processing
+    match /email_queue/{docId} {
+      // Allow creation only for authenticated users
+      // Users can only create documents where userId matches their own auth.uid
+      // Validate required fields and data types
+      allow create: if request.auth != null &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.template is string &&
+        request.resource.data.email is string &&
+        request.resource.data.data is map &&
+        request.resource.data.template in ['welcome_registration', 'password_reset', 'email_verification'];
+
+      // Deny all read operations - only Cloud Functions (Admin SDK) should read these
+      allow read: if false;
+
+      // Deny all update operations - only Cloud Functions should manage queue state
+      allow update: if false;
+
+      // Deny all delete operations - only Cloud Functions should clean up processed items
+      allow delete: if false;
+    }
+
     // Deny all other reads/writes
     match /{document=**} {
       allow read, write: if false;

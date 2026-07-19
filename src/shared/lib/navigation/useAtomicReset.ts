@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useNavigation } from './NavigationContext'
+import { createLogger } from '@/shared/lib/logger'
+
+const logger = createLogger('ATOMIC_RESET')
 
 export interface ResetFunction {
   (): void
@@ -28,7 +31,7 @@ export function useAtomicReset() {
   useEffect(() => {
     // Detect navigation start
     if (currentPage !== previousPageRef.current && !isNavigatingRef.current) {
-      console.log('🔥 [ATOMIC_RESET] NAV_START detected - executing cleanup')
+      logger.log('NAV_START detected - executing cleanup')
       isNavigatingRef.current = true
 
       // Execute all registered cleanup functions
@@ -36,7 +39,7 @@ export function useAtomicReset() {
         try {
           fn()
         } catch (error) {
-          console.error('🔥 [ATOMIC_RESET] Cleanup function failed:', error)
+          logger.error('Cleanup function failed:', error)
         }
       })
 

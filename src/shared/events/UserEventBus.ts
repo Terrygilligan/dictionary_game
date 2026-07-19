@@ -40,16 +40,16 @@ export type UserDomainEvent =
 
 /**
  * User Event Bus
- * 
+ *
  * A typed event bus for user domain events that carries multi-tenant
  * identity metadata in the envelope. This enables proper tenant isolation
  * and audit transparency throughout the event-driven architecture.
- * 
+ *
  * Architectural Compliance:
  * - Multi-Tenant: tenant_id and aggregate_id in every envelope
  * - Event-Sourcing: Immutable event flow with audit trail
  * - Type Safety: Strongly typed event payloads
- * - Decoupling: OutboxProcessor publishes, services subscribe
+ * - Decoupling: Event sources publish, services subscribe
  */
 export interface IUserEventBus {
   /** Publish a user event with envelope metadata */
@@ -94,10 +94,9 @@ export function createUserEventBus(): IUserEventBus {
 
 /**
  * Singleton User Event Bus instance
- * 
+ *
  * This is the shared bus instance used throughout the application.
- * OutboxProcessor publishes to this bus, and services (EmailVerificationService,
- * UserProjectionService) subscribe to it.
+ * Event sources publish to this bus, and services like UserProjectionService subscribe to it.
  */
 export const userEventBus = createUserEventBus()
 

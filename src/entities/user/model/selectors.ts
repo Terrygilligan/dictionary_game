@@ -64,3 +64,21 @@ export const selectUserId = (state: UserState): string | null =>
 
 export const selectLastSyncAt = (state: UserState): number | undefined => 
   state.lastSyncAt
+
+// Guest access selectors
+export const selectGuestAccessState = (state: UserState) => state.guestAccess
+
+export const selectGuestGamesPlayed = (state: UserState): number => 
+  state.guestAccess.gamesPlayed
+
+export const selectGuestGamesRemaining = (state: UserState): number => 
+  state.guestAccess.maxGames - state.guestAccess.gamesPlayed
+
+export const selectIsGuestAccessGranted = (state: UserState): boolean => 
+  state.guestAccess.isAccessGranted
+
+export const selectGuestAccessDeniedReason = (state: UserState): 'limit-reached' | 'other' | null => {
+  if (state.guestAccess.isAccessGranted) return null
+  if (state.guestAccess.gamesPlayed >= state.guestAccess.maxGames) return 'limit-reached'
+  return 'other'
+}

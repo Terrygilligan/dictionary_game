@@ -1,10 +1,25 @@
 import { getFirestoreDB } from '@/shared/api/firebase'
 import { doc, collection, runTransaction, Timestamp, getDoc } from 'firebase/firestore'
-import type { OutboxDocument } from './OutboxProcessor'
+
+/**
+ * Outbox Document interface
+ * Defines the structure of outbox entries for transactional event publishing
+ */
+export interface OutboxDocument {
+  id: string
+  topic: string
+  eventType: string
+  timestamp: string
+  payload: unknown
+  correlationId: string
+  status: 'PENDING' | 'PROCESSING' | 'PROCESSED' | 'FAILED'
+  createdAt: number
+  attempts: number
+}
 
 /**
  * Outbox Manager
- * 
+ *
  * Handles atomic operations between domain events and outbox entries
  * using Firestore transactions to ensure exactly-once semantics.
  */
@@ -40,6 +55,8 @@ export class OutboxManager {
         const outboxDoc: OutboxDocument = {
           id: event.correlationId, // Use correlation ID as document ID for idempotency
           topic: event.topic,
+          eventType: event.topic, // Add eventType at root level for event-sourced pattern
+          timestamp: new Date().toISOString(), // Add timestamp at root level for audit trail
           payload: event.payload,
           correlationId: event.correlationId,
           status: 'PENDING',

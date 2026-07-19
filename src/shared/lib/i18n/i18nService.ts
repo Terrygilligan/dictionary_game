@@ -1,4 +1,7 @@
 import type { I18nService, I18nConfig, SupportedLanguage, LocaleData, TranslationPath } from './types'
+import { createLogger } from '@/shared/lib/logger'
+
+const logger = createLogger('I18N')
 
 /**
  * Default i18n configuration
@@ -36,11 +39,11 @@ async function loadLocaleData(language: SupportedLanguage): Promise<LocaleData> 
     localeCache.set(language, localeData)
     return localeData
   } catch (error) {
-    console.error(`Failed to load locale data for language: ${language}`, error)
+    logger.error(`Failed to load locale data for language: ${language}`, error)
     
     // Fallback to default language if available
     if (language !== defaultConfig.fallbackLanguage) {
-      console.warn(`Falling back to ${defaultConfig.fallbackLanguage}`)
+      logger.warn(`Falling back to ${defaultConfig.fallbackLanguage}`)
       return loadLocaleData(defaultConfig.fallbackLanguage)
     }
     
@@ -96,9 +99,9 @@ class I18nServiceImpl implements I18nService {
       // Store preference in localStorage for persistence
       localStorage.setItem('lexicon-master-language', language)
       
-      console.log(`Language set to: ${language}`)
+      logger.log(`Language set to: ${language}`)
     } catch (error) {
-      console.error(`Failed to set language to ${language}:`, error)
+      logger.error(`Failed to set language to ${language}:`, error)
       throw error
     }
   }
@@ -153,7 +156,7 @@ class I18nServiceImpl implements I18nService {
       try {
         savedLanguage = localStorage.getItem('lexicon-master-language') as SupportedLanguage
       } catch (storageError) {
-        console.warn('🌐 [I18N] localStorage not accessible, using default language', storageError)
+        logger.warn('localStorage not accessible, using default language', storageError)
       }
       
       // Use saved language if valid, otherwise use default
@@ -161,10 +164,10 @@ class I18nServiceImpl implements I18nService {
         ? savedLanguage 
         : this.config.defaultLanguage
       
-      console.log('🌐 [I18N] Initializing with language:', initialLanguage)
+      logger.log('Initializing with language:', initialLanguage)
       await this.setLanguage(initialLanguage)
     } catch (error) {
-      console.error('Failed to initialize i18n service:', error)
+      logger.error('Failed to initialize i18n service:', error)
       // Fallback to default language
       await this.setLanguage(this.config.defaultLanguage)
     }

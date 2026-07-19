@@ -3,6 +3,18 @@ import type { GameCommand, GameState } from '@/entities/game'
 import { GameStoreContext } from './context.ts'
 import type { GameStore } from './gameStore.ts'
 
+/**
+ * Create an empty user performance state for initialization
+ */
+function createEmptyUserPerformanceState() {
+  return {
+    wordPerformance: new Map(),
+    groupPerformance: new Map(),
+    globalSuccessRate: 0,
+    totalAttempts: 0,
+  }
+}
+
 export function useGameStore(): GameStore {
   const store = useContext(GameStoreContext)
   if (!store) {
@@ -33,6 +45,9 @@ export function useGameState(tenant_id: string | null, aggregate_id: string | nu
     streak: 0,
     currentLanguage: 'en',
     currentDifficulty: 5,
+    current_milestone: 1,
+    proficiency_map: new Map(),
+    user_performance: createEmptyUserPerformanceState(),
   })
   
   // Only perform subscription logic when identity is guaranteed

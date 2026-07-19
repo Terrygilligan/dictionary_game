@@ -4,6 +4,9 @@ import { useNavigation, type Page } from '@/shared/lib/navigation'
 import { Button } from '@/shared/ui/Button'
 import { LanguageSwitcher } from '@/shared/ui/LanguageSwitcher'
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
+import { createLogger } from '@/shared/lib/logger'
+
+const logger = createLogger('HEADER')
 
 interface HeaderProps {
   isAuthenticated: boolean
@@ -17,10 +20,10 @@ export function Header({ isAuthenticated }: HeaderProps) {
 
   // Debug: Track Header renders and state to identify duplication
   useEffect(() => {
-    console.log(`🎯 [HEADER] RENDER DETECTED: currentPage=${currentPage}, isAuthenticated=${isAuthenticated}`)
+    logger.log(`RENDER DETECTED: currentPage=${currentPage}, isAuthenticated=${isAuthenticated}`)
   }, [currentPage, isAuthenticated])
   
-  console.log(`🎯 [HEADER] Component rendering: currentPage=${currentPage}`)
+  logger.log(`Component rendering: currentPage=${currentPage}`)
 
   // Check admin status for authenticated users
   useEffect(() => {
@@ -35,7 +38,7 @@ export function Header({ isAuthenticated }: HeaderProps) {
           setIsAdmin(!!adminClaim)
         }
       } catch (error) {
-        console.error('Failed to check admin status:', error)
+        logger.error('Failed to check admin status:', error)
         setIsAdmin(false)
       }
     }

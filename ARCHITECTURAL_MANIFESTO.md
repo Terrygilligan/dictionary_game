@@ -69,3 +69,13 @@ All three must pass.
 ## Accessibility
 
 - **TTS/STT Integration:** The app must prioritize Web Speech APIs for interaction, enabling a "Blind Arbiter" experience where the AI "Dealer" speaks and listens, rather than relying on visual text.
+
+## NEW DEVELOPMENT DIRECTIVE: BACKEND-OFFLOADING
+
+**Goal**: Migrate all sensitive side-effects (emails, audit logs, event processing) from client-side browser logic to Firebase Cloud Functions.
+
+**New Rule**: If a feature requires elevated system permissions or creates a "loop" risk in the client, it must be implemented as a Cloud Function (Admin SDK).
+
+**Client-Side Constraint**: The browser client is strictly for UI rendering and dispatching commands. It is forbidden from managing "outbox" or "queue" state beyond basic write operations.
+
+**Maintainability Focus**: Prioritize Firebase Extensions and standard backend triggers. Do not implement complex client-side circuit breakers or retry logic if a backend trigger can handle it natively.

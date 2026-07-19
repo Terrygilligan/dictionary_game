@@ -68,3 +68,43 @@ export interface AuditProjectionState {
   readonly last_updated: number
   readonly subscription_active: boolean
 }
+
+/**
+ * Drift Detection Types
+ * 
+ * Enables integrity checking of event logs by comparing
+ * event counts against sequence numbers to detect missing or malformed events.
+ */
+
+export interface DriftCheckResult extends Record<string, unknown> {
+  readonly tenant_id: string
+  readonly aggregate_id: string
+  readonly event_count: number
+  readonly expected_sequence: number
+  readonly has_drift: boolean
+  readonly drift_amount: number
+  readonly checked_at: number
+  readonly last_event_sequence?: number
+  readonly missing_sequences?: number[]
+}
+
+export interface DriftDetectionConfig {
+  readonly tenant_id: string
+  readonly aggregate_id: string
+  readonly auto_repair?: boolean
+}
+
+export interface AuditReport {
+  readonly id: string
+  readonly tenant_id: string
+  readonly aggregate_id: string
+  readonly report_type: 'integrity' | 'metrics' | 'activity'
+  readonly data: Record<string, unknown>
+  readonly generated_at: number
+  readonly generated_by: 'system' | 'user'
+}
+
+export interface IntegrityReport extends AuditReport {
+  readonly report_type: 'integrity'
+  readonly data: DriftCheckResult
+}

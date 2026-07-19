@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { gameAuditService } from '@/services/gameAuditService';
+import { useAuthInitialization } from '@/entities/user/model';
 import { useFirebaseAuth } from '@/features/play-round/model/useFirebaseAuth';
 
 /**
@@ -15,23 +16,30 @@ import { useFirebaseAuth } from '@/features/play-round/model/useFirebaseAuth';
  * - Provider Pattern: Follows established provider conventions
  */
 export const GameAuditProvider = () => {
-  const { isAuthenticated, isLoading: authLoading } = useFirebaseAuth();
+  const { canOperate } = useAuthInitialization();
+  const { user } = useFirebaseAuth();
 
   useEffect(() => {
-    // Wait for auth state to resolve
-    if (authLoading) {
+    // Guard: Wait for auth initialization AND user object to be fully populated
+    const isUserFullyPopulated = user && user.id && user.email;
+    
+    if (!canOperate || !isUserFullyPopulated) {
+      console.log('� [GAME_AUDIT] Auth not ready or user not fully populated → stopping game audit service', {
+        canOperate,
+        userExists: !!user,
+        userId: user?.id,
+        hasEmail: !!user?.email
+      });
+      gameAuditService.stop();
       return;
     }
 
-    // Start audit service when user is authenticated
-    if (isAuthenticated) {
-      console.log('📦 [GAME_AUDIT] User authenticated → starting game audit service');
-      gameAuditService.start();
-    } else {
-      console.log('🔒 [GAME_AUDIT] User not authenticated → stopping game audit service');
-      gameAuditService.stop();
-    }
-  }, [isAuthenticated, authLoading]);
+    console.log('� [GAME_AUDIT] Auth ready and user fully populated → starting game audit service', {
+        userId: user.id,
+        email: user.email
+      });
+    gameAuditService.start();
+  }, [canOperate, user]);
 
   return null;
 };

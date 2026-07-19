@@ -3,21 +3,24 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
-  "functions": {
-    "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" install",
-      "npm --prefix \"$RESOURCE_DIR\" run build"
-    ],
-    "source": "functions",
-    "runtime": "nodejs18",
-    "region": "europe-west1",
-    "ignore": [
-      "node_modules",
-      ".git",
-      "firebase-debug.log",
-      "firebase-debug.*.legacy.log"
-    ]
-  },
+  "functions": [
+    {
+      "codebase": "default",
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" install",
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ],
+      "region": "us-central1",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.legacy.log"
+      ],
+      "source": "functions",
+      "runtime": "nodejs22"
+    }
+  ],
   "hosting": {
     "public": "dist",
     "ignore": [
@@ -31,7 +34,7 @@
         "destination": "/privacy-policy.html"
       },
       {
-        "source": "/terms-of-service", 
+        "source": "/terms-of-service",
         "destination": "/terms-of-service.html"
       },
       {

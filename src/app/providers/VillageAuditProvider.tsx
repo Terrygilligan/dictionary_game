@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { villageAuditService } from '@/services/villageAuditService';
+import { useAuthInitialization } from '@/entities/user/model';
 import { useFirebaseAuth } from '@/features/play-round/model/useFirebaseAuth';
 
 /**
@@ -15,23 +16,30 @@ import { useFirebaseAuth } from '@/features/play-round/model/useFirebaseAuth';
  * - Provider Pattern: Follows established provider conventions
  */
 export const VillageAuditProvider = () => {
-  const { isAuthenticated, isLoading: authLoading } = useFirebaseAuth();
+  const { canOperate } = useAuthInitialization();
+  const { user } = useFirebaseAuth();
 
   useEffect(() => {
-    // Wait for auth state to resolve
-    if (authLoading) {
+    // Guard: Wait for auth initialization AND user object to be fully populated
+    const isUserFullyPopulated = user && user.id && user.email;
+    
+    if (!canOperate || !isUserFullyPopulated) {
+      console.log('� [VILLAGE_AUDIT] Auth not ready or user not fully populated → stopping village audit service', {
+        canOperate,
+        userExists: !!user,
+        userId: user?.id,
+        hasEmail: !!user?.email
+      });
+      villageAuditService.stop();
       return;
     }
 
-    // Start audit service when user is authenticated
-    if (isAuthenticated) {
-      console.log('🔐 [VILLAGE_AUDIT] User authenticated → starting village audit service');
-      villageAuditService.start();
-    } else {
-      console.log('🔒 [VILLAGE_AUDIT] User not authenticated → stopping village audit service');
-      villageAuditService.stop();
-    }
-  }, [isAuthenticated, authLoading]);
+    console.log('� [VILLAGE_AUDIT] Auth ready and user fully populated → starting village audit service', {
+      userId: user.id,
+      email: user.email
+    });
+    villageAuditService.start();
+  }, [canOperate, user]);
 
   return null;
 };

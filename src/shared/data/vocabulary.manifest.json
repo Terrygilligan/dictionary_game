@@ -1,0 +1,93 @@
+{
+  "version": "1.0.0",
+  "generated_at": 1721190720000,
+  "entries": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "language": "en",
+      "word": "apple",
+      "word_type": "CONCRETE",
+      "definition": {
+        "short": "A round fruit with red or green skin",
+        "long": "A round fruit with red or green skin and firm white flesh that grows on trees. One of the most common and widely cultivated fruits in the world."
+      },
+      "semantic_group": "food",
+      "milestone_id": 1
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440002",
+      "language": "en",
+      "word": "run",
+      "word_type": "CONCRETE",
+      "definition": {
+        "short": "Move at a speed faster than walking",
+        "long": "Move at a speed faster than a walk, never having both feet on the ground at the same time. A fundamental human movement used in exercise, sports, and daily activities."
+      },
+      "semantic_group": "action",
+      "milestone_id": 1
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440003",
+      "language": "en",
+      "word": "ambiguous",
+      "word_type": "CONTEXTUAL",
+      "definition": {
+        "short": "Open to more than one interpretation",
+        "long": "Open to more than one interpretation; having a double meaning. Often used to describe statements or situations that are unclear or can be understood in multiple ways."
+      },
+      "sentence_frame": "The politician's response was _____, leaving voters unsure of his true intentions.",
+      "semantic_group": "language",
+      "milestone_id": 1
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440004",
+      "language": "en",
+      "word": "book",
+      "word_type": "CONCRETE",
+      "definition": {
+        "short": "A written or printed work consisting of pages",
+        "long": "A written or printed work consisting of pages glued or sewn together along one side and bound in covers. A medium for recording information in the form of writing or images."
+      },
+      "semantic_group": "object",
+      "milestone_id": 1
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440005",
+      "language": "en",
+      "word": "benevolent",
+      "word_type": "CONTEXTUAL",
+      "definition": {
+        "short": "Well-meaning and kindly",
+        "long": "Well-meaning and kindly; charitable. Often used to describe someone who desires to do good and help others, or an organization that operates for charitable purposes."
+      },
+      "sentence_frame": "The _____ donor gave millions to help build schools in developing countries.",
+      "semantic_group": "character",
+      "milestone_id": 1
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440006",
+      "language": "en",
+      "word": "happy",
+      "word_type": "CONCRETE",
+      "definition": {
+        "short": "Feeling or showing pleasure",
+        "long": "Feeling or showing pleasure or contentment. A positive emotional state characterized by feelings of joy, satisfaction, and well-being."
+      },
+      "semantic_group": "emotion",
+      "milestone_id": 1
+    },
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440007",
+      "language": "en",
+      "word": "eloquent",
+      "word_type": "CONTEXTUAL",
+      "definition": {
+        "short": "Fluent or persuasive in speaking or writing",
+        "long": "Fluent or persuasive in speaking or writing; clearly expressing or indicating something. Describes communication that is powerful, moving, and effectively conveys meaning."
+      },
+      "sentence_frame": "Her _____ speech moved the audience to tears.",
+      "semantic_group": "communication",
+      "milestone_id": 1
+    }
+  ]
+}

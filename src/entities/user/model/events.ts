@@ -102,6 +102,28 @@ export interface SyncCompleted extends BaseUserEvent {
   readonly timestamp: number
 }
 
+export interface GuestAccessRequested extends BaseUserEvent {
+  readonly type: 'guestAccess/requested'
+  readonly userId: string
+  readonly timestamp: number
+}
+
+export interface GuestAccessGranted extends BaseUserEvent {
+  readonly type: 'guestAccess/granted'
+  readonly userId: string
+  readonly gamesRemaining: number
+  readonly timestamp: number
+}
+
+export interface GuestAccessDenied extends BaseUserEvent {
+  readonly type: 'guestAccess/denied'
+  readonly userId: string
+  readonly reason: 'limit-reached' | 'other'
+  readonly gamesPlayed: number
+  readonly maxGames: number
+  readonly timestamp: number
+}
+
 export type UserEvent = 
   | UserCreated
   | UserRegistered
@@ -114,3 +136,6 @@ export type UserEvent =
   | FriendAdded
   | FriendRemoved
   | SyncCompleted
+  | GuestAccessRequested
+  | GuestAccessGranted
+  | GuestAccessDenied

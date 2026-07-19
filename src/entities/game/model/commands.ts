@@ -14,6 +14,13 @@ export interface BaseGameCommand {
 }
 
 /**
+ * Game mode for bidirectional learning
+ * - FORWARD: Word to Definition (traditional flashcard)
+ * - REVERSE: Definition to Word (more challenging)
+ */
+export type GameMode = 'FORWARD' | 'REVERSE'
+
+/**
  * Intents emitted by the UI. Commands are requests — they may be rejected by
  * the decider (producing no events) when they are not valid for the current
  * state.
@@ -21,7 +28,12 @@ export interface BaseGameCommand {
  * All commands now explicitly include tenant_id and aggregate_id for multi-tenant isolation.
  */
 export type GameCommand =
-  | BaseGameCommand & { readonly type: 'startGame'; readonly deck: readonly RoundSpec[] }
+  | BaseGameCommand & { 
+      readonly type: 'startGame'; 
+      readonly deck: readonly RoundSpec[]
+      readonly milestone_id?: number
+      readonly game_mode?: GameMode
+    }
   | BaseGameCommand & { readonly type: 'submitAnswer'; readonly choiceId: string }
   | BaseGameCommand & { readonly type: 'nextRound' }
   | BaseGameCommand & { readonly type: 'resetStreak' }

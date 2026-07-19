@@ -3,6 +3,7 @@ import { LandingPage } from '@/pages/landing'
 import { AuthPage } from '@/pages/auth'
 import { ProfilePage } from '@/pages/profile'
 import { GamesPage } from '@/pages/games'
+import { GamePage } from '@/pages/game'
 import { VillagePage } from '@/pages/village'
 import { SuperAdminDashboardPage } from '@/pages/admin/SuperAdminDashboardPage'
 import { BaseLayout } from '@/app/ui/BaseLayout'
@@ -72,6 +73,12 @@ export function AppRouter() {
           switch (currentPage) {
             case 'games':
               return <GamesPage />
+            case 'game':
+              return (
+                <AuthGuard isAuthenticated={!!user} isLoading={authLoading}>
+                  <GamePage />
+                </AuthGuard>
+              )
             case 'profile':
               return (
                 <AuthGuard isAuthenticated={!!user} isLoading={authLoading}>

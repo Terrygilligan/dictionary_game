@@ -11,6 +11,9 @@
  * 3. Validate tenant_id before cleanup (Constraint #4)
  * 4. Log teardown operations for audit trail
  */
+import { createLogger } from '@/shared/lib/logger'
+
+const logger = createLogger('SERVICE_REGISTRY')
 export interface ITeardownService {
   /**
    * Perform absolute teardown of the service
@@ -69,7 +72,7 @@ export class ServiceRegistry {
    * Register a singleton service for lifecycle management
    */
   register(name: string, service: ITeardownService): void {
-    console.log(`📋 [SERVICE_REGISTRY] Registering service: ${name}`)
+    logger.log(`Registering service: ${name}`)
     this.services.set(name, service)
   }
   
@@ -79,23 +82,23 @@ export class ServiceRegistry {
    * @param tenant_id - The tenant ID being torn down (for validation)
    */
   async teardownAll(tenant_id?: string): Promise<void> {
-    console.log(`🧹 [SERVICE_REGISTRY] Starting teardown for tenant: ${tenant_id || 'all'}`)
+    logger.log(`Starting teardown for tenant: ${tenant_id || 'all'}`)
     
     const teardownPromises = Array.from(this.services.entries()).map(
       async ([name, service]) => {
         try {
-          console.log(`🧹 [SERVICE_REGISTRY] Tearing down service: ${name}`)
+          logger.log(`Tearing down service: ${name}`)
           service.teardown(tenant_id)
-          console.log(`✅ [SERVICE_REGISTRY] Service torn down: ${name}`)
+          logger.log(`Service torn down: ${name}`)
         } catch (error) {
-          console.error(`❌ [SERVICE_REGISTRY] Failed to teardown service ${name}:`, error)
+          logger.error(`Failed to teardown service ${name}:`, error)
           // Continue with other services even if one fails
         }
       }
     )
     
     await Promise.all(teardownPromises)
-    console.log(`✅ [SERVICE_REGISTRY] All services torn down for tenant: ${tenant_id || 'all'}`)
+    logger.log(`All services torn down for tenant: ${tenant_id || 'all'}`)
   }
   
   /**

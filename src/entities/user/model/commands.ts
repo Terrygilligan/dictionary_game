@@ -75,6 +75,11 @@ export interface SyncUser extends BaseUserCommand {
   readonly remoteEvents: unknown[] // To be typed when sync is implemented
 }
 
+export interface RequestGuestAccess extends BaseUserCommand {
+  readonly type: 'guestAccess/request'
+  readonly maxGames: number
+}
+
 export type UserCommand = 
   | CreateUser
   | RegisterUser
@@ -86,3 +91,4 @@ export type UserCommand =
   | AddFriend
   | RemoveFriend
   | SyncUser
+  | RequestGuestAccess

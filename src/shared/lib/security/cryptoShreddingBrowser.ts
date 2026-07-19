@@ -11,6 +11,10 @@
  * See SCRATCHPAD.md entry 0013 for GDPR & Crypto-Shredding Readiness
  */
 
+import { createLogger } from '@/shared/lib/logger'
+
+const logger = createLogger('CRYPTO_SHREDDING')
+
 // Web Crypto API for browser compatibility
 const crypto = window.crypto
 
@@ -167,7 +171,7 @@ export async function decryptSensitiveData(encryptedData: EncryptedData): Promis
  */
 export function cryptoShredData(keyId: string): void {
   keyManager.deleteKey(keyId)
-  console.log(`Encryption key ${keyId} has been destroyed. Data is now unrecoverable.`)
+  logger.log(`Encryption key ${keyId} has been destroyed. Data is now unrecoverable.`)
 }
 
 /**
@@ -210,7 +214,7 @@ export async function decryptUserProfile(encryptedProfile: Record<string, any>):
       try {
         decrypted[field] = await decryptSensitiveData(encryptedProfile[field])
       } catch (error) {
-        console.warn(`Failed to decrypt ${field}:`, error)
+        logger.warn(`Failed to decrypt ${field}:`, error)
         decrypted[field] = '[encrypted]'
       }
     }
@@ -261,7 +265,7 @@ export async function decryptEventLog(encryptedEventLog: Record<string, any>): P
       try {
         decryptedEvent.userId = await decryptSensitiveData(event.userId)
       } catch (error) {
-        console.warn('Failed to decrypt userId in event:', error)
+        logger.warn('Failed to decrypt userId in event:', error)
         decryptedEvent.userId = '[encrypted]'
       }
     }
@@ -299,7 +303,7 @@ function base64ToArrayBuffer(base64: string): ArrayBuffer {
 export async function initializeCryptoShredding(): Promise<void> {
   if (keyManager.getActiveKeys().length === 0) {
     await keyManager.generateKey('default')
-    console.log('Crypto-shredding initialized with default key')
+    logger.log('Crypto-shredding initialized with default key')
   }
 }
 

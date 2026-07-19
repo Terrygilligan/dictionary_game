@@ -5,7 +5,7 @@ import { NavigationProvider } from '@/shared/lib/navigation'
 import { UserProvider } from '@/entities/user'
 import { VillageProvider } from '@/entities/village'
 import { EmailVerificationTracker } from '@/components/EmailVerificationTracker'
-import { OutboxProvider } from './OutboxProvider'
+import { UserProjectionProvider } from './UserProjectionProvider'
 import { GameAuditProvider } from './GameAuditProvider'
 import { VillageAuditProvider } from './VillageAuditProvider'
 
@@ -18,7 +18,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
       <I18nProvider>
         <UserProvider>
           <EmailVerificationTracker />
-          <OutboxProvider />
+          <UserProjectionProvider />
           <GameAuditProvider />
           <VillageAuditProvider />
           <VillageProvider>

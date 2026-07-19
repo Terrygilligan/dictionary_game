@@ -6,6 +6,7 @@ import { userStore, type UserStore } from './userStore.ts'
 import type { UserStats, UserClaims } from './types.ts'
 import { useFirebaseAuth } from '@/features/play-round/model/useFirebaseAuth'
 import { createLogger } from '@/shared/lib/logger'
+import { DEFAULT_TENANT_ID } from '@/shared/config/tenant.ts'
 
 const logger = createLogger('USER_PROVIDER')
 
@@ -78,10 +79,19 @@ export function UserProvider({ children, store }: UserProviderProps) {
       if (user?.id) {
         logger.log('Identity resolved:', { userId: user.id, claims: user.claims })
         logger.log('Full user object (sanitized):', { id: user.id, email: user.email, claims: user.claims })
-        setTenantId(user.id)
-        setAggregateId(user.id) // Map both to uid for per-user isolation
+        
+        // CRITICAL FIX: Use DEFAULT_TENANT_ID for community scope, NOT uid
+        // tenant_id represents the community/organization, NOT individual user
+        setTenantId(DEFAULT_TENANT_ID)
+        setAggregateId(user.id) // aggregate_id represents the user instance within the tenant
         setCurrentUserId(user.id)
         setUserClaims(user.claims || null)
+        
+        logger.log('Identity mapping corrected:', { 
+          tenant_id: DEFAULT_TENANT_ID, 
+          aggregate_id: user.id,
+          userId: user.id 
+        })
         logger.log('setUserClaims called with:', user.claims)
       } else {
         logger.log('No authenticated user, clearing all identity state')
@@ -100,6 +110,23 @@ export function UserProvider({ children, store }: UserProviderProps) {
       logger.log('Firebase auth still loading, isInitializing = true')
     }
   }, [user, authLoading])
+
+  // Session Validator: Ensures tenant_id is properly bound before app renders
+  useEffect(() => {
+    if (user?.id && tenantId) {
+      logger.log('[SESSION_VALIDATOR] User successfully bound to tenant:', {
+        userUid: user.id,
+        tenant_id: tenantId,
+        aggregate_id: aggregateId
+      })
+    } else if (user?.id && !tenantId) {
+      console.warn('[SESSION_VALIDATOR] SESSION_ERROR: User authenticated but missing tenant_id', {
+        userUid: user.id,
+        tenant_id: tenantId,
+        aggregate_id: aggregateId
+      })
+    }
+  }, [user, tenantId, aggregateId])
 
   useEffect(() => {
     logger.log('UserProvider mounted')
@@ -170,11 +197,13 @@ export function UserProvider({ children, store }: UserProviderProps) {
       <UserIdentityContext.Provider value={identityValue}>
         <UserClaimsProvider claims={userClaims} isLoading={isInitializing}>
           <UserStatsContext.Provider value={statsValue}>
-            {isInitializing ? (
+            {isInitializing || (user && !tenantId) ? (
               <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                  <p className="text-gray-600">Initializing authentication...</p>
+                  <p className="text-gray-600">
+                    {isInitializing ? 'Initializing authentication...' : 'Binding tenant context...'}
+                  </p>
                 </div>
               </div>
             ) : (

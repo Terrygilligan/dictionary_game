@@ -23,6 +23,8 @@ export type GameEvent =
   | BaseGameEvent & { 
       readonly type: 'game/started'
       readonly deck: readonly RoundSpec[]
+      readonly milestone_id?: number
+      readonly game_mode?: 'FORWARD' | 'REVERSE'
     }
   | BaseGameEvent & {
       readonly type: 'answer/submitted'

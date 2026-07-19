@@ -12,6 +12,9 @@
 
 import admin from 'firebase-admin'
 import * as path from 'node:path'
+import { createLogger } from '@/shared/lib/logger'
+
+const logger = createLogger('ADMIN_SERVICE')
 
 /**
  * Initialize Firebase Admin SDK with service account credentials
@@ -30,9 +33,9 @@ function getAdminApp(): admin.app.App {
         credential: admin.credential.cert(serviceAccount),
       })
       
-      console.log('✅ [ADMIN_SERVICE] Firebase Admin SDK initialized successfully')
+      logger.log('Firebase Admin SDK initialized successfully')
     } catch (error) {
-      console.error('❌ [ADMIN_SERVICE] Failed to initialize Firebase Admin SDK:', error)
+      logger.error('Failed to initialize Firebase Admin SDK:', error)
       throw new Error(
         'Failed to initialize Firebase Admin SDK. ' +
         'Ensure service-account.json exists in the project root.'
@@ -50,7 +53,7 @@ function getAdminApp(): admin.app.App {
  * @returns Promise that resolves when the claim is set
  */
 export async function setSuperAdminClaimByUid(uid: string): Promise<void> {
-  console.log(`🔧 [ADMIN_SERVICE] Setting SuperAdmin claim for UID: ${uid}`)
+  logger.log(`Setting SuperAdmin claim for UID: ${uid}`)
   const auth = getAdminApp().auth()
   
   try {
@@ -59,9 +62,9 @@ export async function setSuperAdminClaimByUid(uid: string): Promise<void> {
       superadmin: true,
     })
     
-    console.log(`✅ [ADMIN_SERVICE] SuperAdmin claim set for user UID: ${uid}`)
+    logger.log(`SuperAdmin claim set for user UID: ${uid}`)
   } catch (error) {
-    console.error(`❌ [ADMIN_SERVICE] Failed to set SuperAdmin claim for UID ${uid}:`, error)
+    logger.error(`Failed to set SuperAdmin claim for UID ${uid}:`, error)
     throw error
   }
 }
@@ -84,9 +87,9 @@ export async function setSuperAdminClaim(email: string): Promise<void> {
       superadmin: true,
     })
     
-    console.log(`✅ [ADMIN_SERVICE] SuperAdmin claim set for user: ${email} (${userRecord.uid})`)
+    logger.log(`SuperAdmin claim set for user: ${email} (${userRecord.uid})`)
   } catch (error) {
-    console.error(`❌ [ADMIN_SERVICE] Failed to set SuperAdmin claim for ${email}:`, error)
+    logger.error(`Failed to set SuperAdmin claim for ${email}:`, error)
     throw error
   }
 }
@@ -109,9 +112,9 @@ export async function removeSuperAdminClaim(email: string): Promise<void> {
       superadmin: null,
     })
     
-    console.log(`✅ [ADMIN_SERVICE] SuperAdmin claim removed from user: ${email} (${userRecord.uid})`)
+    logger.log(`SuperAdmin claim removed from user: ${email} (${userRecord.uid})`)
   } catch (error) {
-    console.error(`❌ [ADMIN_SERVICE] Failed to remove SuperAdmin claim for ${email}:`, error)
+    logger.error(`Failed to remove SuperAdmin claim for ${email}:`, error)
     throw error
   }
 }
@@ -131,7 +134,7 @@ export async function hasSuperAdminClaim(email: string): Promise<boolean> {
     
     return claims.superadmin === true
   } catch (error) {
-    console.error(`❌ [ADMIN_SERVICE] Failed to check SuperAdmin claim for ${email}:`, error)
+    logger.error(`Failed to check SuperAdmin claim for ${email}:`, error)
     return false
   }
 }
@@ -152,9 +155,9 @@ export async function setAdminClaim(email: string): Promise<void> {
       admin: true,
     })
     
-    console.log(`✅ [ADMIN_SERVICE] Admin claim set for user: ${email} (${userRecord.uid})`)
+    logger.log(`Admin claim set for user: ${email} (${userRecord.uid})`)
   } catch (error) {
-    console.error(`❌ [ADMIN_SERVICE] Failed to set Admin claim for ${email}:`, error)
+    logger.error(`Failed to set Admin claim for ${email}:`, error)
     throw error
   }
 }
@@ -180,7 +183,7 @@ export async function getSuperAdminUsers(): Promise<string[]> {
     
     return superAdminEmails
   } catch (error) {
-    console.error('❌ [ADMIN_SERVICE] Failed to list SuperAdmin users:', error)
+    logger.error('Failed to list SuperAdmin users:', error)
     throw error
   }
 }
@@ -208,38 +211,38 @@ async function main() {
     switch (command) {
       case 'set-superadmin':
         await setSuperAdminClaim(identifier)
-        console.log(`✅ SuperAdmin claim successfully set for ${identifier}`)
+        logger.log(`SuperAdmin claim successfully set for ${identifier}`)
         console.log('⚠️  User must sign out and sign back in for claims to take effect')
         break
       
       case 'set-superadmin-by-uid':
         await setSuperAdminClaimByUid(identifier)
-        console.log(`✅ SuperAdmin claim successfully set for UID ${identifier}`)
+        logger.log(`SuperAdmin claim successfully set for UID ${identifier}`)
         console.log('⚠️  User must sign out and sign back in for claims to take effect')
         break
       
       case 'remove-superadmin':
         await removeSuperAdminClaim(identifier)
-        console.log(`✅ SuperAdmin claim successfully removed from ${identifier}`)
+        logger.log(`SuperAdmin claim successfully removed from ${identifier}`)
         console.log('⚠️  User must sign out and sign back in for claims to take effect')
         break
       
       case 'check-superadmin':
         const hasClaim = await hasSuperAdminClaim(identifier)
-        console.log(`${identifier} ${hasClaim ? 'HAS' : 'DOES NOT HAVE'} SuperAdmin claim`)
+        logger.log(`${identifier} ${hasClaim ? 'HAS' : 'DOES NOT HAVE'} SuperAdmin claim`)
         break
       
       case 'list-superadmins':
         const superAdmins = await getSuperAdminUsers()
-        console.log('SuperAdmin users:', superAdmins)
+        logger.log('SuperAdmin users:', superAdmins)
         break
       
       default:
-        console.error(`Unknown command: ${command}`)
+        logger.error(`Unknown command: ${command}`)
         process.exit(1)
     }
   } catch (error) {
-    console.error('Error executing command:', error)
+    logger.error('Error executing command:', error)
     process.exit(1)
   }
 }

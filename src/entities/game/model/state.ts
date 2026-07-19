@@ -1,6 +1,7 @@
 import type { Evolve } from '@/shared/event-sourcing'
 import type { GameEvent } from './events.ts'
 import type { GameState } from './types.ts'
+import { createEmptyUserPerformanceState } from './types.ts'
 
 export const initialGameState: GameState = {
   status: 'idle',
@@ -10,6 +11,9 @@ export const initialGameState: GameState = {
   streak: 0,
   currentLanguage: 'en',
   currentDifficulty: 5, // Default difficulty level
+  current_milestone: 1, // Default to foundational milestone
+  proficiency_map: new Map(),
+  user_performance: createEmptyUserPerformanceState(),
 }
 
 /** Pure fold: `(state, event) -> nextState`. Exhaustive over `GameEvent`. */
@@ -24,6 +28,9 @@ export const evolveGame: Evolve<GameState, GameEvent> = (state, event) => {
         streak: 0,
         currentLanguage: state.currentLanguage,
         currentDifficulty: state.currentDifficulty,
+        current_milestone: event.milestone_id ?? state.current_milestone,
+        proficiency_map: state.proficiency_map,
+        user_performance: state.user_performance,
       }
     case 'answer/submitted':
       return {
@@ -77,6 +84,9 @@ export const evolveGame: Evolve<GameState, GameEvent> = (state, event) => {
         ...initialGameState,
         currentLanguage: state.currentLanguage,
         currentDifficulty: state.currentDifficulty,
+        current_milestone: state.current_milestone,
+        proficiency_map: state.proficiency_map,
+        user_performance: state.user_performance,
       }
     default:
       return assertNever(event)

@@ -1,15 +1,20 @@
 import { useEffect } from 'react'
-import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 import { useNavigation } from '@/shared/lib/navigation'
 import { useGameDispatch } from '@/features/play-round'
 import { useGameIdentity } from '@/features/play-round/model/useFirebaseAuth'
+import { useGuestAccess } from '@/features/guest-access'
 import { LandingContent } from './LandingContent'
 
 export function LandingPage() {
-  const { t } = useTranslate()
   const { navigate, currentPage } = useNavigation()
   const dispatch = useGameDispatch()
   const { tenant_id, aggregate_id, isLoading, error } = useGameIdentity()
+  
+  // Guest access hook - handles eligibility via event sourcing
+  const { 
+    isAccessGranted, 
+    requestGuestAccess 
+  } = useGuestAccess()
 
   // Debug: Verify navigation hook is working
   useEffect(() => {
@@ -31,19 +36,20 @@ export function LandingPage() {
     }
   }, [dispatch, tenant_id, aggregate_id, isLoading, error])
 
-  // Helper function to safely get translations with fallbacks
-  const safeT = (key: string, fallback?: string) => {
-    const translation = t(key)
-    // If translation equals the key (not found) and we have a fallback, use fallback
-    if (translation === key && fallback) {
-      return fallback
+  // Navigation side-effect: navigate to games when guest access is granted
+  useEffect(() => {
+    if (isAccessGranted) {
+      console.log('✅ [LANDING] Guest access granted - navigating to games page')
+      navigate('games')
     }
-    return translation
-  }
+  }, [isAccessGranted, navigate])
 
   const handlePlayAsGuest = () => {
-    console.log('🎮 [LANDING] Play as Guest button clicked - navigating to games page')
-    navigate('games')
+    console.log('🎮 [LANDING] Play as Guest button clicked - requesting guest access')
+    
+    // Dispatch command to user entity decider
+    // The decider will evaluate eligibility and emit appropriate events
+    requestGuestAccess()
   }
 
   const handleRegister = () => {
@@ -53,7 +59,6 @@ export function LandingPage() {
 
   return (
     <LandingContent 
-      safeT={safeT}
       handlePlayAsGuest={handlePlayAsGuest}
       handleRegister={handleRegister}
     />

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Queue Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        #output {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 20px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Email Queue Test</h1>
+        
+        <div class="test-section info">
+            <h3>Test Configuration</h3>
+            <p><strong>Email:</strong> <span id="testEmail">test-user-</span>@example.com</p>
+            <p><strong>Password:</strong> password123</p>
+            <p><strong>Username:</strong> testUser</p>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Controls</h3>
+            <button id="runTest" onclick="runEmailTest()">Run Email Queue Test</button>
+            <button id="cleanup" onclick="cleanupTest()" disabled>Cleanup Test User</button>
+        </div>
+
+        <div id="output"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, createUserWithEmailAndPassword, deleteUser, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase configuration - replace with your actual config
+        const firebaseConfig = {
+            apiKey: "AIzaSyD YOUR_API_KEY_HERE",
+            authDomain: "lexicon-master-adb6b.firebaseapp.com",
+            projectId: "lexicon-master-adb6b",
+            storageBucket: "lexicon-master-adb6b.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        let app, auth, db, testUser = null;
+        const output = document.getElementById('output');
+        const testEmail = document.getElementById('testEmail');
+
+        // Generate random test email
+        const randomEmail = `test-user-${Date.now()}@example.com`;
+        testEmail.textContent = randomEmail.substring(0, 20) + '...';
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toISOString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            output.textContent += logMessage;
+            output.scrollTop = output.scrollHeight;
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+
+        function clearOutput() {
+            output.textContent = '';
+        }
+
+        async function initializeFirebase() {
+            try {
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                log('Firebase initialized successfully', 'success');
+            } catch (error) {
+                log(`Firebase initialization failed: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        async function runEmailTest() {
+            clearOutput();
+            const runButton = document.getElementById('runTest');
+            const cleanupButton = document.getElementById('cleanup');
+            
+            try {
+                runButton.disabled = true;
+                log('Starting email queue test...', 'info');
+
+                // Initialize Firebase
+                await initializeFirebase();
+
+                // Step 1: Create test user
+                log('Step 1: Creating test user...', 'info');
+                const userCredential = await createUserWithEmailAndPassword(auth, randomEmail, 'password123');
+                testUser = userCredential.user;
+                log(`✅ User created: ${testUser.uid}`, 'success');
+
+                // Step 2: Queue email
+                log('Step 2: Queuing welcome email...', 'info');
+                const emailQueueRef = collection(db, 'email_queue');
+                await addDoc(emailQueueRef, {
+                    email: randomEmail,
+                    userId: testUser.uid,
+                    template: 'welcome_registration',
+                    data: { username: 'testUser' },
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                });
+                log('✅ Email queued successfully', 'success');
+
+                // Step 3: Verify document
+                log('Step 3: Verifying email queue document...', 'info');
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait for Firestore sync
+                
+                const q = query(emailQueueRef, where('userId', '==', testUser.uid), where('template', '==', 'welcome_registration'));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    throw new Error('No email queue document found');
+                }
+
+                const doc = querySnapshot.docs[0];
+                const data = doc.data();
+                
+                log('✅ Email queue document found:', 'success');
+                log(`Document ID: ${doc.id}`, 'info');
+                log(`Email: ${data.email}`, 'info');
+                log(`Template: ${data.template}`, 'info');
+                log(`User ID: ${data.userId}`, 'info');
+                log(`Data: ${JSON.stringify(data.data)}`, 'info');
+                log(`Status: ${data.status}`, 'info');
+
+                // Validate structure
+                if (data.email === randomEmail && 
+                    data.template === 'welcome_registration' && 
+                    data.userId === testUser.uid &&
+                    data.data?.username === 'testUser') {
+                    log('🎉 All validations passed!', 'success');
+                    cleanupButton.disabled = false;
+                } else {
+                    throw new Error('Validation failed - document structure incorrect');
+                }
+
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+                console.error(error);
+            } finally {
+                runButton.disabled = false;
+            }
+        }
+
+        async function cleanupTest() {
+            try {
+                const cleanupButton = document.getElementById('cleanup');
+                cleanupButton.disabled = true;
+                log('Cleaning up test user...', 'info');
+
+                if (testUser) {
+                    await deleteUser(testUser);
+                    log('✅ Test user deleted from Firebase Auth', 'success');
+                    testUser = null;
+                } else {
+                    log('No test user to delete', 'info');
+                }
+            } catch (error) {
+                log(`❌ Cleanup failed: ${error.message}`, 'error');
+                console.error(error);
+            }
+        }
+
+        // Expose functions to window
+        window.runEmailTest = runEmailTest;
+        window.cleanupTest = cleanupTest;
+    </script>
+</body>
+</html>

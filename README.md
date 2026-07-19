@@ -68,11 +68,23 @@ The app implements a comprehensive event-driven user system with Firebase Auth i
 - **Email Verification**: Automatic detection of email verification changes via React hooks, dispatching `USER_EMAIL_VERIFIED` events to update Firestore in real-time.
 - **GDPR Compliance**: All user data encrypted with AES-256-GCM before Firestore writes, maintaining privacy and compliance.
 - **Firestore Projection**: User data stored in main documents (`users/{userId}`) with service account write permissions for projections.
+- **Backend Email Processing**: Email sending migrated to Cloud Functions with Resend integration for improved security and reliability.
 
-**Email Verification Flow:**
+**Email Architecture (Backend-First):**
 ```
-User verifies email → useEmailVerification hook detects change → USER_EMAIL_VERIFIED event → Firestore updated
+Frontend → email_queue collection → processEmailQueue Cloud Function → Resend API → Email delivery
 ```
+
+**Email Templates:**
+- `welcome_registration` - Welcome emails for new users with username personalization
+- `password_reset` - Password reset emails with reset link support
+- `email_verification` - Email verification reminders
+
+**Security Model:**
+- Write-only access to `email_queue` collection for authenticated users
+- Firestore rules validate template types and data structure
+- Cloud Functions manage queue processing with automatic cleanup
+- Error tracking via `email_errors` collection for failed deliveries
 
 See [`SCRATCHPAD.md`](./SCRATCHPAD.md) for the per-feature rationale required by
 the agentic workflow, and [`AGENTS.md`](./AGENTS.md) for contributor rules.
