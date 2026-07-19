@@ -75,9 +75,9 @@ function filterWordsByDifficulty(
  * log only ever records legitimate transitions.
  */
 export const decideGame: Decider<GameState, GameCommand, GameEvent> = (state, command, context) => {
-  // Context parameter is provided for architectural compliance and future use.
-  // Current decision logic is pure based on state and command alone.
-  void context // Suppress unused variable warning
+  // Extract context for telemetry and operational flow
+  const { timestamp } = context
+  // correlationId is available in context for future operational flow needs
   // Extract tenant and aggregate information from command
   const { tenant_id, aggregate_id } = command
 
@@ -119,7 +119,17 @@ export const decideGame: Decider<GameState, GameCommand, GameEvent> = (state, co
       const choice = round.choices.find((c) => c.id === command.choiceId)
       if (!choice) return []
       const nextStreak = choice.correct ? state.streak + 1 : 0
-      
+
+      // Extract word metadata for telemetry from the current round
+      const wordId = round.wordId
+      const difficulty = round.difficulty ?? state.currentDifficulty
+      const polysemy = round.polysemy ?? 1
+      const semanticGroup = round.semanticGroup ?? 'default'
+
+      // Calculate response time - for now using a placeholder
+      // In production, this should be tracked at the edge layer and passed via context
+      const responseTimeMs = (context as any).responseTimeMs ?? 0
+
       // Record the cause (the answer) before its effect (the streak change).
       return [
         {
@@ -127,14 +137,20 @@ export const decideGame: Decider<GameState, GameCommand, GameEvent> = (state, co
           roundIndex: state.currentRound,
           choiceId: choice.id,
           correct: choice.correct,
+          wordId,
+          difficulty,
+          polysemy,
+          semanticGroup,
+          responseTimeMs,
+          timestamp,
           tenant_id,
           aggregate_id,
         },
-        { 
-          type: 'streak/updated', 
+        {
+          type: 'streak/updated',
           streak: nextStreak,
           tenant_id,
-          aggregate_id
+          aggregate_id,
         },
       ]
     }

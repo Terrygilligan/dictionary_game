@@ -33,6 +33,80 @@ export const evolveGame: Evolve<GameState, GameEvent> = (state, event) => {
         user_performance: state.user_performance,
       }
     case 'answer/submitted':
+      // Extract word metadata from the event (telemetry-ready payload)
+      const wordId = (event as any).wordId
+      const semanticGroup = (event as any).semanticGroup ?? 'default'
+      const eventTimestamp = (event as any).timestamp ?? Date.now()
+
+      // Update proficiency map for spaced repetition tracking
+      const updatedProficiency = new Map(state.proficiency_map)
+      if (wordId) {
+        const existingProficiency = updatedProficiency.get(wordId) || {
+          wordId,
+          correct: 0,
+          total: 0,
+          lastAttemptedAt: undefined,
+        }
+        updatedProficiency.set(wordId, {
+          wordId,
+          correct: existingProficiency.correct + (event.correct ? 1 : 0),
+          total: existingProficiency.total + 1,
+          lastAttemptedAt: eventTimestamp,
+        })
+      }
+
+      // Update user performance state for adaptive difficulty tuning
+      const updatedWordPerformance = new Map(state.user_performance.wordPerformance)
+      const updatedGroupPerformance = new Map(state.user_performance.groupPerformance)
+      
+      if (wordId) {
+        // Update word-level performance
+        const existingWordPerf = updatedWordPerformance.get(wordId) || {
+          wordId,
+          semantic_group: semanticGroup,
+          attempts: 0,
+          correct: 0,
+          lastAttemptedAt: undefined,
+        }
+        updatedWordPerformance.set(wordId, {
+          wordId,
+          semantic_group: semanticGroup,
+          attempts: existingWordPerf.attempts + 1,
+          correct: existingWordPerf.correct + (event.correct ? 1 : 0),
+          lastAttemptedAt: eventTimestamp,
+        })
+
+        // Update semantic group performance
+        const existingGroupPerf = updatedGroupPerformance.get(semanticGroup) || {
+          semantic_group: semanticGroup,
+          totalAttempts: 0,
+          correctAnswers: 0,
+          successRate: 0,
+        }
+        const newGroupAttempts = existingGroupPerf.totalAttempts + 1
+        const newGroupCorrect = existingGroupPerf.correctAnswers + (event.correct ? 1 : 0)
+        updatedGroupPerformance.set(semanticGroup, {
+          semantic_group: semanticGroup,
+          totalAttempts: newGroupAttempts,
+          correctAnswers: newGroupCorrect,
+          successRate: newGroupCorrect / newGroupAttempts,
+        })
+      }
+
+      // Recalculate global success rate
+      const newTotalAttempts = state.user_performance.totalAttempts + 1
+      const newTotalCorrect = state.user_performance.wordPerformance.size === 0
+        ? (event.correct ? 1 : 0)
+        : Array.from(updatedWordPerformance.values()).reduce((sum, wp) => sum + wp.correct, 0)
+      const newGlobalSuccessRate = newTotalAttempts > 0 ? newTotalCorrect / newTotalAttempts : 0
+
+      const updatedUserPerformance = {
+        wordPerformance: updatedWordPerformance,
+        groupPerformance: updatedGroupPerformance,
+        globalSuccessRate: newGlobalSuccessRate,
+        totalAttempts: newTotalAttempts,
+      }
+
       return {
         ...state,
         answers: [
@@ -43,6 +117,8 @@ export const evolveGame: Evolve<GameState, GameEvent> = (state, event) => {
             correct: event.correct,
           },
         ],
+        proficiency_map: updatedProficiency,
+        user_performance: updatedUserPerformance,
       }
     case 'round/advanced':
       return { ...state, currentRound: event.toRoundIndex }

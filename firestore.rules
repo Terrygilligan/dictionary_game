@@ -145,6 +145,32 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // Sent emails collection - idempotency tracking for email operations
+    match /sent_emails/{correlationId} {
+      // Allow service account to create sent email records (for idempotency)
+      // Allow admins to read for debugging
+      allow create: if request.auth != null &&
+        (request.auth.token.email == 'firebase-adminsdk-fbsvc@lexicon-master-adb6b.iam.gserviceaccount.com' ||
+         request.auth.token.superadmin == true ||
+         request.auth.token.admin == true) &&
+        request.resource.data.correlationId is string &&
+        request.resource.data.templateType is string &&
+        request.resource.data.sentAt is number &&
+        request.resource.data.recipientEmail is string;
+
+      // Allow service account and admins to read
+      allow read: if request.auth != null &&
+        (request.auth.token.email == 'firebase-adminsdk-fbsvc@lexicon-master-adb6b.iam.gserviceaccount.com' ||
+         request.auth.token.superadmin == true ||
+         request.auth.token.admin == true);
+
+      // Deny all updates - sent email records should be immutable
+      allow update: if false;
+
+      // Deny all deletes - sent email records should be preserved for audit trail
+      allow delete: if false;
+    }
+
     // Deny all other reads/writes
     match /{document=**} {
       allow read, write: if false;

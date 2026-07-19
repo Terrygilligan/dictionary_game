@@ -14,6 +14,7 @@ import * as admin from "firebase-admin";
 import {Resend} from "resend";
 import {defineSecret} from "firebase-functions/params";
 import {getEmailContent} from "./templates/emailTemplates";
+import {processOutboxEvent} from "./outboxProcessor";
 
 // Start writing functions
 // https://firebase.google.com/docs/functions/typescript
@@ -39,89 +40,97 @@ const resendApiKey = defineSecret('RESEND_API_KEY');
 /**
  * Cloud Function to process email queue documents
  * Triggered when a new document is created in the email_queue collection
+ * 
+ * DEPRECATED: This function is being decommissioned in favor of the OutboxProcessor.
+ * Email operations now go through: outbox → OutboxProcessor → EmailTemplateService → Resend
+ * 
+ * TODO: After confirming no in-flight emails remain in email_queue collection, remove this function entirely
  */
-export const processEmailQueue = onDocumentCreated(
-  {
-    document: 'email_queue/{docId}',
-    secrets: [resendApiKey],
-  },
-  async (event) => {
-    const snapshot = event.data;
-    if (!snapshot) {
-      logger.error('No snapshot provided');
-      return;
-    }
+// export const processEmailQueue = onDocumentCreated(
+//   {
+//     document: 'email_queue/{docId}',
+//     secrets: [resendApiKey],
+//   },
+//   async (event) => {
+//     const snapshot = event.data;
+//     if (!snapshot) {
+//       logger.error('No snapshot provided');
+//       return;
+//     }
 
-    const data = snapshot.data();
-    const docId = event.params.docId;
+//     const data = snapshot.data();
+//     const docId = event.params.docId;
 
-    logger.info(`Processing email queue document: ${docId}`, { data });
+//     logger.info(`Processing email queue document: ${docId}`, { data });
 
-    try {
-      // Extract email data
-      const { email, userId, template, data: templateData } = data;
+//     try {
+//       // Extract email data
+//       const { email, userId, template, data: templateData } = data;
 
-      if (!email || !userId || !template) {
-        throw new Error('Missing required fields: email, userId, or template');
-      }
+//       if (!email || !userId || !template) {
+//         throw new Error('Missing required fields: email, userId, or template');
+//       }
 
-      // Get email content from template mapper
-      const emailContent = getEmailContent(template, {
-        email,
-        userId,
-        ...templateData,
-      });
+//       // Get email content from template mapper
+//       const emailContent = getEmailContent(template, {
+//         email,
+//         userId,
+//         ...templateData,
+//       });
 
-      // Initialize Resend with API key from secret
-      const resend = new Resend(resendApiKey.value());
+//       // Initialize Resend with API key from secret
+//       const resend = new Resend(resendApiKey.value());
 
-      // Send email
-      const result = await resend.emails.send({
-        from: 'Lexicon Master <onboarding@resend.dev>',
-        to: [email],
-        subject: emailContent.subject,
-        html: emailContent.html,
-      });
+//       // Send email
+//       const result = await resend.emails.send({
+//         from: 'Lexicon Master <onboarding@resend.dev>',
+//         to: [email],
+//         subject: emailContent.subject,
+//         html: emailContent.html,
+//       });
 
-      logger.info(`Email sent successfully via Resend`, {
-        docId,
-        email,
-        template,
-        resendId: result.data?.id,
-      });
+//       logger.info(`Email sent successfully via Resend`, {
+//         docId,
+//         email,
+//         template,
+//         resendId: result.data?.id,
+//       });
 
-      // Delete the document after successful send to keep queue empty
-      const firestore = admin.firestore();
-      await firestore.collection('email_queue').doc(docId).delete();
+//       // Delete the document after successful send to keep queue empty
+//       const firestore = admin.firestore();
+//       await firestore.collection('email_queue').doc(docId).delete();
 
-      logger.info(`Email queue document deleted after successful send: ${docId}`);
+//       logger.info(`Email queue document deleted after successful send: ${docId}`);
 
-    } catch (error) {
-      logger.error(`Failed to process email queue document: ${docId}`, error);
+//     } catch (error) {
+//       logger.error(`Failed to process email queue document: ${docId}`, error);
 
-      // Log error and leave document in queue for debugging/retry
-      // Optionally move to email_errors collection for better tracking
-      try {
-        const firestore = admin.firestore();
-        const errorDoc = {
-          ...data,
-          originalDocId: docId,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          errorAt: admin.firestore.FieldValue.serverTimestamp(),
-          retryCount: 0,
-        };
+//       // Log error and leave document in queue for debugging/retry
+//       // Optionally move to email_errors collection for better tracking
+//       try {
+//         const firestore = admin.firestore();
+//         const errorDoc = {
+//           ...data,
+//           originalDocId: docId,
+//           error: error instanceof Error ? error.message : 'Unknown error',
+//           errorAt: admin.firestore.FieldValue.serverTimestamp(),
+//           retryCount: 0,
+//         };
 
-        // Move to email_errors collection for tracking
-        await firestore.collection('email_errors').add(errorDoc);
+//         // Move to email_errors collection for tracking
+//         await firestore.collection('email_errors').add(errorDoc);
 
-        // Delete from queue after moving to errors
-        await firestore.collection('email_queue').doc(docId).delete();
+//         // Delete from queue after moving to errors
+//         await firestore.collection('email_queue').doc(docId).delete();
 
-        logger.info(`Email queue document moved to email_errors collection: ${docId}`);
-      } catch (moveError) {
-        logger.error(`Failed to move document to email_errors: ${docId}`, moveError);
-        // Document remains in email_queue for manual inspection
-      }
-    }
-  }
-);
+//         logger.info(`Email queue document moved to email_errors collection: ${docId}`);
+//       } catch (moveError) {
+//         logger.error(`Failed to move document to email_errors: ${docId}`, moveError);
+//         // Document remains in email_queue for manual inspection
+//       }
+//     }
+//   }
+// );
+
+// Export outbox processor
+export { processOutboxEvent };

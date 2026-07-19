@@ -17,6 +17,9 @@ export interface RoundSpec {
   readonly partOfSpeech: string
   readonly choices: readonly Choice[]
   readonly milestone_id?: number
+  readonly difficulty?: number
+  readonly polysemy?: number
+  readonly semanticGroup?: string
 }
 
 export type GameStatus = 'idle' | 'playing' | 'finished'

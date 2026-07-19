@@ -96,7 +96,13 @@ async function simulateGameSession(
       aggregate_id,
       roundIndex: i,
       choiceId: 'choice1',
-      correct: true
+      correct: true,
+      wordId: i % 2 === 0 ? 'word1' : 'word2',
+      difficulty: 5,
+      polysemy: 1,
+      semanticGroup: 'default',
+      responseTimeMs: 1000,
+      timestamp: Date.now()
     }
     
     const streakEvent = {
@@ -125,7 +131,13 @@ async function simulateGameSession(
       aggregate_id,
       roundIndex: i,
       choiceId: 'choice2',
-      correct: false
+      correct: false,
+      wordId: i % 2 === 0 ? 'word1' : 'word2',
+      difficulty: 5,
+      polysemy: 1,
+      semanticGroup: 'default',
+      responseTimeMs: 1000,
+      timestamp: Date.now()
     }
     
     const streakEvent = {
@@ -243,7 +255,13 @@ async function simulateAndMonitor(
     aggregate_id,
     roundIndex: 0,
     choiceId: 'choice1',
-    correct: true
+    correct: true,
+    wordId: 'word1',
+    difficulty: 5,
+    polysemy: 1,
+    semanticGroup: 'default',
+    responseTimeMs: 1000,
+    timestamp: Date.now()
   }
   
   const streakEvent = {

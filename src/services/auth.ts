@@ -132,7 +132,11 @@ class FirebaseAuthService implements AuthService {
 
   /**
    * Helper function to write email requests to email_queue collection
-   * Following the write-only security model - clients can only create, never read/update/delete
+   * DEPRECATED: This method is being decommissioned in favor of the outbox pattern.
+   * Email operations now go through: outbox → OutboxProcessor → EmailTemplateService → Resend
+   * 
+   * TODO: After confirming no in-flight emails remain in email_queue collection, remove this method entirely
+   * TODO: For password_reset and email_verification, need to add outbox integration before full deprecation
    */
   private async queueEmail(email: string, template: string, additionalData?: Record<string, any>): Promise<void> {
     if (!this.auth.currentUser) {
@@ -202,9 +206,12 @@ class FirebaseAuthService implements AuthService {
       const token = await userCredential.user.getIdToken()
 
       // Queue welcome/verification email for new user
+      // DEPRECATED: Email operations now use outbox pattern instead of queueEmail
+      // The user.registered event is already published via AuthCommandService.registerUser()
+      // which triggers the OutboxProcessor → EmailTemplateService → Resend flow
       try {
-        await this.queueEmail(email, 'welcome_registration', { username: displayName })
-        logger.log('Welcome email queued for new user:', email)
+        // await this.queueEmail(email, 'welcome_registration', { username: displayName })
+        logger.log('Welcome email skipped - using outbox pattern via AuthCommandService:', email)
       } catch (emailError) {
         // Don't fail signup if email queue fails, but log the error
         logger.error('Failed to queue welcome email:', emailError)

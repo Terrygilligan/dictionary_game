@@ -31,6 +31,12 @@ export type GameEvent =
       readonly roundIndex: number
       readonly choiceId: string
       readonly correct: boolean
+      readonly wordId: string
+      readonly difficulty: number
+      readonly polysemy: number
+      readonly semanticGroup: string
+      readonly responseTimeMs: number
+      readonly timestamp: number
     }
   | BaseGameEvent & {
       readonly type: 'round/advanced'

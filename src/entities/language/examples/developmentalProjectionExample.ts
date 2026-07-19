@@ -130,7 +130,13 @@ function createLearningEvents(state: LinguisticState, iteration: number): GameEv
     aggregate_id: 'demo_session',
     roundIndex: iteration,
     choiceId: isCorrect ? 'correct_choice' : 'wrong_choice',
-    correct: isCorrect
+    correct: isCorrect,
+    wordId: `word_${iteration}`,
+    difficulty: 5,
+    polysemy: 1,
+    semanticGroup: 'default',
+    responseTimeMs: 1000,
+    timestamp: Date.now()
   }
   events.push(answerEvent)
   
