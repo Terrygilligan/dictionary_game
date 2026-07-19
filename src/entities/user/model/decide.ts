@@ -2,6 +2,16 @@ import type { UserState } from './state.ts'
 import type { UserCommand, UserEvent } from './index.ts'
 
 /**
+ * Context object for decider execution
+ * 
+ * Contains external dependencies that the decider needs but should not
+ * generate itself, maintaining pure function architecture.
+ */
+export interface DeciderContext {
+  readonly timestamp: number
+}
+
+/**
  * Pure user domain decider.
  * 
  * Takes current state and a command, returns the events that should occur.
@@ -12,6 +22,7 @@ import type { UserCommand, UserEvent } from './index.ts'
 export function decideUser(
   state: UserState,
   command: UserCommand,
+  context: DeciderContext,
 ): readonly UserEvent[] {
   switch (command.type) {
     case 'user/create':
@@ -22,10 +33,10 @@ export function decideUser(
         type: 'user/created',
         tenant_id: command.tenant_id,
         aggregate_id: command.aggregate_id,
-        userId: 'user_' + Date.now(), // Will be replaced by proper ID generation
+        userId: command.userId || `user_${context.timestamp}`,
         email: command.email,
         displayName: command.displayName,
-        createdAt: Date.now(), // Will be replaced by injectable clock
+        createdAt: context.timestamp,
       }]
 
     case 'user/register':
@@ -53,7 +64,7 @@ export function decideUser(
         aggregate_id: command.aggregate_id,
         userId: state.user.id,
         token: command.token, // Token handled by auth service, not exposed to UI
-        timestamp: Date.now(), // Will be replaced by injectable clock
+        timestamp: context.timestamp,
       }]
 
     case 'user/update':
@@ -68,7 +79,7 @@ export function decideUser(
         aggregate_id: command.aggregate_id,
         userId: state.user.id,
         displayName: command.displayName,
-        timestamp: Date.now(), // Will be replaced by injectable clock
+        timestamp: context.timestamp,
       }]
 
     case 'user/verify-email':
@@ -81,7 +92,7 @@ export function decideUser(
         aggregate_id: command.aggregate_id,
         userId: command.userId,
         email: command.email,
-        verifiedAt: Date.now(), // Will be replaced by injectable clock
+        verifiedAt: context.timestamp,
       }]
 
     case 'profile/update':
@@ -103,7 +114,7 @@ export function decideUser(
           village: command.village,
           postcode: command.postcode,
           shareLocationForLeaderboard: command.shareLocationForLeaderboard,
-          timestamp: Date.now(), // Will be replaced by injectable clock
+          timestamp: context.timestamp,
         })
       }
       
@@ -134,7 +145,7 @@ export function decideUser(
           totalQuestions: command.totalQuestions,
           streak: command.streak,
           highestStreak: command.highestStreak,
-          timestamp: Date.now(), // Will be replaced by injectable clock
+          timestamp: context.timestamp,
         })
       }
       
@@ -153,7 +164,7 @@ export function decideUser(
         aggregate_id: command.aggregate_id,
         userId: state.user.id,
         friendId: command.friendId,
-        timestamp: Date.now(), // Will be replaced by injectable clock
+        timestamp: context.timestamp,
       }]
 
     case 'friend/remove':
@@ -169,7 +180,7 @@ export function decideUser(
         aggregate_id: command.aggregate_id,
         userId: state.user.id,
         friendId: command.friendId,
-        timestamp: Date.now(), // Will be replaced by injectable clock
+        timestamp: context.timestamp,
       }]
 
     case 'user/sync':
@@ -189,7 +200,7 @@ export function decideUser(
             tenant_id: command.tenant_id,
             aggregate_id: command.aggregate_id,
             userId: state.user?.id ?? 'guest',
-            timestamp: Date.now(), // Will be replaced by injectable clock
+            timestamp: context.timestamp,
           },
           {
             type: 'guestAccess/granted',
@@ -197,7 +208,7 @@ export function decideUser(
             aggregate_id: command.aggregate_id,
             userId: state.user?.id ?? 'guest',
             gamesRemaining: maxGames - gamesPlayed,
-            timestamp: Date.now(), // Will be replaced by injectable clock
+            timestamp: context.timestamp,
           },
         ]
       } else {
@@ -208,7 +219,7 @@ export function decideUser(
             tenant_id: command.tenant_id,
             aggregate_id: command.aggregate_id,
             userId: state.user?.id ?? 'guest',
-            timestamp: Date.now(), // Will be replaced by injectable clock
+            timestamp: context.timestamp,
           },
           {
             type: 'guestAccess/denied',
@@ -218,7 +229,7 @@ export function decideUser(
             reason: 'limit-reached',
             gamesPlayed: gamesPlayed,
             maxGames: maxGames,
-            timestamp: Date.now(), // Will be replaced by injectable clock
+            timestamp: context.timestamp,
           },
         ]
       }

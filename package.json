@@ -10,6 +10,7 @@
     "typecheck": "tsc -b",
     "lint": "oxlint",
     "test": "vitest run",
+    "test:unit": "vitest run --config vitest.unit.config.ts",
     "deploy": "npm run build && gh-pages -d dist"
   },
   "dependencies": {

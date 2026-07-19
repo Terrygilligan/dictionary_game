@@ -34,7 +34,8 @@ export function createVillageStore(options: EventStoreOptions = {}): VillageStor
       
       // Pure domain processing - command used exactly as received
       const currentState = store.getState(command.tenant_id, command.aggregate_id)
-      const events = decideVillage(currentState, command)
+      const context = { timestamp: Date.now() }
+      const events = decideVillage(currentState, command, context)
       console.log(`🏘️ [VILLAGE_STORE] Generated events:`, events.length, events)
       
       store.commit(events, command.tenant_id, command.aggregate_id)

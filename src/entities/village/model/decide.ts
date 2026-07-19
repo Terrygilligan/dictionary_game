@@ -1,6 +1,16 @@
 import type { VillageEvent } from './events'
 
 /**
+ * Context object for decider execution
+ * 
+ * Contains external dependencies that the decider needs but should not
+ * generate itself, maintaining pure function architecture.
+ */
+export interface DeciderContext {
+  readonly timestamp: number
+}
+
+/**
  * Pure village decision function.
  * 
  * Takes current state and a command, returns events to be processed.
@@ -20,6 +30,7 @@ export interface CreateVillageCommand {
   name: string
   description: string
   userId: string
+  villageId?: string // Optional: if not provided, generated from context timestamp
 }
 
 export interface AddContributionCommand {
@@ -32,6 +43,7 @@ export interface AddContributionCommand {
   wordId: string
   definition: string
   translation?: string
+  contributionId?: string // Optional: if not provided, generated from context timestamp
 }
 
 export interface VoteContributionCommand {
@@ -54,11 +66,12 @@ export interface CreateBattleCommand {
   startTime: number
   endTime: number
   userId: string
+  battleId?: string // Optional: if not provided, generated from context timestamp
 }
 
 export type VillageCommand = CreateVillageCommand | AddContributionCommand | VoteContributionCommand | CreateBattleCommand
 
-export function decideVillage(_state: any, command: VillageCommand): VillageEvent[] {
+export function decideVillage(_state: any, command: VillageCommand, context: DeciderContext): VillageEvent[] {
   switch (command.type) {
     case 'village/create':
       if (!command.name.trim()) {
@@ -67,10 +80,10 @@ export function decideVillage(_state: any, command: VillageCommand): VillageEven
       
       return [{
         type: 'village/created',
-        villageId: `village_${Date.now()}`,
+        villageId: command.villageId || `village_${context.timestamp}`,
         name: command.name.trim(),
         description: command.description.trim(),
-        createdAt: Date.now(),
+        createdAt: context.timestamp,
       }]
 
     case 'contribution/add':
@@ -81,13 +94,13 @@ export function decideVillage(_state: any, command: VillageCommand): VillageEven
       return [{
         type: 'contribution/added',
         villageId: command.villageId,
-        contributionId: `contrib_${Date.now()}`,
+        contributionId: command.contributionId || `contrib_${context.timestamp}`,
         userId: command.userId,
         userName: command.userName,
         wordId: command.wordId,
         definition: command.definition.trim(),
         translation: command.translation?.trim(),
-        createdAt: Date.now(),
+        createdAt: context.timestamp,
       }]
 
     case 'contribution/vote':
@@ -97,23 +110,23 @@ export function decideVillage(_state: any, command: VillageCommand): VillageEven
         contributionId: command.contributionId,
         userId: command.userId,
         vote: command.vote,
-        votedAt: Date.now(),
+        votedAt: context.timestamp,
       }]
 
     case 'battle/create':
-      if (!command.name.trim() || command.endTime <= Date.now()) {
+      if (!command.name.trim() || command.endTime <= context.timestamp) {
         return [] // Validation failed
       }
 
       return [{
         type: 'battle/created',
-        battleId: `battle_${Date.now()}`,
+        battleId: command.battleId || `battle_${context.timestamp}`,
         villageId: command.villageId,
         name: command.name.trim(),
         description: command.description.trim(),
         startTime: command.startTime,
         endTime: command.endTime,
-        createdAt: Date.now(),
+        createdAt: context.timestamp,
       }]
 
     default:

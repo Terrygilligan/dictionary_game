@@ -35,6 +35,16 @@ export const initialVocabularyState: VocabularyState = {
 }
 
 /**
+ * Context object for decider execution
+ * 
+ * Contains external dependencies that the decider needs but should not
+ * generate itself, maintaining pure function architecture.
+ */
+export interface DeciderContext {
+  readonly timestamp: number
+}
+
+/**
  * Decide function for vocabulary commands
  * 
  * Validates commands and returns appropriate events.
@@ -42,18 +52,20 @@ export const initialVocabularyState: VocabularyState = {
  * 
  * @param state - Current vocabulary state
  * @param command - The command to process
+ * @param context - Execution context with timestamp
  * @returns Array of events (empty if command is invalid)
  */
 export function decideVocabulary(
   state: VocabularyState,
-  command: VocabularyCommand
+  command: VocabularyCommand,
+  context: DeciderContext
 ): VocabularyEvent[] {
   switch (command.type) {
     case 'vocabulary/addWordDefinition':
-      return handleAddWordDefinition(state, command)
+      return handleAddWordDefinition(state, command, context)
     
     case 'vocabulary/bulkAddWordDefinitions':
-      return handleBulkAddWordDefinitions(state, command)
+      return handleBulkAddWordDefinitions(state, command, context)
     
     default:
       // Unknown command type - return no events
@@ -68,11 +80,13 @@ export function decideVocabulary(
  * 
  * @param state - Current vocabulary state
  * @param command - The addWordDefinition command
+ * @param context - Execution context with timestamp
  * @returns Array of events (WordDefinitionAdded or WordDefinitionValidationFailed)
  */
 function handleAddWordDefinition(
   state: VocabularyState,
-  command: AddWordDefinition
+  command: AddWordDefinition,
+  context: DeciderContext
 ): VocabularyEvent[] {
   const { tenant_id, aggregate_id, entry } = command
 
@@ -87,7 +101,7 @@ function handleAddWordDefinition(
       type: 'vocabulary/wordDefinitionValidationFailed',
       wordId: entry.id,
       errors: validationResult.errors,
-      failedAt: Date.now(),
+      failedAt: context.timestamp,
     }
     return [validationFailedEvent]
   }
@@ -105,7 +119,7 @@ function handleAddWordDefinition(
     type: 'vocabulary/wordDefinitionAdded',
     wordId: entry.id,
     entry,
-    addedAt: Date.now(),
+    addedAt: context.timestamp,
   }
 
   return [wordAddedEvent]
@@ -119,11 +133,13 @@ function handleAddWordDefinition(
  * 
  * @param state - Current vocabulary state
  * @param command - The bulkAddWordDefinitions command
+ * @param context - Execution context with timestamp
  * @returns Array of events (mixed success and validation failed events)
  */
 function handleBulkAddWordDefinitions(
   state: VocabularyState,
-  command: BulkAddWordDefinitions
+  command: BulkAddWordDefinitions,
+  context: DeciderContext
 ): VocabularyEvent[] {
   const { tenant_id, aggregate_id, entries } = command
   const events: VocabularyEvent[] = []
@@ -141,7 +157,7 @@ function handleBulkAddWordDefinitions(
         type: 'vocabulary/wordDefinitionValidationFailed',
         wordId: entry.id,
         errors: validationResult.errors,
-        failedAt: Date.now(),
+        failedAt: context.timestamp,
       }
       events.push(validationFailedEvent)
       continue
@@ -160,7 +176,7 @@ function handleBulkAddWordDefinitions(
       type: 'vocabulary/wordDefinitionAdded',
       wordId: entry.id,
       entry,
-      addedAt: Date.now(),
+      addedAt: context.timestamp,
     }
     events.push(wordAddedEvent)
     successfulWordIds.push(entry.id)
@@ -174,7 +190,7 @@ function handleBulkAddWordDefinitions(
       type: 'vocabulary/bulkWordDefinitionsAdded',
       wordIds: successfulWordIds,
       count: successfulWordIds.length,
-      addedAt: Date.now(),
+      addedAt: context.timestamp,
     }
     events.push(bulkAddedEvent)
   }

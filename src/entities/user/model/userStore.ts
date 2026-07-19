@@ -25,7 +25,8 @@ export function createUserStore(options: EventStoreOptions = {}): UserStore {
     ...store,
     dispatch(command, tenant_id, aggregate_id) {
       const currentState = store.getState(tenant_id, aggregate_id)
-      const events = decideUser(currentState, command)
+      const context = { timestamp: Date.now() }
+      const events = decideUser(currentState, command, context)
       store.commit(events, tenant_id, aggregate_id)
     },
   }

@@ -13,6 +13,7 @@ export interface BaseUserCommand {
 
 export interface CreateUser extends BaseUserCommand {
   readonly type: 'user/create'
+  readonly userId?: string // Optional: if not provided, will be generated from context timestamp
   readonly email: string
   readonly displayName: string
 }

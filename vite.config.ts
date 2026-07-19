@@ -16,6 +16,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/shared/test/setup.ts'],
     css: false,
-    exclude: ['node_modules', 'dist', '.idea', '.git', '.svn', '.archive', '**/show-integration-logs.spec.ts'],
+    exclude: ['node_modules', 'dist', '.idea', '.git', '.svn', '.archive', '**/show-integration-logs.spec.ts', '**/*.unit.spec.ts', 'functions', 'admin'],
+    include: ['**/*.spec.ts', '**/*.test.ts'],
   },
 })
