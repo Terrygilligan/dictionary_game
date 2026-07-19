@@ -4,7 +4,7 @@
  */
 
 import { initializeI18n, i18nService } from '@/shared/lib/i18n/i18nService'
-import { getLocalizedWordById, initializeWordTranslations } from '@/entities/lexicon'
+import { getLocalizedWordById, initializeWordTranslations, loadLexiconData } from '@/entities/lexicon'
 import { useTranslate } from '@/shared/lib/i18n/useTranslate'
 
 /**
@@ -25,11 +25,14 @@ export async function initializeMultilingualSystem() {
 /**
  * Example: Get a localized word by ID
  */
-export function demonstrateLocalizedWord() {
+export async function demonstrateLocalizedWord() {
   const wordId = 'word_001' // 'aberration' in English
   
-  // Get the word in the current language
-  const localizedWord = getLocalizedWordById(wordId)
+  // Load lexicon data at the edge layer
+  const lexicon = await loadLexiconData()
+  
+  // Get the word in the current language using dependency injection
+  const localizedWord = getLocalizedWordById(lexicon, wordId)
   
   if (localizedWord) {
     console.log('Word ID:', localizedWord.id)
@@ -37,6 +40,8 @@ export function demonstrateLocalizedWord() {
     console.log('Localized definition:', localizedWord.localizedDefinition)
     console.log('Original word:', localizedWord.translations.en)
     console.log('Original definition:', localizedWord.definitions.en)
+    console.log('Polysemy rating:', localizedWord.polysemy)
+    console.log('Difficulty rating:', localizedWord.difficulty)
   }
 }
 
@@ -75,14 +80,17 @@ export function MultilingualGameComponent() {
 export async function demonstrateLanguageSwitching() {
   const languages = ['en', 'nl', 'fr', 'de'] as const
   
+  // Load lexicon data once at the edge layer
+  const lexicon = await loadLexiconData()
+  
   for (const lang of languages) {
     console.log(`\n--- Switching to ${lang} ---`)
     
     // Switch language
     await i18nService.setLanguage(lang)
     
-    // Get the same word in different languages
-    const word = getLocalizedWordById('word_001')
+    // Get the same word in different languages using dependency injection
+    const word = getLocalizedWordById(lexicon, 'word_001')
     
     if (word) {
       console.log(`${lang.toUpperCase()}:`, word.localizedWord)
@@ -106,7 +114,7 @@ export function checkTranslationCoverage() {
   console.log('- Dutch: ✅')
   console.log('- French: ✅')
   console.log('- German: ✅')
-  console.log('- Bulgarian: ⏳ (coming soon)')
+  console.log('- Bulgarian: ✅')
   console.log('- Indonesian: ⏳ (coming soon)')
 }
 
@@ -164,7 +172,7 @@ export async function runAllExamples() {
   
   try {
     await initializeMultilingualSystem()
-    demonstrateLocalizedWord()
+    await demonstrateLocalizedWord()
     await demonstrateLanguageSwitching()
     checkTranslationCoverage()
     demonstrateFirebaseIntegration()

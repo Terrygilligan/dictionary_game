@@ -46,7 +46,14 @@ export function createGameStore(options: EventStoreOptions = {}): GameStore {
       const currentState = store.getState(command.tenant_id, command.aggregate_id)
       logger.log(`Current state before decision:`, currentState.status)
 
-      const events = decideGame(currentState, command)
+      // Inject context at the edge - timestamp generated here, not in decider
+      const context = {
+        timestamp: Date.now(),
+        userId: command.tenant_id, // Use tenant_id as userId for game context
+        correlationId: crypto.randomUUID()
+      }
+
+      const events = decideGame(currentState, command, context)
       logger.log(`Generated events:`, events.length, events)
 
       store.commit(events, command.tenant_id, command.aggregate_id)

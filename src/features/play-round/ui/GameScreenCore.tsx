@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   selectCurrentAnswer,
   selectCurrentRound,
@@ -7,7 +7,7 @@ import {
   selectScore,
   selectStreak,
 } from '@/entities/game'
-import { buildDeck, type DeckOptions } from '../model/deck.ts'
+import { buildDeck, preFetchLexicon, type DeckOptions } from '../model/deck.ts'
 import { useGameDispatch, useGameState } from '../model/useGame.ts'
 import { StartPanel } from './StartPanel.tsx'
 import { RoundPanel } from './RoundPanel.tsx'
@@ -34,6 +34,7 @@ export function GameScreenCore({
   // UNCONDITIONAL HOOKS - Always called in the same order
   const state = useGameState(tenant_id, aggregate_id)
   const dispatch = useGameDispatch()
+  const [isLoadingDeck, setIsLoadingDeck] = useState(false)
 
   // Reset game state when navigating away
   useEffect(() => {
@@ -45,12 +46,26 @@ export function GameScreenCore({
     }
   }, [dispatch, resetOnUnmount, state.status, tenant_id, aggregate_id])
 
-  const startGame = useCallback(() => {
+  // Pre-fetch lexicon data when component mounts or language changes
+  // This ensures data is ready before user clicks "Play", making UI feel snappier
+  useEffect(() => {
+    console.log(`🔄 [GAME] Pre-fetching lexicon data for language "${language}"`)
+    preFetchLexicon(language)
+  }, [language])
+
+  const startGame = useCallback(async () => {
     console.log(`🎮 GameScreen.startGame: Starting game with language "${language}"`)
     console.log(`🎮 GameScreen.startGame: Deck options:`, { ...deckOptions, language })
-    const deck = buildDeck({ ...deckOptions, language })
-    console.log(`🎮 GameScreen.startGame: Built deck with ${deck.length} rounds`)
-    dispatch({ type: 'startGame', deck, tenant_id, aggregate_id })
+    setIsLoadingDeck(true)
+    try {
+      const deck = await buildDeck({ ...deckOptions, language })
+      console.log(`🎮 GameScreen.startGame: Built deck with ${deck.length} rounds`)
+      dispatch({ type: 'startGame', deck, tenant_id, aggregate_id })
+    } catch (error) {
+      console.error('❌ [GAME] Failed to build deck:', error)
+    } finally {
+      setIsLoadingDeck(false)
+    }
   }, [dispatch, deckOptions, language, tenant_id, aggregate_id])
 
   const submitAnswer = useCallback(
@@ -63,7 +78,7 @@ export function GameScreenCore({
   
   // CONDITIONAL RENDERING - No hooks involved
   if (state.status === 'idle') {
-    return <StartPanel onStart={startGame} />
+    return <StartPanel onStart={startGame} isLoading={isLoadingDeck} />
   }
 
   if (state.status === 'finished') {

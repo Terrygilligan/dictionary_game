@@ -14,7 +14,6 @@
 
 import admin from 'firebase-admin'
 import type { VocabularyEvent, WordDefinitionAdded, WordDefinitionRemoved } from '../src/entities/vocabulary/model/events.js'
-import type { VocabularyEntry } from '../src/entities/vocabulary/model/types.js'
 import type { ITeardownService } from '../src/shared/services/ITeardownService.js'
 import type {
   OutboxDocument,

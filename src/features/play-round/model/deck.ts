@@ -1,4 +1,5 @@
-import { getRandomWordsForLanguage } from '@/entities/lexicon'
+import type { LexiconEntry } from '@/entities/lexicon'
+import { getRandomWordsForLanguage, LexiconCache } from '@/entities/lexicon'
 import type { Choice, RoundSpec } from '@/entities/game'
 import { nextId, sample, shuffle, type Rng } from '@/shared/lib'
 
@@ -7,18 +8,47 @@ export interface DeckOptions {
   choicesPerRound?: number
   rng?: Rng
   language?: string
+  lexicon?: readonly LexiconEntry[]  // Dependency injection: lexicon data provided by edge layer (optional for backward compatibility)
+}
+
+/**
+ * Pre-fetch lexicon data for a specific language
+ * This initiates loading without awaiting, useful for warming up the cache
+ * when the user navigates to the game screen.
+ * 
+ * @param languageCode - The language code to pre-fetch
+ */
+export function preFetchLexicon(languageCode: string): void {
+  LexiconCache.preFetch(languageCode)
+}
+
+/**
+ * Load lexicon data at the edge layer using the memoized cache
+ * This function should be called from command handlers or UI components, not from domain logic
+ * Uses LexiconCache to prevent redundant I/O operations
+ * @param languageCode - The language code to load (defaults to 'en')
+ * @returns Promise resolving to lexicon data
+ */
+export async function loadLexiconData(languageCode: string = 'en'): Promise<readonly LexiconEntry[]> {
+  return await LexiconCache.getOrLoad(languageCode)
 }
 
 /**
  * Builds a shuffled deck of rounds. This is the only impure part of starting a
  * game (randomness); the resulting deck is passed into the `startGame` command
  * so the event log remains a deterministic record.
+ * 
+ * @param options - Deck building options including injected lexicon data
+ * @returns A deck of game rounds
  */
-export function buildDeck(options: DeckOptions = {}): RoundSpec[] {
-  const { roundCount = 8, choicesPerRound = 4, rng = Math.random, language = 'en' } = options
+export async function buildDeck(options: DeckOptions): Promise<RoundSpec[]> {
+  const { roundCount = 8, choicesPerRound = 4, rng = Math.random, language = 'en', lexicon: providedLexicon } = options
 
-  // Get random words for the specified language
-  const words = getRandomWordsForLanguage(roundCount + (choicesPerRound - 1) * roundCount, language)
+  // Load lexicon data if not provided (edge layer loading with cache)
+  const lexicon = providedLexicon || await loadLexiconData(language)
+
+  // Get random words for the specified language using injected lexicon data
+  const words = getRandomWordsForLanguage(lexicon, roundCount + (choicesPerRound - 1) * roundCount, language)
 
   // Select prompt words
   const prompts = sample(words, roundCount, rng)

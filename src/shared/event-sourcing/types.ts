@@ -25,4 +25,5 @@ export type Evolve<TState, TEvent> = (state: TState, event: TEvent) => TState
 export type Decider<TState, TCommand, TEvent> = (
   state: TState,
   command: TCommand,
+  context: { timestamp: number, userId?: string, correlationId?: string }
 ) => readonly TEvent[]

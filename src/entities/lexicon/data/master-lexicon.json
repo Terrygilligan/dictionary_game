@@ -17,7 +17,9 @@
       "page": 1,
       "column": 1,
       "wordNumber": 1
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_002",
@@ -37,7 +39,9 @@
       "page": 1,
       "column": 1,
       "wordNumber": 2
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_003",
@@ -57,7 +61,9 @@
       "page": 1,
       "column": 1,
       "wordNumber": 3
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_004",
@@ -77,7 +83,9 @@
       "page": 1,
       "column": 1,
       "wordNumber": 4
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_005",
@@ -97,7 +105,9 @@
       "page": 1,
       "column": 1,
       "wordNumber": 5
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_006",
@@ -117,7 +127,9 @@
       "page": 1,
       "column": 1,
       "wordNumber": 6
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_007",
@@ -137,7 +149,9 @@
       "page": 1,
       "column": 1,
       "wordNumber": 7
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_008",
@@ -157,7 +171,9 @@
       "page": 1,
       "column": 1,
       "wordNumber": 8
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_009",
@@ -177,7 +193,9 @@
       "page": 1,
       "column": 1,
       "wordNumber": 9
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_010",
@@ -197,7 +215,9 @@
       "page": 1,
       "column": 1,
       "wordNumber": 10
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_011",
@@ -223,7 +243,9 @@
       "page": 1,
       "column": 2,
       "wordNumber": 1
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_012",
@@ -249,7 +271,9 @@
       "page": 1,
       "column": 2,
       "wordNumber": 2
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_013",
@@ -275,7 +299,9 @@
       "page": 1,
       "column": 2,
       "wordNumber": 3
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_014",
@@ -301,7 +327,9 @@
       "page": 1,
       "column": 2,
       "wordNumber": 4
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_015",
@@ -327,7 +355,9 @@
       "page": 1,
       "column": 2,
       "wordNumber": 5
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_016",
@@ -353,7 +383,9 @@
       "page": 1,
       "column": 2,
       "wordNumber": 6
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_017",
@@ -379,7 +411,9 @@
       "page": 1,
       "column": 2,
       "wordNumber": 7
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_018",
@@ -405,7 +439,9 @@
       "page": 1,
       "column": 2,
       "wordNumber": 8
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_019",
@@ -431,7 +467,9 @@
       "page": 1,
       "column": 2,
       "wordNumber": 9
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   },
   {
     "id": "word_020",
@@ -457,6 +495,8 @@
       "page": 1,
       "column": 2,
       "wordNumber": 10
-    }
+    },
+    "polysemy": 1,
+    "difficulty": 2
   }
 ]

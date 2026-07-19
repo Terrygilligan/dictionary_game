@@ -45,7 +45,12 @@ function run(state: MainGameState, command: MainGameCommand): MainGameState {
     tenant_id: 'test-tenant',
     aggregate_id: 'test-aggregate'
   }
-  return decideMainGame(state, commandWithIdentity).reduce<MainGameState>(evolveMainGame, state)
+  const context = {
+    timestamp: 1234567890, // Static timestamp for deterministic testing
+    userId: 'test-user',
+    correlationId: 'test-correlation'
+  }
+  return decideMainGame(state, commandWithIdentity, context).reduce<MainGameState>(evolveMainGame, state)
 }
 
 /** Drives the machine to `ready` with the coordinate pointing at `w-secret`. */
@@ -67,7 +72,12 @@ describe('main game — phased selection', () => {
 
   it('rejects startGame when no layout has any word', () => {
     const empty: LexiconLayout = { scrolls: [{ label: 'X', pages: [] }] }
-    expect(decideMainGame(initialMainGameState, { type: 'startGame', layout: empty })).toEqual([])
+    const context = {
+      timestamp: 1234567890,
+      userId: 'test-user',
+      correlationId: 'test-correlation'
+    }
+    expect(decideMainGame(initialMainGameState, { type: 'startGame', layout: empty }, context)).toEqual([])
   })
 
   it('walks scroll → page → column → wordNumber → ready', () => {
@@ -86,24 +96,34 @@ describe('main game — phased selection', () => {
 
   it('rejects out-of-order commands', () => {
     const started = run(initialMainGameState, { type: 'startGame', layout })
+    const context = {
+      timestamp: 1234567890,
+      userId: 'test-user',
+      correlationId: 'test-correlation'
+    }
     // Cannot pick a page before a scroll.
-    expect(decideMainGame(started, { type: 'selectPage', page: 0 })).toEqual([])
+    expect(decideMainGame(started, { type: 'selectPage', page: 0 }, context)).toEqual([])
     // Cannot seal before all coordinates are chosen.
-    expect(decideMainGame(started, { type: 'sealWord' })).toEqual([])
+    expect(decideMainGame(started, { type: 'sealWord' }, context)).toEqual([])
   })
 
   it('rejects out-of-bounds selections', () => {
     const started = run(initialMainGameState, { type: 'startGame', layout })
-    expect(decideMainGame(started, { type: 'selectScroll', scroll: 2 })).toEqual([])
-    expect(decideMainGame(started, { type: 'selectScroll', scroll: -1 })).toEqual([])
-    expect(decideMainGame(started, { type: 'selectScroll', scroll: 1.5 })).toEqual([])
+    const context = {
+      timestamp: 1234567890,
+      userId: 'test-user',
+      correlationId: 'test-correlation'
+    }
+    expect(decideMainGame(started, { type: 'selectScroll', scroll: 2 }, context)).toEqual([])
+    expect(decideMainGame(started, { type: 'selectScroll', scroll: -1 }, context)).toEqual([])
+    expect(decideMainGame(started, { type: 'selectScroll', scroll: 1.5 }, context)).toEqual([])
 
     const onColumn = run(
       run(started, { type: 'selectScroll', scroll: 1 }),
       { type: 'selectPage', page: 0 },
     )
     // Scroll 1 / page 0 has a single column (index 0); index 1 is out of range.
-    expect(decideMainGame(onColumn, { type: 'selectColumn', column: 1 })).toEqual([])
+    expect(decideMainGame(onColumn, { type: 'selectColumn', column: 1 }, context)).toEqual([])
   })
 })
 
@@ -126,7 +146,12 @@ describe('main game — blind arbiter', () => {
   })
 
   it('rejects revealWord before a word is sealed', () => {
-    expect(decideMainGame(toReady(), { type: 'revealWord' })).toEqual([])
+    const context = {
+      timestamp: 1234567890,
+      userId: 'test-user',
+      correlationId: 'test-correlation'
+    }
+    expect(decideMainGame(toReady(), { type: 'revealWord' }, context)).toEqual([])
   })
 
   it('produces a deterministic event sequence for a full game', () => {
@@ -142,8 +167,13 @@ describe('main game — blind arbiter', () => {
 
     let state = initialMainGameState
     const log: MainGameEvent[] = []
+    const context = {
+      timestamp: 1234567890,
+      userId: 'test-user',
+      correlationId: 'test-correlation'
+    }
     for (const command of commands) {
-      const events = decideMainGame(state, command)
+      const events = decideMainGame(state, command, context)
       log.push(...events)
       state = events.reduce<MainGameState>(evolveMainGame, state)
     }

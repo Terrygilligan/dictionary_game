@@ -1,3 +1,5 @@
 export * from './model/lexicon'
 export * from './model/types'
 export * from './model/i18nLexicon'
+export { loadMasterLexicon as loadLexiconData } from './model/lexiconLoader'
+export { LexiconCache } from './model/lexiconCache'

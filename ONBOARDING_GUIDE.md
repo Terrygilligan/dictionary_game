@@ -5,9 +5,44 @@
 
 ---
 
+# Project Vision: Lexicon Master
+
+**Core Philosophy**: A high-precision, event-sourced language acquisition platform that treats architectural purity as the primary mechanism for long-term scalability and cognitive learning.
+
+## The Architectural Manifesto: "The Gold Standard"
+
+We reject the volatility of traditional monolithic applications. Our system is built on:
+
+* **Pure Function Architecture**: All business logic is deterministic, defined strictly as `(state, command, context) => events`. We banish side effects (system time, logging, or file access) to the edge of the system.
+* **Event-Sourcing**: The system state is a derivative of a pure, immutable stream of events. We never mutate the past; we only project new states from our event history.
+* **Zero-Trust Data Contracts**: Our code dictates the rules. We do not modify database or event structures to accommodate flawed payloads; the system mandates compliance to ensure 100% architectural integrity.
+
+## The Learning Engine
+
+* **Cognitive Agnosticism**: The platform is engine-agnostic, supporting three distinct pedagogical dimensions through a unified `RoundSpec`:
+  - **Recognition**: Mapping concepts to terms
+  - **Recall**: Mapping terms to definitions/context
+  - **Cross-Language Transfer**: Bridging vocabulary gaps between different linguistic structures
+* **Global Cognitive Mapping**: Telemetry is not siloed by game mode. All player progress is aggregated into a single, unified `UserPerformance` profile, tracking proficiency at the `word_id` level regardless of which game mode the user is playing.
+
+## Data Integrity & Multilingualism
+
+* **Semantic Data Contracts**: Language is treated as an injectable configuration. Our data layer provides `Mode-Ready` entries—containing term, definition, polysemy, and semantic difficulty—ensuring the engine has the metadata required for adaptive learning.
+* **Dependency Injection**: Language data is never "imported" or "fetched" by domain logic. It is injected at the edge, allowing for dynamic language switching and easy, mockable unit testing.
+
+## Developer Experience & Operational Rigor
+
+* **Determinism**: All unit tests are 100% deterministic, utilizing static context injection. We eliminate "clock drift" and environment-dependent failures.
+* **Developer-First Workflow**: By using agentic workflows and local repository-based templates, we prioritize high-velocity development without compromising the integrity of our core event-sourcing pipeline.
+* **Weekend Boundaries**: We build for the long term. By enforcing strict separation between software development and personal time, we maintain the clarity required for high-level architecture.
+
+---
+
 ## Welcome to Lexicon Master! 🎉
 
 This guide will help you get up to speed with the Lexicon Master project. Lexicon Master is a sophisticated vocabulary-building game built with modern web technologies and event-sourcing architecture.
+
+**💡 North Star**: Every architectural decision should align with the Project Vision above. If a feature, pull request, or refactor doesn't align with these principles, it needs to be adjusted.
 
 ---
 

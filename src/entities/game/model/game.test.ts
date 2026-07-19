@@ -25,7 +25,12 @@ function run(state: GameState, command: GameCommand): GameState {
     tenant_id: 'test-tenant',
     aggregate_id: 'test-aggregate'
   }
-  return decideGame(state, commandWithIdentity).reduce<GameState>(evolveGame, state)
+  const context = {
+    timestamp: 1234567890, // Static timestamp for deterministic testing
+    userId: 'test-user',
+    correlationId: 'test-correlation'
+  }
+  return decideGame(state, commandWithIdentity, context).reduce<GameState>(evolveGame, state)
 }
 
 describe('game domain', () => {
@@ -37,7 +42,12 @@ describe('game domain', () => {
   })
 
   it('ignores startGame with an empty deck', () => {
-    expect(decideGame(initialGameState, { type: 'startGame', deck: [], tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })).toEqual([])
+    const context = {
+      timestamp: 1234567890,
+      userId: 'test-user',
+      correlationId: 'test-correlation'
+    }
+    expect(decideGame(initialGameState, { type: 'startGame', deck: [], tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }, context)).toEqual([])
   })
 
   it('records a submitted answer with correctness', () => {
@@ -51,12 +61,22 @@ describe('game domain', () => {
   it('rejects a second answer for the same round', () => {
     const started = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
     const answered = run(started, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
-    expect(decideGame(answered, { type: 'submitAnswer', choiceId: 'alpha-b', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })).toEqual([])
+    const context = {
+      timestamp: 1234567890,
+      userId: 'test-user',
+      correlationId: 'test-correlation'
+    }
+    expect(decideGame(answered, { type: 'submitAnswer', choiceId: 'alpha-b', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }, context)).toEqual([])
   })
 
   it('cannot advance before answering', () => {
     const started = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
-    expect(decideGame(started, { type: 'nextRound', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })).toEqual([])
+    const context = {
+      timestamp: 1234567890,
+      userId: 'test-user',
+      correlationId: 'test-correlation'
+    }
+    expect(decideGame(started, { type: 'nextRound', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }, context)).toEqual([])
   })
 
   it('finishes after the last round and derives the final score', () => {
@@ -82,8 +102,13 @@ describe('game domain', () => {
 
     let state = initialGameState
     const log: GameEvent[] = []
+    const context = {
+      timestamp: 1234567890,
+      userId: 'test-user',
+      correlationId: 'test-correlation'
+    }
     for (const command of commands) {
-      const events = decideGame(state, command)
+      const events = decideGame(state, command, context)
       log.push(...events)
       state = events.reduce<GameState>(evolveGame, state)
     }
@@ -122,7 +147,12 @@ describe('game domain', () => {
 
     it('emits answer/submitted before streak/updated', () => {
       const started = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
-      const events = decideGame(started, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
+      const context = {
+        timestamp: 1234567890,
+        userId: 'test-user',
+        correlationId: 'test-correlation'
+      }
+      const events = decideGame(started, { type: 'submitAnswer', choiceId: 'alpha-a', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }, context)
       expect(events.map((e) => e.type)).toEqual(['answer/submitted', 'streak/updated'])
       expect(events[1]).toEqual({ type: 'streak/updated', streak: 1, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
     })
@@ -137,7 +167,12 @@ describe('game domain', () => {
 
     it('resetStreak is a no-op when the streak is already 0', () => {
       const started = run(initialGameState, { type: 'startGame', deck, tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })
-      expect(decideGame(started, { type: 'resetStreak', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' })).toEqual([])
+      const context = {
+        timestamp: 1234567890,
+        userId: 'test-user',
+        correlationId: 'test-correlation'
+      }
+      expect(decideGame(started, { type: 'resetStreak', tenant_id: 'test-tenant', aggregate_id: 'test-aggregate' }, context)).toEqual([])
     })
   })
 })

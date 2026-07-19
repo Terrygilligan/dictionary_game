@@ -16,7 +16,11 @@ import { columnCount, hasAnyWord, inRange, pageCount, resolveWordId, scrollCount
 export const decideMainGame: Decider<MainGameState, MainGameCommand, MainGameEvent> = (
   state,
   command,
+  context,
 ) => {
+  // Context parameter is provided for architectural compliance and future use.
+  // Current decision logic is pure based on state and command alone.
+  void context // Suppress unused variable warning
   switch (command.type) {
     case 'startGame': {
       if (!hasAnyWord(command.layout)) return []
